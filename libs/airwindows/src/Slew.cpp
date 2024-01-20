@@ -15,37 +15,14 @@ namespace Slew {
 Slew::Slew(audioMasterCallback audioMaster) :
     AudioEffectX(audioMaster, kNumPrograms, kNumParameters)
 {
+    A = 0.0;
+
 	lastSampleL = 0.0;
 	lastSampleR = 0.0;
 
-// TODO: uncomment canDo entries according to your plugin's capabilities
-//    _canDo.insert("sendVstEvents"); // plug-in will send Vst events to Host.
-//    _canDo.insert("sendVstMidiEvent"); // plug-in will send MIDI events to Host.
-//    _canDo.insert("sendVstTimeInfo"); // unknown
-//    _canDo.insert("receiveVstEvents"); // plug-in can receive Vst events from Host.
-//    _canDo.insert("receiveVstMidiEvent"); // plug-in can receive MIDI events from Host.
-//    _canDo.insert("receiveVstTimeInfo"); // plug-in can receive Time info from Host.
-//    _canDo.insert("offline"); // plug-in supports offline functions (#offlineNotify, #offlinePrepare, #offlineRun).
     _canDo.insert("plugAsChannelInsert"); // plug-in can be used as a channel insert effect.
     _canDo.insert("plugAsSend"); // plug-in can be used as a send effect.
-//    _canDo.insert("mixDryWet"); // dry/wet mix control
-//    _canDo.insert("noRealTime"); // no real-time processing
-//    _canDo.insert("multipass"); // unknown
-//    _canDo.insert("metapass"); // unknown
-//    _canDo.insert("x1in1out"); 
-//    _canDo.insert("x1in2out"); 
-//    _canDo.insert("x2in1out"); 
     _canDo.insert("x2in2out"); 
-//    _canDo.insert("x2in4out"); 
-//    _canDo.insert("x4in2out"); 
-//    _canDo.insert("x4in4out"); 
-//    _canDo.insert("x4in8out"); // 4:2 matrix to surround bus
-//    _canDo.insert("x8in4out"); // surround bus to 4:2 matrix
-//    _canDo.insert("x8in8out"); 
-//    _canDo.insert("midiProgramNames"); // plug-in supports function #getMidiProgramName().
-//    _canDo.insert("conformsToWindowRules"); // mac: doesn't mess with grafport.
-//    _canDo.insert("bypass"); // plug-in supports function #setBypass().
-    
     
     // these configuration values are established in the header
     setNumInputs(kNumInputs);
@@ -53,8 +30,10 @@ Slew::Slew(audioMasterCallback audioMaster) :
     setUniqueID(kUniqueId);
     canProcessReplacing();     // supports output replacing
     canDoubleReplacing();      // supports double precision processing
- 	programsAreChunks(true);
-   
+    programsAreChunks(true);
+
+    A = 0;
+
     vst_strncpy (_programName, "Default", kVstMaxProgNameLen); // default program name
 }
 
@@ -86,7 +65,7 @@ static float pinParameter(float data)
 VstInt32 Slew::getChunk (void** data, bool isPreset)
 {
 	float *chunkData = (float *)calloc(kNumParameters, sizeof(float));
-	chunkData[0] = gain;
+	chunkData[0] = A;
 	/* Note: The way this is set up, it will break if you manage to save settings on an Intel
 	 machine and load them on a PPC Mac. However, it's fine if you stick to the machine you 
 	 started with. */
@@ -98,7 +77,7 @@ VstInt32 Slew::getChunk (void** data, bool isPreset)
 VstInt32 Slew::setChunk (void* data, VstInt32 byteSize, bool isPreset)
 {	
 	float *chunkData = (float *)data;
-	gain = pinParameter(chunkData[0]);
+	A = pinParameter(chunkData[0]);
 	/* We're ignoring byteSize as we found it to be a filthy liar */
 	
 	/* calculate any other fields you need here - you could copy in 
@@ -109,7 +88,7 @@ VstInt32 Slew::setChunk (void* data, VstInt32 byteSize, bool isPreset)
 void Slew::setParameter(VstInt32 index, float value) {
     switch (index) {
         case kSlewParam:
-            gain = value;
+            A = value;
             break;
         default: // unknown parameter, shouldn't happen!
             throw;
@@ -119,7 +98,7 @@ void Slew::setParameter(VstInt32 index, float value) {
 float Slew::getParameter(VstInt32 index) {
     switch (index) {
         case kSlewParam:
-            return gain;
+            return A;
             break;
         default: // unknown parameter, shouldn't happen!
             break;
@@ -128,33 +107,24 @@ float Slew::getParameter(VstInt32 index) {
 }
 
 void Slew::getParameterName(VstInt32 index, char *text) {
-    switch (index) {
-        case kSlewParam:
-            vst_strncpy (text, "Clamping", kVstMaxParamStrLen);
-            break;
-        default: // unknown parameter, shouldn't happen!
-            break;
-    }
+    vst_strncpy (text, "Clamping", kVstMaxParamStrLen);
 }
 
-void Slew::getParameterDisplay(VstInt32 index, char *text) {
-    switch (index) {
-        case kSlewParam:
-            float2string (gain, text, kVstMaxParamStrLen);
-            break;
-        default: // unknown parameter, shouldn't happen!
-            break;
-    }
+void Slew::getParameterDisplay(VstInt32 index, char *text, float extVal, bool isExternal) {
+    float2string (EXTV(A) * 100.0, text, kVstMaxParamStrLen);
 }
 
 void Slew::getParameterLabel(VstInt32 index, char *text) {
-    switch (index) {
-        case kSlewParam:
-            vst_strncpy (text, "", kVstMaxParamStrLen);
-            break;
-        default: // unknown parameter, shouldn't happen!
-            break;
-    }
+    vst_strncpy (text, "%", kVstMaxParamStrLen);
+}
+
+bool Slew::parseParameterValueFromString(VstInt32 index, const char* str, float& f)
+{
+   auto v = std::atof(str);
+
+   f = v / 100.0;
+
+   return true;
 }
 
 VstInt32 Slew::canDo(char *text) 

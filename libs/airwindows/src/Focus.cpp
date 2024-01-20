@@ -17,7 +17,7 @@ Focus::Focus(audioMasterCallback audioMaster) :
 {
 	A = 0.0;
 	B = 0.5;
-	C = 0.5;
+	C = 0.0;
 	D = 1.0;
 	E = 1.0;
 	for (int x = 0; x < 9; x++) {figureL[x] = 0.0;figureR[x] = 0.0;}
@@ -108,42 +108,53 @@ void Focus::getParameterName(VstInt32 index, char *text) {
         case kParamA: vst_strncpy (text, "Boost", kVstMaxParamStrLen); break;
 		case kParamB: vst_strncpy (text, "Focus", kVstMaxParamStrLen); break;
 		case kParamC: vst_strncpy (text, "Mode", kVstMaxParamStrLen); break;
-		case kParamD: vst_strncpy (text, "Output", kVstMaxParamStrLen); break;
-		case kParamE: vst_strncpy (text, "Dry/Wet", kVstMaxParamStrLen); break;
+		case kParamD: vst_strncpy (text, "Boost Output", kVstMaxParamStrLen); break;
+		case kParamE: vst_strncpy (text, "Mix", kVstMaxParamStrLen); break;
         default: break; // unknown parameter, shouldn't happen!
     } //this is our labels for displaying in the VST host
 }
 
-void Focus::getParameterDisplay(VstInt32 index, char *text) {
+void Focus::getParameterDisplay(VstInt32 index, char *text, float extVal, bool isExternal) {
     switch (index) {
-        case kParamA: float2string (A*12.0, text, kVstMaxParamStrLen); break;
-        case kParamB: float2string (B, text, kVstMaxParamStrLen); break;
-        case kParamC: switch((VstInt32)( C * 4.999 )) //0 to almost edge of # of params
+        case kParamA: float2string (EXTV(A) * 12.0, text, kVstMaxParamStrLen); break;
+        case kParamB: float2string (EXTV(B) * 100.0, text, kVstMaxParamStrLen); break;
+        case kParamC: switch((VstInt32)(EXTV(C) * 4.999)) //0 to almost edge of # of params
 		{
 			case 0: vst_strncpy (text, "Density", kVstMaxParamStrLen); break;
 			case 1: vst_strncpy (text, "Drive", kVstMaxParamStrLen); break;
 			case 2: vst_strncpy (text, "Spiral", kVstMaxParamStrLen); break;
 			case 3: vst_strncpy (text, "Mojo", kVstMaxParamStrLen); break;
 			case 4: vst_strncpy (text, "Dyno", kVstMaxParamStrLen); break;
-			default: break; // unknown parameter, shouldn't happen!
+			default: text[0] = 0; break; // unknown parameter, shouldn't happen!
 		} break;
-        case kParamD: float2string (D, text, kVstMaxParamStrLen); break;
-        case kParamE: float2string (E, text, kVstMaxParamStrLen); break;
+        case kParamD: dB2string (EXTV(D), text, kVstMaxParamStrLen); break;
+        case kParamE: float2string (EXTV(E) * 100.0, text, kVstMaxParamStrLen); break;
         default: break; // unknown parameter, shouldn't happen!
 	} //this displays the values and handles 'popups' where it's discrete choices
 }
 
 bool Focus::parseParameterValueFromString(VstInt32 index, const char* str, float& f)
 {
-   auto v = std::atof( str );
-   if( index == kParamA )
+   auto v = std::atof(str);
+
+   switch (index)
+   {
+   case kParamA:
    {
       f = v / 12.f;
+      break;
    }
-   else
+   case kParamD:
    {
-      f = v;
+      f = string2dB(str, v);
+      break;
    }
+   default:
+   {
+      f = v / 100.0;
+   }
+   }
+
    return true;
 }
 
@@ -166,17 +177,17 @@ void Focus::getIntegralDisplayForValue(VstInt32 index, float value, char* text)
    case 2: vst_strncpy (text, "Spiral", kVstMaxParamStrLen); break;
    case 3: vst_strncpy (text, "Mojo", kVstMaxParamStrLen); break;
    case 4: vst_strncpy (text, "Dyno", kVstMaxParamStrLen); break;
-   default: break; // unknown parameter, shouldn't happen!
+   default: text[0] = 0; break; // unknown parameter, shouldn't happen!
    }
 }
 
 void Focus::getParameterLabel(VstInt32 index, char *text) {
     switch (index) {
         case kParamA: vst_strncpy (text, "dB", kVstMaxParamStrLen); break;
-        case kParamB: vst_strncpy (text, "", kVstMaxParamStrLen); break;
+        case kParamB: vst_strncpy (text, "%", kVstMaxParamStrLen); break;
         case kParamC: vst_strncpy (text, "", kVstMaxParamStrLen); break;
-        case kParamD: vst_strncpy (text, "", kVstMaxParamStrLen); break;
-        case kParamE: vst_strncpy (text, "", kVstMaxParamStrLen); break;
+        case kParamD: vst_strncpy (text, "dB", kVstMaxParamStrLen); break;
+        case kParamE: vst_strncpy (text, "%", kVstMaxParamStrLen); break;
 		default: break; // unknown parameter, shouldn't happen!
     }
 }
