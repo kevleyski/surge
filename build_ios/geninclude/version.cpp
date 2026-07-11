@@ -20,9 +20,9 @@ namespace Surge
    const bool Build::IsRelease = 0;
    const bool Build::IsNightly = ! Build::IsRelease;
 
-   const char* Build::BuildNumberStr = "f9a10616"; // Build number to be sure that each result could identified.
+   const char* Build::BuildNumberStr = "66b101d9"; // Build number to be sure that each result could identified.
    
-   const char* Build::FullVersionStr = "1.4.main.f9a10616";
+   const char* Build::FullVersionStr = "1.4.main.66b101d9";
    const char* Build::BuildHost = "kevs-m3.local";
    const char* Build::BuildArch = "arm64";
    const char *Build::BuildCompiler = "AppleClang-21.0.0.21000101";
@@ -30,10 +30,10 @@ namespace Surge
    const char* Build::BuildLocation = "local";
 
    const char* Build::BuildDate = "2026-07-11";
-   const char* Build::BuildTime = "18:47:02";
+   const char* Build::BuildTime = "18:50:32";
    const char* Build::BuildYear = "2026";
 
-   const char* Build::GitHash = "f9a10616";
+   const char* Build::GitHash = "66b101d9";
    const char* Build::GitBranch = "main";
 
    const char* Build::CMAKE_INSTALL_PREFIX = "/usr/local";
