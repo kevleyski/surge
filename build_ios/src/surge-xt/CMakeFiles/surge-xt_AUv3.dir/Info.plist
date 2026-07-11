@@ -1,83 +1,82 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-<plist>
-  <dict>
-    <key>NSMicrophoneUsageDescription</key>
-    <string>Surge XT would like to use your microphone for audio input</string>
-    <key>NSBluetoothAlwaysUsageDescription</key>
-    <string>Surge XT would like to use Bluetooth</string>
-    <key>NSBluetoothPeripheralUsageDescription</key>
-    <string>Surge XT would like to use Bluetooth</string>
-    <key>LSRequiresIPhoneOS</key>
-    <true/>
-    <key>UIViewControllerBasedStatusBarAppearance</key>
-    <true/>
-    <key>UILaunchStoryboardName</key>
-    <string>LaunchScreen</string>
-    <key>UIApplicationSceneManifest</key>
-    <dict>
-      <key>UIApplicationSupportsMultipleScenes</key>
-      <false/>
-      <key>UISceneConfigurations</key>
-      <dict/>
-    </dict>
-    <key>CFBundleExecutable</key>
-    <string>Surge XT</string>
-    <key>CFBundleIdentifier</key>
-    <string>org.vicwomg.surge-xt.surge-xtAUv3</string>
-    <key>CFBundleName</key>
-    <string>Surge XT</string>
-    <key>CFBundleDisplayName</key>
-    <string>Surge XT</string>
-    <key>CFBundlePackageType</key>
-    <string>XPC!</string>
-    <key>CFBundleSignature</key>
-    <string>????</string>
-    <key>CFBundleShortVersionString</key>
-    <string>1.4.0</string>
-    <key>CFBundleVersion</key>
-    <string>1.4.0</string>
-    <key>NSHumanReadableCopyright</key>
-    <string></string>
-    <key>NSHighResolutionCapable</key>
-    <true/>
-    <key>UISupportsDocumentBrowser</key>
-    <true/>
-    <key>NSExtension</key>
-    <dict>
-      <key>NSExtensionPrincipalClass</key>
-      <string>Surge_XTAUFactoryAUv3</string>
-      <key>NSExtensionPointIdentifier</key>
-      <string>com.apple.AudioUnit-UI</string>
-      <key>NSExtensionAttributes</key>
-      <dict>
-        <key>AudioComponents</key>
-        <array>
-          <dict>
-            <key>name</key>
-            <string>Surge Synth Team: Surge XT</string>
-            <key>description</key>
-            <string>Surge XT</string>
-            <key>factoryFunction</key>
-            <string>Surge_XTAUFactoryAUv3</string>
-            <key>manufacturer</key>
-            <string>VmbA</string>
-            <key>type</key>
-            <string>aumu</string>
-            <key>subtype</key>
-            <string>SgXT</string>
-            <key>version</key>
-            <integer>66560</integer>
-            <key>sandboxSafe</key>
-            <true/>
-            <key>tags</key>
-            <array>
-              <string>Synth</string>
-            </array>
-          </dict>
-        </array>
-      </dict>
-    </dict>
-  </dict>
+<plist version="1.0">
+<dict>
+	<key>CFBundleDisplayName</key>
+	<string>Surge XT</string>
+	<key>CFBundleExecutable</key>
+	<string>Surge XT</string>
+	<key>CFBundleIdentifier</key>
+	<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+	<key>CFBundleName</key>
+	<string>Surge XT</string>
+	<key>CFBundlePackageType</key>
+	<string>XPC!</string>
+	<key>CFBundleShortVersionString</key>
+	<string>1.4.0</string>
+	<key>CFBundleSignature</key>
+	<string>????</string>
+	<key>CFBundleVersion</key>
+	<string>1.4.0</string>
+	<key>LSRequiresIPhoneOS</key>
+	<true/>
+	<key>NSBluetoothAlwaysUsageDescription</key>
+	<string>Surge XT would like to use Bluetooth</string>
+	<key>NSBluetoothPeripheralUsageDescription</key>
+	<string>Surge XT would like to use Bluetooth</string>
+	<key>NSExtension</key>
+	<dict>
+		<key>NSExtensionAttributes</key>
+		<dict>
+			<key>AudioComponents</key>
+			<array>
+				<dict>
+					<key>description</key>
+					<string>Surge XT</string>
+					<key>factoryFunction</key>
+					<string>Surge_XTAUFactoryAUv3</string>
+					<key>manufacturer</key>
+					<string>VmbA</string>
+					<key>name</key>
+					<string>Surge Synth Team: Surge XT</string>
+					<key>sandboxSafe</key>
+					<true/>
+					<key>subtype</key>
+					<string>SgXT</string>
+					<key>tags</key>
+					<array>
+						<string>Synth</string>
+					</array>
+					<key>type</key>
+					<string>aumu</string>
+					<key>version</key>
+					<integer>66560</integer>
+				</dict>
+			</array>
+		</dict>
+		<key>NSExtensionPointIdentifier</key>
+		<string>com.apple.AudioUnit-UI</string>
+		<key>NSExtensionPrincipalClass</key>
+		<string>Surge_XTAUFactoryAUv3</string>
+	</dict>
+	<key>NSHighResolutionCapable</key>
+	<true/>
+	<key>NSHumanReadableCopyright</key>
+	<string></string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Surge XT would like to use your microphone for audio input</string>
+	<key>UIApplicationSceneManifest</key>
+	<dict>
+		<key>UIApplicationSupportsMultipleScenes</key>
+		<false/>
+		<key>UISceneConfigurations</key>
+		<dict/>
+	</dict>
+	<key>UILaunchStoryboardName</key>
+	<string>LaunchScreen</string>
+	<key>UISupportsDocumentBrowser</key>
+	<true/>
+	<key>UIViewControllerBasedStatusBarAppearance</key>
+	<true/>
+</dict>
 </plist>

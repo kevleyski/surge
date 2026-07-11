@@ -14,9 +14,6 @@
 
 #include <sst/plugininfra/version_information.h>
 
-static_assert(""[0] != '\0',
-              "GIT_COMMIT_HASH not defined. Run cmake/git-version-functions.cmake commands to use "
-              "this library");
 namespace sst::plugininfra
 {
 // clang-format off
