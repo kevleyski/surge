@@ -1,0 +1,1397 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXAggregateTarget section */
+		412D95C48532286282373140 /* ALL_BUILD */ = {
+			isa = PBXAggregateTarget;
+			buildConfigurationList = A31450735E614C9DAB5930F8 /* Build configuration list for PBXAggregateTarget "ALL_BUILD" */;
+			buildPhases = (
+				1EA72D66097C22D1A30D8ECD /* Generate CMakeFiles/ALL_BUILD */,
+			);
+			dependencies = (
+				A7FDEA85E76C493188D54A6D /* PBXTargetDependency */,
+				998247CAE2824866B888E24B /* PBXTargetDependency */,
+				80BA0BBBD2894671AA2CD76B /* PBXTargetDependency */,
+			);
+			name = ALL_BUILD;
+			productName = ALL_BUILD;
+		};
+		77C1A3C52D322D9730269CA7 /* install */ = {
+			isa = PBXAggregateTarget;
+			buildConfigurationList = 968F04276B8649198C37DB92 /* Build configuration list for PBXAggregateTarget "install" */;
+			buildPhases = (
+				93426DA6A4AC2C2AC9CE883C /* CMake PostBuild Rules */,
+			);
+			dependencies = (
+				BEB8F517A34443608EEE8E10 /* PBXTargetDependency */,
+			);
+			name = install;
+			productName = install;
+		};
+		89D95F8BA93D09359DDCC172 /* ZERO_CHECK */ = {
+			isa = PBXAggregateTarget;
+			buildConfigurationList = F6C38483793B4846AA200FFB /* Build configuration list for PBXAggregateTarget "ZERO_CHECK" */;
+			buildPhases = (
+				2469D7A0C2B35D06C746A1A3 /* Generate CMakeFiles/ZERO_CHECK */,
+			);
+			dependencies = (
+			);
+			name = ZERO_CHECK;
+			productName = ZERO_CHECK;
+		};
+/* End PBXAggregateTarget section */
+
+/* Begin PBXBuildFile section */
+		029A5EE34B3A4DEB975EB773 /* /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-effects/CMakeFiles/sst-effects-presets.dir/Info.plist */ = {isa = PBXBuildFile; fileRef = CA70744172FD4CB6ADF4998A /* /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-effects/CMakeFiles/sst-effects-presets.dir/Info.plist */; };
+		0D3AA37884CB4F5190FD7B73 /* /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-effects/__cmrc_sst-effects-presets/intermediate/presets/voice-effects/README.md.cpp */ = {isa = PBXBuildFile; fileRef = 817371C1BE164C5A90EB83E2 /* /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-effects/__cmrc_sst-effects-presets/intermediate/presets/voice-effects/README.md.cpp */; };
+		2ACB5B639019421E8DC9A14F /* /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-effects/__cmrc_sst-effects-presets/intermediate/presets/voice-effects/osc-ebwf/SuperSaw.vcfx.cpp.rule */ = {isa = PBXBuildFile; fileRef = 37274D564F4B4584906CC226 /* /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-effects/__cmrc_sst-effects-presets/intermediate/presets/voice-effects/osc-ebwf/SuperSaw.vcfx.cpp.rule */; };
+		2C1E34DAF5E445EABA492C60 /* /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-effects/__cmrc_sst-effects-presets/intermediate/presets/voice-effects/osc-ebwf/SuperTri.vcfx.cpp */ = {isa = PBXBuildFile; fileRef = 4161F99C290E42498C08882F /* /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-effects/__cmrc_sst-effects-presets/intermediate/presets/voice-effects/osc-ebwf/SuperTri.vcfx.cpp */; };
+		3DE1B386B0C842CD8C9BB6B7 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/sst/sst-effects/src/preset-api.cpp */ = {isa = PBXBuildFile; fileRef = F486A4E3BD82444897F479EB /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/sst/sst-effects/src/preset-api.cpp */; };
+		4284060147894C95ABFB34AB /* /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-effects/__cmrc_sst-effects-presets/lib.cpp.rule */ = {isa = PBXBuildFile; fileRef = 5F694ECA6DD84FE1AD439B18 /* /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-effects/__cmrc_sst-effects-presets/lib.cpp.rule */; };
+		50DB6F0DE3C5446485989344 /* /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-effects/__cmrc_sst-effects-presets/intermediate/presets/voice-effects/3op-pm/Hit Me with an EG.vcfx.cpp.rule */ = {isa = PBXBuildFile; fileRef = 3DFA3FBBFB35449C95146800 /* /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-effects/__cmrc_sst-effects-presets/intermediate/presets/voice-effects/3op-pm/Hit Me with an EG.vcfx.cpp.rule */; };
+		97F7B23ED96F4513AB6BD855 /* /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-effects/__cmrc_sst-effects-presets/intermediate/presets/voice-effects/osc-ebwf/SuperTri.vcfx.cpp.rule */ = {isa = PBXBuildFile; fileRef = 900601C93B2C43D989C35A82 /* /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-effects/__cmrc_sst-effects-presets/intermediate/presets/voice-effects/osc-ebwf/SuperTri.vcfx.cpp.rule */; };
+		9D98E52B8FF444DCA8692EE3 /* /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-effects/__cmrc_sst-effects-presets/intermediate/presets/voice-effects/3op-pm/Hit Me with an EG.vcfx.cpp */ = {isa = PBXBuildFile; fileRef = AB6010A5A13444A08DA0CD83 /* /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-effects/__cmrc_sst-effects-presets/intermediate/presets/voice-effects/3op-pm/Hit Me with an EG.vcfx.cpp */; };
+		A5BDBB62615A44FDB96FD941 /* /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-effects/__cmrc_sst-effects-presets/intermediate/presets/voice-effects/osc-ebwf/SyncSine.vcfx.cpp.rule */ = {isa = PBXBuildFile; fileRef = E5AC54A738A74DA18E02774B /* /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-effects/__cmrc_sst-effects-presets/intermediate/presets/voice-effects/osc-ebwf/SyncSine.vcfx.cpp.rule */; };
+		BDECD07F5E6C4BDCAD0664D8 /* /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-effects/__cmrc_sst-effects-presets/intermediate/presets/voice-effects/README.md.cpp.rule */ = {isa = PBXBuildFile; fileRef = 7B3F5FAA881C4BEDA92043C6 /* /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-effects/__cmrc_sst-effects-presets/intermediate/presets/voice-effects/README.md.cpp.rule */; };
+		C1ED8E2E6E50433DA95764E5 /* /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-effects/__cmrc_sst-effects-presets/intermediate/presets/voice-effects/osc-ebwf/SyncSine.vcfx.cpp */ = {isa = PBXBuildFile; fileRef = 4051A18F74AB43BFA1CA51EB /* /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-effects/__cmrc_sst-effects-presets/intermediate/presets/voice-effects/osc-ebwf/SyncSine.vcfx.cpp */; };
+		D245B92D05674C68923FB8BE /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/sst/sst-effects/CMakeLists.txt */ = {isa = PBXBuildFile; fileRef = 21F374A50AD6465BA63F4DB1 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/sst/sst-effects/CMakeLists.txt */; };
+		E934021DCA2D4AEC8FA9682C /* /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-effects/CMakeFiles/sst-effects-preset-api.dir/Info.plist */ = {isa = PBXBuildFile; fileRef = 5496AFD6B2CF4EE182984409 /* /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-effects/CMakeFiles/sst-effects-preset-api.dir/Info.plist */; };
+		F4D1275F610345F49AE10636 /* /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-effects/__cmrc_sst-effects-presets/lib.cpp */ = {isa = PBXBuildFile; fileRef = BB9A4A1D77B346419F7A423D /* /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-effects/__cmrc_sst-effects-presets/lib.cpp */; };
+		F6828E668EAE48C3B781745B /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/sst/sst-effects/CMakeLists.txt */ = {isa = PBXBuildFile; fileRef = 40A4F57CFEED4F7A88B9D790 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/sst/sst-effects/CMakeLists.txt */; };
+		F6981D061B794F29AB355D4B /* /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-effects/__cmrc_sst-effects-presets/intermediate/presets/voice-effects/osc-ebwf/SuperSaw.vcfx.cpp */ = {isa = PBXBuildFile; fileRef = C9533A21721546C594CC7F38 /* /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-effects/__cmrc_sst-effects-presets/intermediate/presets/voice-effects/osc-ebwf/SuperSaw.vcfx.cpp */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXBuildStyle section */
+		26D1CABEC40C4773A3E72ADE /* Release */ = {
+			isa = PBXBuildStyle;
+			buildSettings = {
+				COPY_PHASE_STRIP = NO;
+			};
+			name = Release;
+		};
+		3EB1049B58A74640BE86B1BC /* Debug */ = {
+			isa = PBXBuildStyle;
+			buildSettings = {
+				COPY_PHASE_STRIP = NO;
+			};
+			name = Debug;
+		};
+		675CD65706214B7B8E431856 /* MinSizeRel */ = {
+			isa = PBXBuildStyle;
+			buildSettings = {
+				COPY_PHASE_STRIP = NO;
+			};
+			name = MinSizeRel;
+		};
+		E50F583B112D4206A953A524 /* RelWithDebInfo */ = {
+			isa = PBXBuildStyle;
+			buildSettings = {
+				COPY_PHASE_STRIP = NO;
+			};
+			name = RelWithDebInfo;
+		};
+/* End PBXBuildStyle section */
+
+/* Begin PBXContainerItemProxy section */
+		4216F231095747218AD59058 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = D4557C6B66A3479C831199A0 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = D20FA1A5DBF5B0A12FFFC625;
+			remoteInfo = "sst-effects-preset-api";
+		};
+		43DD82577CE84E26B090E5FB /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = D4557C6B66A3479C831199A0 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 89D95F8BA93D09359DDCC172;
+			remoteInfo = ZERO_CHECK;
+		};
+		6DF500359198487BB45D28AA /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = D4557C6B66A3479C831199A0 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 412D95C48532286282373140;
+			remoteInfo = ALL_BUILD;
+		};
+		7617E2AFD05F401CB3047AF0 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = D4557C6B66A3479C831199A0 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = A5840CCDDB5ED83F2D976909;
+			remoteInfo = "sst-effects-presets";
+		};
+		841D60C4A1E24389BF415C3A /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = D4557C6B66A3479C831199A0 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 89D95F8BA93D09359DDCC172;
+			remoteInfo = ZERO_CHECK;
+		};
+		8E48759406E84A2A90C72E93 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = D4557C6B66A3479C831199A0 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = A5840CCDDB5ED83F2D976909;
+			remoteInfo = "sst-effects-presets";
+		};
+		ECF3B4CD35894E8EAE7082F5 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = D4557C6B66A3479C831199A0 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 89D95F8BA93D09359DDCC172;
+			remoteInfo = ZERO_CHECK;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		07EE7E8A376043688A1A1AF7 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/sst/sst-effects/CMakeLists.txt */ = {isa = PBXFileReference; explicitFileType = sourcecode.text; fileEncoding = 4; name = CMakeLists.txt; path = CMakeLists.txt; sourceTree = SOURCE_ROOT; };
+		21F374A50AD6465BA63F4DB1 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/sst/sst-effects/CMakeLists.txt */ = {isa = PBXFileReference; explicitFileType = sourcecode.text; fileEncoding = 4; name = CMakeLists.txt; path = CMakeLists.txt; sourceTree = SOURCE_ROOT; };
+		37274D564F4B4584906CC226 /* /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-effects/__cmrc_sst-effects-presets/intermediate/presets/voice-effects/osc-ebwf/SuperSaw.vcfx.cpp.rule */ = {isa = PBXFileReference; explicitFileType = default; fileEncoding = 4; name = SuperSaw.vcfx.cpp.rule; path = "/Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-effects/__cmrc_sst-effects-presets/intermediate/presets/voice-effects/osc-ebwf/SuperSaw.vcfx.cpp.rule"; sourceTree = "<absolute>"; };
+		3DFA3FBBFB35449C95146800 /* /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-effects/__cmrc_sst-effects-presets/intermediate/presets/voice-effects/3op-pm/Hit Me with an EG.vcfx.cpp.rule */ = {isa = PBXFileReference; explicitFileType = default; fileEncoding = 4; name = "Hit Me with an EG.vcfx.cpp.rule"; path = "/Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-effects/__cmrc_sst-effects-presets/intermediate/presets/voice-effects/3op-pm/Hit Me with an EG.vcfx.cpp.rule"; sourceTree = "<absolute>"; };
+		4051A18F74AB43BFA1CA51EB /* /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-effects/__cmrc_sst-effects-presets/intermediate/presets/voice-effects/osc-ebwf/SyncSine.vcfx.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = SyncSine.vcfx.cpp; path = "/Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-effects/__cmrc_sst-effects-presets/intermediate/presets/voice-effects/osc-ebwf/SyncSine.vcfx.cpp"; sourceTree = "<absolute>"; };
+		40A4F57CFEED4F7A88B9D790 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/sst/sst-effects/CMakeLists.txt */ = {isa = PBXFileReference; explicitFileType = sourcecode.text; fileEncoding = 4; name = CMakeLists.txt; path = CMakeLists.txt; sourceTree = SOURCE_ROOT; };
+		4161F99C290E42498C08882F /* /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-effects/__cmrc_sst-effects-presets/intermediate/presets/voice-effects/osc-ebwf/SuperTri.vcfx.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = SuperTri.vcfx.cpp; path = "/Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-effects/__cmrc_sst-effects-presets/intermediate/presets/voice-effects/osc-ebwf/SuperTri.vcfx.cpp"; sourceTree = "<absolute>"; };
+		5496AFD6B2CF4EE182984409 /* /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-effects/CMakeFiles/sst-effects-preset-api.dir/Info.plist */ = {isa = PBXFileReference; explicitFileType = sourcecode.text.plist; fileEncoding = 4; name = Info.plist; path = "/Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-effects/CMakeFiles/sst-effects-preset-api.dir/Info.plist"; sourceTree = "<absolute>"; };
+		5F694ECA6DD84FE1AD439B18 /* /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-effects/__cmrc_sst-effects-presets/lib.cpp.rule */ = {isa = PBXFileReference; explicitFileType = default; fileEncoding = 4; name = lib.cpp.rule; path = "/Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-effects/__cmrc_sst-effects-presets/lib.cpp.rule"; sourceTree = "<absolute>"; };
+		7B3F5FAA881C4BEDA92043C6 /* /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-effects/__cmrc_sst-effects-presets/intermediate/presets/voice-effects/README.md.cpp.rule */ = {isa = PBXFileReference; explicitFileType = default; fileEncoding = 4; name = README.md.cpp.rule; path = "/Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-effects/__cmrc_sst-effects-presets/intermediate/presets/voice-effects/README.md.cpp.rule"; sourceTree = "<absolute>"; };
+		817371C1BE164C5A90EB83E2 /* /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-effects/__cmrc_sst-effects-presets/intermediate/presets/voice-effects/README.md.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = README.md.cpp; path = "/Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-effects/__cmrc_sst-effects-presets/intermediate/presets/voice-effects/README.md.cpp"; sourceTree = "<absolute>"; };
+		85BAB814C4714B01A8126E29 /* sst-effects-presets */ = {isa = PBXFileReference; explicitFileType = archive.ar; path = "libsst-effects-presets.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		900601C93B2C43D989C35A82 /* /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-effects/__cmrc_sst-effects-presets/intermediate/presets/voice-effects/osc-ebwf/SuperTri.vcfx.cpp.rule */ = {isa = PBXFileReference; explicitFileType = default; fileEncoding = 4; name = SuperTri.vcfx.cpp.rule; path = "/Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-effects/__cmrc_sst-effects-presets/intermediate/presets/voice-effects/osc-ebwf/SuperTri.vcfx.cpp.rule"; sourceTree = "<absolute>"; };
+		AB6010A5A13444A08DA0CD83 /* /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-effects/__cmrc_sst-effects-presets/intermediate/presets/voice-effects/3op-pm/Hit Me with an EG.vcfx.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = "Hit Me with an EG.vcfx.cpp"; path = "/Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-effects/__cmrc_sst-effects-presets/intermediate/presets/voice-effects/3op-pm/Hit Me with an EG.vcfx.cpp"; sourceTree = "<absolute>"; };
+		B0DF38DCA45E4E9C920DE553 /* sst-effects-preset-api */ = {isa = PBXFileReference; explicitFileType = archive.ar; path = "libsst-effects-preset-api.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		BB9A4A1D77B346419F7A423D /* /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-effects/__cmrc_sst-effects-presets/lib.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = lib.cpp; path = "/Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-effects/__cmrc_sst-effects-presets/lib.cpp"; sourceTree = "<absolute>"; };
+		C9533A21721546C594CC7F38 /* /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-effects/__cmrc_sst-effects-presets/intermediate/presets/voice-effects/osc-ebwf/SuperSaw.vcfx.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = SuperSaw.vcfx.cpp; path = "/Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-effects/__cmrc_sst-effects-presets/intermediate/presets/voice-effects/osc-ebwf/SuperSaw.vcfx.cpp"; sourceTree = "<absolute>"; };
+		CA70744172FD4CB6ADF4998A /* /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-effects/CMakeFiles/sst-effects-presets.dir/Info.plist */ = {isa = PBXFileReference; explicitFileType = sourcecode.text.plist; fileEncoding = 4; name = Info.plist; path = "/Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-effects/CMakeFiles/sst-effects-presets.dir/Info.plist"; sourceTree = "<absolute>"; };
+		E5AC54A738A74DA18E02774B /* /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-effects/__cmrc_sst-effects-presets/intermediate/presets/voice-effects/osc-ebwf/SyncSine.vcfx.cpp.rule */ = {isa = PBXFileReference; explicitFileType = default; fileEncoding = 4; name = SyncSine.vcfx.cpp.rule; path = "/Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-effects/__cmrc_sst-effects-presets/intermediate/presets/voice-effects/osc-ebwf/SyncSine.vcfx.cpp.rule"; sourceTree = "<absolute>"; };
+		F486A4E3BD82444897F479EB /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/sst/sst-effects/src/preset-api.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = "preset-api.cpp"; path = "src/preset-api.cpp"; sourceTree = SOURCE_ROOT; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		B2FC977DD7354872919F6476 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		FEBD3FC842A5402E8B769000 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		0E376D59E5CF4526B7A6DE09 /* CMake Rules */ = {
+			isa = PBXGroup;
+			children = (
+				3DFA3FBBFB35449C95146800 /* /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-effects/__cmrc_sst-effects-presets/intermediate/presets/voice-effects/3op-pm/Hit Me with an EG.vcfx.cpp.rule */,
+				7B3F5FAA881C4BEDA92043C6 /* /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-effects/__cmrc_sst-effects-presets/intermediate/presets/voice-effects/README.md.cpp.rule */,
+				37274D564F4B4584906CC226 /* /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-effects/__cmrc_sst-effects-presets/intermediate/presets/voice-effects/osc-ebwf/SuperSaw.vcfx.cpp.rule */,
+				900601C93B2C43D989C35A82 /* /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-effects/__cmrc_sst-effects-presets/intermediate/presets/voice-effects/osc-ebwf/SuperTri.vcfx.cpp.rule */,
+				E5AC54A738A74DA18E02774B /* /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-effects/__cmrc_sst-effects-presets/intermediate/presets/voice-effects/osc-ebwf/SyncSine.vcfx.cpp.rule */,
+				5F694ECA6DD84FE1AD439B18 /* /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-effects/__cmrc_sst-effects-presets/lib.cpp.rule */,
+			);
+			name = "CMake Rules";
+			sourceTree = "<group>";
+		};
+		0F4882FA9D1A42D99B9B801F /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				5496AFD6B2CF4EE182984409 /* /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-effects/CMakeFiles/sst-effects-preset-api.dir/Info.plist */,
+			);
+			name = Resources;
+			sourceTree = "<group>";
+		};
+		29732E87B6874B46BA17B4A2 /* Source Files */ = {
+			isa = PBXGroup;
+			children = (
+				AB6010A5A13444A08DA0CD83 /* /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-effects/__cmrc_sst-effects-presets/intermediate/presets/voice-effects/3op-pm/Hit Me with an EG.vcfx.cpp */,
+				817371C1BE164C5A90EB83E2 /* /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-effects/__cmrc_sst-effects-presets/intermediate/presets/voice-effects/README.md.cpp */,
+				C9533A21721546C594CC7F38 /* /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-effects/__cmrc_sst-effects-presets/intermediate/presets/voice-effects/osc-ebwf/SuperSaw.vcfx.cpp */,
+				4161F99C290E42498C08882F /* /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-effects/__cmrc_sst-effects-presets/intermediate/presets/voice-effects/osc-ebwf/SuperTri.vcfx.cpp */,
+				4051A18F74AB43BFA1CA51EB /* /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-effects/__cmrc_sst-effects-presets/intermediate/presets/voice-effects/osc-ebwf/SyncSine.vcfx.cpp */,
+				BB9A4A1D77B346419F7A423D /* /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-effects/__cmrc_sst-effects-presets/lib.cpp */,
+			);
+			name = "Source Files";
+			sourceTree = "<group>";
+		};
+		3C9463C4E6F946AA89FF5C83 /* sst-effects-presets */ = {
+			isa = PBXGroup;
+			children = (
+				0E376D59E5CF4526B7A6DE09 /* CMake Rules */,
+				E5B62100580F4629AB397E38 /* Resources */,
+				29732E87B6874B46BA17B4A2 /* Source Files */,
+				40A4F57CFEED4F7A88B9D790 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/sst/sst-effects/CMakeLists.txt */,
+			);
+			name = "sst-effects-presets";
+			sourceTree = "<group>";
+		};
+		69E17DBB15DE4AC682ACF97C /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Resources;
+			sourceTree = "<group>";
+		};
+		6BB2EB707C5C469481D3D914 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		87A44E332C364F009C5B3B62 /* Source Files */ = {
+			isa = PBXGroup;
+			children = (
+				F486A4E3BD82444897F479EB /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/sst/sst-effects/src/preset-api.cpp */,
+			);
+			name = "Source Files";
+			sourceTree = "<group>";
+		};
+		8CD3A1AC9AE64BCD9C5B9F48 /* ALL_BUILD */ = {
+			isa = PBXGroup;
+			children = (
+				9F89BF4E143643D58F464ACC /* CMake Rules */,
+				07EE7E8A376043688A1A1AF7 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/sst/sst-effects/CMakeLists.txt */,
+			);
+			name = ALL_BUILD;
+			sourceTree = "<group>";
+		};
+		9F89BF4E143643D58F464ACC /* CMake Rules */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = "CMake Rules";
+			sourceTree = "<group>";
+		};
+		B30E592269C84BB0A28C33C9 /* sst-effects-preset-api */ = {
+			isa = PBXGroup;
+			children = (
+				0F4882FA9D1A42D99B9B801F /* Resources */,
+				87A44E332C364F009C5B3B62 /* Source Files */,
+				21F374A50AD6465BA63F4DB1 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/sst/sst-effects/CMakeLists.txt */,
+			);
+			name = "sst-effects-preset-api";
+			sourceTree = "<group>";
+		};
+		B864F965A31B4CD7A20095D6 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				B0DF38DCA45E4E9C920DE553 /* sst-effects-preset-api */,
+				85BAB814C4714B01A8126E29 /* sst-effects-presets */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		E570A203A9E04878A6726976 = {
+			isa = PBXGroup;
+			children = (
+				8CD3A1AC9AE64BCD9C5B9F48 /* ALL_BUILD */,
+				B30E592269C84BB0A28C33C9 /* sst-effects-preset-api */,
+				3C9463C4E6F946AA89FF5C83 /* sst-effects-presets */,
+				B864F965A31B4CD7A20095D6 /* Products */,
+				6BB2EB707C5C469481D3D914 /* Frameworks */,
+				69E17DBB15DE4AC682ACF97C /* Resources */,
+			);
+			sourceTree = "<group>";
+		};
+		E5B62100580F4629AB397E38 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				CA70744172FD4CB6ADF4998A /* /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-effects/CMakeFiles/sst-effects-presets.dir/Info.plist */,
+			);
+			name = Resources;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		A5840CCDDB5ED83F2D976909 /* sst-effects-presets */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 6F1E29E048FC41CCB6E158F1 /* Build configuration list for PBXNativeTarget "sst-effects-presets" */;
+			buildPhases = (
+				12996454D2F2858A120F5946 /* Generate __cmrc_sst-effects-presets/lib.cpp */,
+				2E2E2831537566CE878C4887 /* Generate __cmrc_sst-effects-presets/intermediate/presets/voice-effects/3op-pm/Hit Me with an EG.vcfx.cpp */,
+				15C6206690F26BD3B99CF6E8 /* Generate __cmrc_sst-effects-presets/intermediate/presets/voice-effects/README.md.cpp */,
+				6C4C044A9B1885042B280F93 /* Generate __cmrc_sst-effects-presets/intermediate/presets/voice-effects/osc-ebwf/SuperSaw.vcfx.cpp */,
+				98669C99936C6B4EC11D700E /* Generate __cmrc_sst-effects-presets/intermediate/presets/voice-effects/osc-ebwf/SuperTri.vcfx.cpp */,
+				63E03C6A71D656DB6F92E770 /* Generate __cmrc_sst-effects-presets/intermediate/presets/voice-effects/osc-ebwf/SyncSine.vcfx.cpp */,
+				EC884FCE2E4E42D097247429 /* Sources */,
+				B2FC977DD7354872919F6476 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				F81B74748A0F4B30959E96E7 /* PBXTargetDependency */,
+			);
+			name = "sst-effects-presets";
+			productName = "sst-effects-presets";
+			productReference = 85BAB814C4714B01A8126E29 /* sst-effects-presets */;
+			productType = "com.apple.product-type.library.static";
+		};
+		D20FA1A5DBF5B0A12FFFC625 /* sst-effects-preset-api */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 50BE910366FB44EBA83210ED /* Build configuration list for PBXNativeTarget "sst-effects-preset-api" */;
+			buildPhases = (
+				2E30D9DDEFFB4F7F8C34165C /* Sources */,
+				FEBD3FC842A5402E8B769000 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				7AB1D63501A94D7BB97CEB91 /* PBXTargetDependency */,
+				307D1F3B17AC4D4BA2B4FE7F /* PBXTargetDependency */,
+			);
+			name = "sst-effects-preset-api";
+			productName = "sst-effects-preset-api";
+			productReference = B0DF38DCA45E4E9C920DE553 /* sst-effects-preset-api */;
+			productType = "com.apple.product-type.library.static";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		D4557C6B66A3479C831199A0 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 2660;
+			};
+			buildConfigurationList = 7F762041D2D54699B1BFF4EC /* Build configuration list for PBXProject "sst-effects" */;
+			buildSettings = {
+			};
+			buildStyles = (
+				3EB1049B58A74640BE86B1BC /* Debug */,
+				26D1CABEC40C4773A3E72ADE /* Release */,
+				675CD65706214B7B8E431856 /* MinSizeRel */,
+				E50F583B112D4206A953A524 /* RelWithDebInfo */,
+			);
+			compatibilityVersion = "Xcode 3.2";
+			hasScannedForEncodings = 0;
+			mainGroup = E570A203A9E04878A6726976;
+			projectDirPath = "/Volumes/KJSL/workspace/github_kevleyski/surge/libs/sst/sst-effects";
+			projectRoot = "";
+			targets = (
+				412D95C48532286282373140 /* ALL_BUILD */,
+				77C1A3C52D322D9730269CA7 /* install */,
+				D20FA1A5DBF5B0A12FFFC625 /* sst-effects-preset-api */,
+				A5840CCDDB5ED83F2D976909 /* sst-effects-presets */,
+				89D95F8BA93D09359DDCC172 /* ZERO_CHECK */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		12996454D2F2858A120F5946 /* Generate __cmrc_sst-effects-presets/lib.cpp */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+/Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/_cmrc/include/cmrc/cmrc.hpp,"/Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-effects/__cmrc_sst-effects-presets/lib_.cpp"			);
+			name = "Generate __cmrc_sst-effects-presets/lib.cpp";
+			outputPaths = (
+"/Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-effects/__cmrc_sst-effects-presets/lib.cpp"			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "set -e
+if test \"$CONFIGURATION\" = \"Debug\"; then :
+  cd /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-effects
+  /opt/homebrew/bin/cmake -E copy_if_different /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-effects/__cmrc_sst-effects-presets/lib_.cpp /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-effects/__cmrc_sst-effects-presets/lib.cpp
+fi
+if test \"$CONFIGURATION\" = \"Release\"; then :
+  cd /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-effects
+  /opt/homebrew/bin/cmake -E copy_if_different /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-effects/__cmrc_sst-effects-presets/lib_.cpp /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-effects/__cmrc_sst-effects-presets/lib.cpp
+fi
+if test \"$CONFIGURATION\" = \"MinSizeRel\"; then :
+  cd /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-effects
+  /opt/homebrew/bin/cmake -E copy_if_different /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-effects/__cmrc_sst-effects-presets/lib_.cpp /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-effects/__cmrc_sst-effects-presets/lib.cpp
+fi
+if test \"$CONFIGURATION\" = \"RelWithDebInfo\"; then :
+  cd /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-effects
+  /opt/homebrew/bin/cmake -E copy_if_different /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-effects/__cmrc_sst-effects-presets/lib_.cpp /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-effects/__cmrc_sst-effects-presets/lib.cpp
+fi
+";
+			showEnvVarsInLog = 0;
+		};
+		15C6206690F26BD3B99CF6E8 /* Generate __cmrc_sst-effects-presets/intermediate/presets/voice-effects/README.md.cpp */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+"/Volumes/KJSL/workspace/github_kevleyski/surge/libs/sst/sst-effects/presets/voice-effects/README.md",/Volumes/KJSL/workspace/github_kevleyski/surge/src/cmake/CmakeRC.cmake			);
+			name = "Generate __cmrc_sst-effects-presets/intermediate/presets/voice-effects/README.md.cpp";
+			outputPaths = (
+"/Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-effects/__cmrc_sst-effects-presets/intermediate/presets/voice-effects/README.md.cpp"			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "set -e
+if test \"$CONFIGURATION\" = \"Debug\"; then :
+  cd /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-effects
+  /opt/homebrew/bin/cmake -D_CMRC_GENERATE_MODE=TRUE -DNAMESPACE=sst_effects_presets -DSYMBOL=f_56ca_presets_voice_effects_README_md -DINPUT_FILE=/Volumes/KJSL/workspace/github_kevleyski/surge/libs/sst/sst-effects/presets/voice-effects/README.md -DOUTPUT_FILE=/Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-effects/__cmrc_sst-effects-presets/intermediate/presets/voice-effects/README.md.cpp -P /Volumes/KJSL/workspace/github_kevleyski/surge/src/cmake/CmakeRC.cmake
+fi
+if test \"$CONFIGURATION\" = \"Release\"; then :
+  cd /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-effects
+  /opt/homebrew/bin/cmake -D_CMRC_GENERATE_MODE=TRUE -DNAMESPACE=sst_effects_presets -DSYMBOL=f_56ca_presets_voice_effects_README_md -DINPUT_FILE=/Volumes/KJSL/workspace/github_kevleyski/surge/libs/sst/sst-effects/presets/voice-effects/README.md -DOUTPUT_FILE=/Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-effects/__cmrc_sst-effects-presets/intermediate/presets/voice-effects/README.md.cpp -P /Volumes/KJSL/workspace/github_kevleyski/surge/src/cmake/CmakeRC.cmake
+fi
+if test \"$CONFIGURATION\" = \"MinSizeRel\"; then :
+  cd /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-effects
+  /opt/homebrew/bin/cmake -D_CMRC_GENERATE_MODE=TRUE -DNAMESPACE=sst_effects_presets -DSYMBOL=f_56ca_presets_voice_effects_README_md -DINPUT_FILE=/Volumes/KJSL/workspace/github_kevleyski/surge/libs/sst/sst-effects/presets/voice-effects/README.md -DOUTPUT_FILE=/Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-effects/__cmrc_sst-effects-presets/intermediate/presets/voice-effects/README.md.cpp -P /Volumes/KJSL/workspace/github_kevleyski/surge/src/cmake/CmakeRC.cmake
+fi
+if test \"$CONFIGURATION\" = \"RelWithDebInfo\"; then :
+  cd /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-effects
+  /opt/homebrew/bin/cmake -D_CMRC_GENERATE_MODE=TRUE -DNAMESPACE=sst_effects_presets -DSYMBOL=f_56ca_presets_voice_effects_README_md -DINPUT_FILE=/Volumes/KJSL/workspace/github_kevleyski/surge/libs/sst/sst-effects/presets/voice-effects/README.md -DOUTPUT_FILE=/Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-effects/__cmrc_sst-effects-presets/intermediate/presets/voice-effects/README.md.cpp -P /Volumes/KJSL/workspace/github_kevleyski/surge/src/cmake/CmakeRC.cmake
+fi
+";
+			showEnvVarsInLog = 0;
+		};
+		1EA72D66097C22D1A30D8ECD /* Generate CMakeFiles/ALL_BUILD */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "Generate CMakeFiles/ALL_BUILD";
+			outputPaths = (
+"/Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-effects/CMakeFiles/ALL_BUILD"			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "set -e
+if test \"$CONFIGURATION\" = \"Debug\"; then :
+  cd /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-effects
+  echo Build\\ all\\ projects
+fi
+if test \"$CONFIGURATION\" = \"Release\"; then :
+  cd /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-effects
+  echo Build\\ all\\ projects
+fi
+if test \"$CONFIGURATION\" = \"MinSizeRel\"; then :
+  cd /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-effects
+  echo Build\\ all\\ projects
+fi
+if test \"$CONFIGURATION\" = \"RelWithDebInfo\"; then :
+  cd /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-effects
+  echo Build\\ all\\ projects
+fi
+";
+			showEnvVarsInLog = 0;
+		};
+		2469D7A0C2B35D06C746A1A3 /* Generate CMakeFiles/ZERO_CHECK */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "Generate CMakeFiles/ZERO_CHECK";
+			outputPaths = (
+"/Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-effects/CMakeFiles/ZERO_CHECK"			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "set -e
+if test \"$CONFIGURATION\" = \"Debug\"; then :
+  cd /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-effects
+  make -f /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-effects/CMakeScripts/ReRunCMake.make
+fi
+if test \"$CONFIGURATION\" = \"Release\"; then :
+  cd /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-effects
+  make -f /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-effects/CMakeScripts/ReRunCMake.make
+fi
+if test \"$CONFIGURATION\" = \"MinSizeRel\"; then :
+  cd /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-effects
+  make -f /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-effects/CMakeScripts/ReRunCMake.make
+fi
+if test \"$CONFIGURATION\" = \"RelWithDebInfo\"; then :
+  cd /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-effects
+  make -f /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-effects/CMakeScripts/ReRunCMake.make
+fi
+";
+			showEnvVarsInLog = 0;
+		};
+		2E2E2831537566CE878C4887 /* Generate __cmrc_sst-effects-presets/intermediate/presets/voice-effects/3op-pm/Hit Me with an EG.vcfx.cpp */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+"/Volumes/KJSL/workspace/github_kevleyski/surge/libs/sst/sst-effects/presets/voice-effects/3op-pm/Hit Me with an EG.vcfx",/Volumes/KJSL/workspace/github_kevleyski/surge/src/cmake/CmakeRC.cmake			);
+			name = "Generate __cmrc_sst-effects-presets/intermediate/presets/voice-effects/3op-pm/Hit Me with an EG.vcfx.cpp";
+			outputPaths = (
+"/Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-effects/__cmrc_sst-effects-presets/intermediate/presets/voice-effects/3op-pm/Hit Me with an EG.vcfx.cpp"			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "set -e
+if test \"$CONFIGURATION\" = \"Debug\"; then :
+  cd /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-effects
+  /opt/homebrew/bin/cmake -D_CMRC_GENERATE_MODE=TRUE -DNAMESPACE=sst_effects_presets -DSYMBOL=f_5606_presets_voice_effects_3op_pm_Hit_Me_with_an_EG_vcfx -DINPUT_FILE=/Volumes/KJSL/workspace/github_kevleyski/surge/libs/sst/sst-effects/presets/voice-effects/3op-pm/Hit\\ Me\\ with\\ an\\ EG.vcfx -DOUTPUT_FILE=/Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-effects/__cmrc_sst-effects-presets/intermediate/presets/voice-effects/3op-pm/Hit\\ Me\\ with\\ an\\ EG.vcfx.cpp -P /Volumes/KJSL/workspace/github_kevleyski/surge/src/cmake/CmakeRC.cmake
+fi
+if test \"$CONFIGURATION\" = \"Release\"; then :
+  cd /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-effects
+  /opt/homebrew/bin/cmake -D_CMRC_GENERATE_MODE=TRUE -DNAMESPACE=sst_effects_presets -DSYMBOL=f_5606_presets_voice_effects_3op_pm_Hit_Me_with_an_EG_vcfx -DINPUT_FILE=/Volumes/KJSL/workspace/github_kevleyski/surge/libs/sst/sst-effects/presets/voice-effects/3op-pm/Hit\\ Me\\ with\\ an\\ EG.vcfx -DOUTPUT_FILE=/Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-effects/__cmrc_sst-effects-presets/intermediate/presets/voice-effects/3op-pm/Hit\\ Me\\ with\\ an\\ EG.vcfx.cpp -P /Volumes/KJSL/workspace/github_kevleyski/surge/src/cmake/CmakeRC.cmake
+fi
+if test \"$CONFIGURATION\" = \"MinSizeRel\"; then :
+  cd /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-effects
+  /opt/homebrew/bin/cmake -D_CMRC_GENERATE_MODE=TRUE -DNAMESPACE=sst_effects_presets -DSYMBOL=f_5606_presets_voice_effects_3op_pm_Hit_Me_with_an_EG_vcfx -DINPUT_FILE=/Volumes/KJSL/workspace/github_kevleyski/surge/libs/sst/sst-effects/presets/voice-effects/3op-pm/Hit\\ Me\\ with\\ an\\ EG.vcfx -DOUTPUT_FILE=/Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-effects/__cmrc_sst-effects-presets/intermediate/presets/voice-effects/3op-pm/Hit\\ Me\\ with\\ an\\ EG.vcfx.cpp -P /Volumes/KJSL/workspace/github_kevleyski/surge/src/cmake/CmakeRC.cmake
+fi
+if test \"$CONFIGURATION\" = \"RelWithDebInfo\"; then :
+  cd /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-effects
+  /opt/homebrew/bin/cmake -D_CMRC_GENERATE_MODE=TRUE -DNAMESPACE=sst_effects_presets -DSYMBOL=f_5606_presets_voice_effects_3op_pm_Hit_Me_with_an_EG_vcfx -DINPUT_FILE=/Volumes/KJSL/workspace/github_kevleyski/surge/libs/sst/sst-effects/presets/voice-effects/3op-pm/Hit\\ Me\\ with\\ an\\ EG.vcfx -DOUTPUT_FILE=/Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-effects/__cmrc_sst-effects-presets/intermediate/presets/voice-effects/3op-pm/Hit\\ Me\\ with\\ an\\ EG.vcfx.cpp -P /Volumes/KJSL/workspace/github_kevleyski/surge/src/cmake/CmakeRC.cmake
+fi
+";
+			showEnvVarsInLog = 0;
+		};
+		3C0110FC8322DE7E50886E21 = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "# shell script goes here
+exit 0";
+			showEnvVarsInLog = 0;
+		};
+		63E03C6A71D656DB6F92E770 /* Generate __cmrc_sst-effects-presets/intermediate/presets/voice-effects/osc-ebwf/SyncSine.vcfx.cpp */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+"/Volumes/KJSL/workspace/github_kevleyski/surge/libs/sst/sst-effects/presets/voice-effects/osc-ebwf/SyncSine.vcfx",/Volumes/KJSL/workspace/github_kevleyski/surge/src/cmake/CmakeRC.cmake			);
+			name = "Generate __cmrc_sst-effects-presets/intermediate/presets/voice-effects/osc-ebwf/SyncSine.vcfx.cpp";
+			outputPaths = (
+"/Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-effects/__cmrc_sst-effects-presets/intermediate/presets/voice-effects/osc-ebwf/SyncSine.vcfx.cpp"			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "set -e
+if test \"$CONFIGURATION\" = \"Debug\"; then :
+  cd /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-effects
+  /opt/homebrew/bin/cmake -D_CMRC_GENERATE_MODE=TRUE -DNAMESPACE=sst_effects_presets -DSYMBOL=f_edb8_presets_voice_effects_osc_ebwf_SyncSine_vcfx -DINPUT_FILE=/Volumes/KJSL/workspace/github_kevleyski/surge/libs/sst/sst-effects/presets/voice-effects/osc-ebwf/SyncSine.vcfx -DOUTPUT_FILE=/Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-effects/__cmrc_sst-effects-presets/intermediate/presets/voice-effects/osc-ebwf/SyncSine.vcfx.cpp -P /Volumes/KJSL/workspace/github_kevleyski/surge/src/cmake/CmakeRC.cmake
+fi
+if test \"$CONFIGURATION\" = \"Release\"; then :
+  cd /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-effects
+  /opt/homebrew/bin/cmake -D_CMRC_GENERATE_MODE=TRUE -DNAMESPACE=sst_effects_presets -DSYMBOL=f_edb8_presets_voice_effects_osc_ebwf_SyncSine_vcfx -DINPUT_FILE=/Volumes/KJSL/workspace/github_kevleyski/surge/libs/sst/sst-effects/presets/voice-effects/osc-ebwf/SyncSine.vcfx -DOUTPUT_FILE=/Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-effects/__cmrc_sst-effects-presets/intermediate/presets/voice-effects/osc-ebwf/SyncSine.vcfx.cpp -P /Volumes/KJSL/workspace/github_kevleyski/surge/src/cmake/CmakeRC.cmake
+fi
+if test \"$CONFIGURATION\" = \"MinSizeRel\"; then :
+  cd /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-effects
+  /opt/homebrew/bin/cmake -D_CMRC_GENERATE_MODE=TRUE -DNAMESPACE=sst_effects_presets -DSYMBOL=f_edb8_presets_voice_effects_osc_ebwf_SyncSine_vcfx -DINPUT_FILE=/Volumes/KJSL/workspace/github_kevleyski/surge/libs/sst/sst-effects/presets/voice-effects/osc-ebwf/SyncSine.vcfx -DOUTPUT_FILE=/Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-effects/__cmrc_sst-effects-presets/intermediate/presets/voice-effects/osc-ebwf/SyncSine.vcfx.cpp -P /Volumes/KJSL/workspace/github_kevleyski/surge/src/cmake/CmakeRC.cmake
+fi
+if test \"$CONFIGURATION\" = \"RelWithDebInfo\"; then :
+  cd /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-effects
+  /opt/homebrew/bin/cmake -D_CMRC_GENERATE_MODE=TRUE -DNAMESPACE=sst_effects_presets -DSYMBOL=f_edb8_presets_voice_effects_osc_ebwf_SyncSine_vcfx -DINPUT_FILE=/Volumes/KJSL/workspace/github_kevleyski/surge/libs/sst/sst-effects/presets/voice-effects/osc-ebwf/SyncSine.vcfx -DOUTPUT_FILE=/Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-effects/__cmrc_sst-effects-presets/intermediate/presets/voice-effects/osc-ebwf/SyncSine.vcfx.cpp -P /Volumes/KJSL/workspace/github_kevleyski/surge/src/cmake/CmakeRC.cmake
+fi
+";
+			showEnvVarsInLog = 0;
+		};
+		6C4C044A9B1885042B280F93 /* Generate __cmrc_sst-effects-presets/intermediate/presets/voice-effects/osc-ebwf/SuperSaw.vcfx.cpp */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+"/Volumes/KJSL/workspace/github_kevleyski/surge/libs/sst/sst-effects/presets/voice-effects/osc-ebwf/SuperSaw.vcfx",/Volumes/KJSL/workspace/github_kevleyski/surge/src/cmake/CmakeRC.cmake			);
+			name = "Generate __cmrc_sst-effects-presets/intermediate/presets/voice-effects/osc-ebwf/SuperSaw.vcfx.cpp";
+			outputPaths = (
+"/Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-effects/__cmrc_sst-effects-presets/intermediate/presets/voice-effects/osc-ebwf/SuperSaw.vcfx.cpp"			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "set -e
+if test \"$CONFIGURATION\" = \"Debug\"; then :
+  cd /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-effects
+  /opt/homebrew/bin/cmake -D_CMRC_GENERATE_MODE=TRUE -DNAMESPACE=sst_effects_presets -DSYMBOL=f_cdc4_presets_voice_effects_osc_ebwf_SuperSaw_vcfx -DINPUT_FILE=/Volumes/KJSL/workspace/github_kevleyski/surge/libs/sst/sst-effects/presets/voice-effects/osc-ebwf/SuperSaw.vcfx -DOUTPUT_FILE=/Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-effects/__cmrc_sst-effects-presets/intermediate/presets/voice-effects/osc-ebwf/SuperSaw.vcfx.cpp -P /Volumes/KJSL/workspace/github_kevleyski/surge/src/cmake/CmakeRC.cmake
+fi
+if test \"$CONFIGURATION\" = \"Release\"; then :
+  cd /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-effects
+  /opt/homebrew/bin/cmake -D_CMRC_GENERATE_MODE=TRUE -DNAMESPACE=sst_effects_presets -DSYMBOL=f_cdc4_presets_voice_effects_osc_ebwf_SuperSaw_vcfx -DINPUT_FILE=/Volumes/KJSL/workspace/github_kevleyski/surge/libs/sst/sst-effects/presets/voice-effects/osc-ebwf/SuperSaw.vcfx -DOUTPUT_FILE=/Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-effects/__cmrc_sst-effects-presets/intermediate/presets/voice-effects/osc-ebwf/SuperSaw.vcfx.cpp -P /Volumes/KJSL/workspace/github_kevleyski/surge/src/cmake/CmakeRC.cmake
+fi
+if test \"$CONFIGURATION\" = \"MinSizeRel\"; then :
+  cd /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-effects
+  /opt/homebrew/bin/cmake -D_CMRC_GENERATE_MODE=TRUE -DNAMESPACE=sst_effects_presets -DSYMBOL=f_cdc4_presets_voice_effects_osc_ebwf_SuperSaw_vcfx -DINPUT_FILE=/Volumes/KJSL/workspace/github_kevleyski/surge/libs/sst/sst-effects/presets/voice-effects/osc-ebwf/SuperSaw.vcfx -DOUTPUT_FILE=/Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-effects/__cmrc_sst-effects-presets/intermediate/presets/voice-effects/osc-ebwf/SuperSaw.vcfx.cpp -P /Volumes/KJSL/workspace/github_kevleyski/surge/src/cmake/CmakeRC.cmake
+fi
+if test \"$CONFIGURATION\" = \"RelWithDebInfo\"; then :
+  cd /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-effects
+  /opt/homebrew/bin/cmake -D_CMRC_GENERATE_MODE=TRUE -DNAMESPACE=sst_effects_presets -DSYMBOL=f_cdc4_presets_voice_effects_osc_ebwf_SuperSaw_vcfx -DINPUT_FILE=/Volumes/KJSL/workspace/github_kevleyski/surge/libs/sst/sst-effects/presets/voice-effects/osc-ebwf/SuperSaw.vcfx -DOUTPUT_FILE=/Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-effects/__cmrc_sst-effects-presets/intermediate/presets/voice-effects/osc-ebwf/SuperSaw.vcfx.cpp -P /Volumes/KJSL/workspace/github_kevleyski/surge/src/cmake/CmakeRC.cmake
+fi
+";
+			showEnvVarsInLog = 0;
+		};
+		87AF4882E018677E2624B544 = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "# shell script goes here
+exit 0";
+			showEnvVarsInLog = 0;
+		};
+		93426DA6A4AC2C2AC9CE883C /* CMake PostBuild Rules */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "CMake PostBuild Rules";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "set -e
+if test \"$CONFIGURATION\" = \"Debug\"; then :
+  cd /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-effects
+  /opt/homebrew/bin/cmake -DBUILD_TYPE=$CONFIGURATION -DEFFECTIVE_PLATFORM_NAME=$EFFECTIVE_PLATFORM_NAME -P cmake_install.cmake
+fi
+if test \"$CONFIGURATION\" = \"Release\"; then :
+  cd /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-effects
+  /opt/homebrew/bin/cmake -DBUILD_TYPE=$CONFIGURATION -DEFFECTIVE_PLATFORM_NAME=$EFFECTIVE_PLATFORM_NAME -P cmake_install.cmake
+fi
+if test \"$CONFIGURATION\" = \"MinSizeRel\"; then :
+  cd /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-effects
+  /opt/homebrew/bin/cmake -DBUILD_TYPE=$CONFIGURATION -DEFFECTIVE_PLATFORM_NAME=$EFFECTIVE_PLATFORM_NAME -P cmake_install.cmake
+fi
+if test \"$CONFIGURATION\" = \"RelWithDebInfo\"; then :
+  cd /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-effects
+  /opt/homebrew/bin/cmake -DBUILD_TYPE=$CONFIGURATION -DEFFECTIVE_PLATFORM_NAME=$EFFECTIVE_PLATFORM_NAME -P cmake_install.cmake
+fi
+";
+			showEnvVarsInLog = 0;
+		};
+		98669C99936C6B4EC11D700E /* Generate __cmrc_sst-effects-presets/intermediate/presets/voice-effects/osc-ebwf/SuperTri.vcfx.cpp */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+"/Volumes/KJSL/workspace/github_kevleyski/surge/libs/sst/sst-effects/presets/voice-effects/osc-ebwf/SuperTri.vcfx",/Volumes/KJSL/workspace/github_kevleyski/surge/src/cmake/CmakeRC.cmake			);
+			name = "Generate __cmrc_sst-effects-presets/intermediate/presets/voice-effects/osc-ebwf/SuperTri.vcfx.cpp";
+			outputPaths = (
+"/Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-effects/__cmrc_sst-effects-presets/intermediate/presets/voice-effects/osc-ebwf/SuperTri.vcfx.cpp"			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "set -e
+if test \"$CONFIGURATION\" = \"Debug\"; then :
+  cd /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-effects
+  /opt/homebrew/bin/cmake -D_CMRC_GENERATE_MODE=TRUE -DNAMESPACE=sst_effects_presets -DSYMBOL=f_3a07_presets_voice_effects_osc_ebwf_SuperTri_vcfx -DINPUT_FILE=/Volumes/KJSL/workspace/github_kevleyski/surge/libs/sst/sst-effects/presets/voice-effects/osc-ebwf/SuperTri.vcfx -DOUTPUT_FILE=/Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-effects/__cmrc_sst-effects-presets/intermediate/presets/voice-effects/osc-ebwf/SuperTri.vcfx.cpp -P /Volumes/KJSL/workspace/github_kevleyski/surge/src/cmake/CmakeRC.cmake
+fi
+if test \"$CONFIGURATION\" = \"Release\"; then :
+  cd /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-effects
+  /opt/homebrew/bin/cmake -D_CMRC_GENERATE_MODE=TRUE -DNAMESPACE=sst_effects_presets -DSYMBOL=f_3a07_presets_voice_effects_osc_ebwf_SuperTri_vcfx -DINPUT_FILE=/Volumes/KJSL/workspace/github_kevleyski/surge/libs/sst/sst-effects/presets/voice-effects/osc-ebwf/SuperTri.vcfx -DOUTPUT_FILE=/Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-effects/__cmrc_sst-effects-presets/intermediate/presets/voice-effects/osc-ebwf/SuperTri.vcfx.cpp -P /Volumes/KJSL/workspace/github_kevleyski/surge/src/cmake/CmakeRC.cmake
+fi
+if test \"$CONFIGURATION\" = \"MinSizeRel\"; then :
+  cd /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-effects
+  /opt/homebrew/bin/cmake -D_CMRC_GENERATE_MODE=TRUE -DNAMESPACE=sst_effects_presets -DSYMBOL=f_3a07_presets_voice_effects_osc_ebwf_SuperTri_vcfx -DINPUT_FILE=/Volumes/KJSL/workspace/github_kevleyski/surge/libs/sst/sst-effects/presets/voice-effects/osc-ebwf/SuperTri.vcfx -DOUTPUT_FILE=/Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-effects/__cmrc_sst-effects-presets/intermediate/presets/voice-effects/osc-ebwf/SuperTri.vcfx.cpp -P /Volumes/KJSL/workspace/github_kevleyski/surge/src/cmake/CmakeRC.cmake
+fi
+if test \"$CONFIGURATION\" = \"RelWithDebInfo\"; then :
+  cd /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-effects
+  /opt/homebrew/bin/cmake -D_CMRC_GENERATE_MODE=TRUE -DNAMESPACE=sst_effects_presets -DSYMBOL=f_3a07_presets_voice_effects_osc_ebwf_SuperTri_vcfx -DINPUT_FILE=/Volumes/KJSL/workspace/github_kevleyski/surge/libs/sst/sst-effects/presets/voice-effects/osc-ebwf/SuperTri.vcfx -DOUTPUT_FILE=/Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-effects/__cmrc_sst-effects-presets/intermediate/presets/voice-effects/osc-ebwf/SuperTri.vcfx.cpp -P /Volumes/KJSL/workspace/github_kevleyski/surge/src/cmake/CmakeRC.cmake
+fi
+";
+			showEnvVarsInLog = 0;
+		};
+		9B50530E35CC49C82C2FACCF = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "# shell script goes here
+exit 0";
+			showEnvVarsInLog = 0;
+		};
+/* End PBXShellScriptBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		2E30D9DDEFFB4F7F8C34165C /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				3DE1B386B0C842CD8C9BB6B7 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/sst/sst-effects/src/preset-api.cpp */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		EC884FCE2E4E42D097247429 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				9D98E52B8FF444DCA8692EE3 /* /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-effects/__cmrc_sst-effects-presets/intermediate/presets/voice-effects/3op-pm/Hit Me with an EG.vcfx.cpp */,
+				0D3AA37884CB4F5190FD7B73 /* /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-effects/__cmrc_sst-effects-presets/intermediate/presets/voice-effects/README.md.cpp */,
+				F6981D061B794F29AB355D4B /* /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-effects/__cmrc_sst-effects-presets/intermediate/presets/voice-effects/osc-ebwf/SuperSaw.vcfx.cpp */,
+				2C1E34DAF5E445EABA492C60 /* /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-effects/__cmrc_sst-effects-presets/intermediate/presets/voice-effects/osc-ebwf/SuperTri.vcfx.cpp */,
+				C1ED8E2E6E50433DA95764E5 /* /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-effects/__cmrc_sst-effects-presets/intermediate/presets/voice-effects/osc-ebwf/SyncSine.vcfx.cpp */,
+				F4D1275F610345F49AE10636 /* /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-effects/__cmrc_sst-effects-presets/lib.cpp */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		307D1F3B17AC4D4BA2B4FE7F /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 89D95F8BA93D09359DDCC172 /* ZERO_CHECK */;
+			targetProxy = 43DD82577CE84E26B090E5FB /* PBXContainerItemProxy */;
+		};
+		7AB1D63501A94D7BB97CEB91 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = A5840CCDDB5ED83F2D976909 /* sst-effects-presets */;
+			targetProxy = 8E48759406E84A2A90C72E93 /* PBXContainerItemProxy */;
+		};
+		80BA0BBBD2894671AA2CD76B /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 89D95F8BA93D09359DDCC172 /* ZERO_CHECK */;
+			targetProxy = 841D60C4A1E24389BF415C3A /* PBXContainerItemProxy */;
+		};
+		998247CAE2824866B888E24B /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = D20FA1A5DBF5B0A12FFFC625 /* sst-effects-preset-api */;
+			targetProxy = 4216F231095747218AD59058 /* PBXContainerItemProxy */;
+		};
+		A7FDEA85E76C493188D54A6D /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = A5840CCDDB5ED83F2D976909 /* sst-effects-presets */;
+			targetProxy = 7617E2AFD05F401CB3047AF0 /* PBXContainerItemProxy */;
+		};
+		BEB8F517A34443608EEE8E10 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 412D95C48532286282373140 /* ALL_BUILD */;
+			targetProxy = 6DF500359198487BB45D28AA /* PBXContainerItemProxy */;
+		};
+		F81B74748A0F4B30959E96E7 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 89D95F8BA93D09359DDCC172 /* ZERO_CHECK */;
+			targetProxy = ECF3B4CD35894E8EAE7082F5 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		13F93493353942629608BD4E /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COMBINE_HIDPI_IMAGES = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'","$(inherited)");
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				INSTALL_PATH = "";
+				OTHER_LDFLAGS = ("","$(inherited)");
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = ZERO_CHECK;
+				SECTORDER_FLAGS = "";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("$(inherited)");
+			};
+			name = Debug;
+		};
+		4E0CA387132F44B3B5B784E0 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = arm64;
+				COMBINE_HIDPI_IMAGES = YES;
+				CONFIGURATION_BUILD_DIR = "/Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-effects/Debug${EFFECTIVE_PLATFORM_NAME}";
+				EXECUTABLE_PREFIX = lib;
+				EXECUTABLE_SUFFIX = .a;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'","$(inherited)");
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = (/Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/_cmrc/include,"$(inherited)");
+				INSTALL_PATH = "";
+				LIBRARY_STYLE = STATIC;
+				LLVM_LTO = YES_THIN;
+				ONLY_ACTIVE_ARCH = NO;
+				OTHER_CPLUSPLUSFLAGS = "   '-std=c++20' '-flto=thin' -fPIC -fvisibility=hidden -fvisibility-inlines-hidden -Wno-multichar -fno-math-errno -fno-trapping-math -fno-char8_t -Wno-unused-command-line-argument -Wno-deprecated-declarations '-Werror=inconsistent-missing-override' '-Werror=logical-op-parentheses' '-Werror=dynamic-class-memaccess' '-Werror=undefined-bool-conversion' '-Werror=bitwise-op-parentheses' '-Werror=pointer-bool-conversion' -faligned-allocation -fasm-blocks ";
+				OTHER_LIBTOOLFLAGS = ("");
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = "sst-effects-presets";
+				SECTORDER_FLAGS = "";
+				TARGET_TEMP_DIR = "/Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/build/sst-effects-presets.build/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("$(inherited)");
+			};
+			name = Debug;
+		};
+		5C2F3AE97E464903BF1A6D34 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = arm64;
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = B973YVS5A5;
+				IPHONEOS_DEPLOYMENT_TARGET = 10.15;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SYMROOT = /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/build;
+			};
+			name = Release;
+		};
+		630660C0BBAB4A1FA230D4A4 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COMBINE_HIDPI_IMAGES = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'","$(inherited)");
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				INSTALL_PATH = "";
+				OTHER_LDFLAGS = ("","$(inherited)");
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = ZERO_CHECK;
+				SECTORDER_FLAGS = "";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("$(inherited)");
+			};
+			name = Release;
+		};
+		7A48ADCDBB0943508E1C748F /* RelWithDebInfo */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = arm64;
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = B973YVS5A5;
+				IPHONEOS_DEPLOYMENT_TARGET = 10.15;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SYMROOT = /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/build;
+			};
+			name = RelWithDebInfo;
+		};
+		7ABEE5546AC74D17BF64A26E /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COMBINE_HIDPI_IMAGES = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'","$(inherited)");
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				INSTALL_PATH = "";
+				OTHER_LDFLAGS = ("","$(inherited)");
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = ALL_BUILD;
+				SECTORDER_FLAGS = "";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("$(inherited)");
+			};
+			name = Debug;
+		};
+		7C690C3388C94A86A9A839E3 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COMBINE_HIDPI_IMAGES = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'","$(inherited)");
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				INSTALL_PATH = "";
+				OTHER_LDFLAGS = ("","$(inherited)");
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = install;
+				SECTORDER_FLAGS = "";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("$(inherited)");
+			};
+			name = Debug;
+		};
+		7F277159EE8B4414BE5CCA8C /* RelWithDebInfo */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = arm64;
+				COMBINE_HIDPI_IMAGES = YES;
+				CONFIGURATION_BUILD_DIR = "/Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-effects/RelWithDebInfo${EFFECTIVE_PLATFORM_NAME}";
+				EXECUTABLE_PREFIX = lib;
+				EXECUTABLE_SUFFIX = .a;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 2;
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'","$(inherited)");
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = ("/Volumes/KJSL/workspace/github_kevleyski/surge/libs/sst/sst-effects/src",/Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/_cmrc/include,"$(inherited)");
+				INSTALL_PATH = "";
+				LIBRARY_STYLE = STATIC;
+				LLVM_LTO = YES_THIN;
+				ONLY_ACTIVE_ARCH = NO;
+				OTHER_CPLUSPLUSFLAGS = "       -DNDEBUG '-std=c++20' '-flto=thin' -fPIC -fvisibility=hidden -fvisibility-inlines-hidden -Wno-multichar -fno-math-errno -fno-trapping-math -fno-char8_t -Wno-unused-command-line-argument -Wno-deprecated-declarations '-Werror=inconsistent-missing-override' '-Werror=logical-op-parentheses' '-Werror=dynamic-class-memaccess' '-Werror=undefined-bool-conversion' '-Werror=bitwise-op-parentheses' '-Werror=pointer-bool-conversion' -faligned-allocation -fasm-blocks ";
+				OTHER_LIBTOOLFLAGS = ("");
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = "sst-effects-preset-api";
+				SECTORDER_FLAGS = "";
+				TARGET_TEMP_DIR = "/Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/build/sst-effects-preset-api.build/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("$(inherited)");
+			};
+			name = RelWithDebInfo;
+		};
+		7F88612FA2234BB49AF6BEA7 /* MinSizeRel */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COMBINE_HIDPI_IMAGES = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'","$(inherited)");
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				INSTALL_PATH = "";
+				OTHER_LDFLAGS = ("","$(inherited)");
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = ALL_BUILD;
+				SECTORDER_FLAGS = "";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("$(inherited)");
+			};
+			name = MinSizeRel;
+		};
+		856FDF02EAF246A4B83CD075 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COMBINE_HIDPI_IMAGES = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'","$(inherited)");
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				INSTALL_PATH = "";
+				OTHER_LDFLAGS = ("","$(inherited)");
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = install;
+				SECTORDER_FLAGS = "";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("$(inherited)");
+			};
+			name = Release;
+		};
+		884FA8FCBF104EAB8A99E534 /* RelWithDebInfo */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = arm64;
+				COMBINE_HIDPI_IMAGES = YES;
+				CONFIGURATION_BUILD_DIR = "/Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-effects/RelWithDebInfo${EFFECTIVE_PLATFORM_NAME}";
+				EXECUTABLE_PREFIX = lib;
+				EXECUTABLE_SUFFIX = .a;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 2;
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'","$(inherited)");
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = (/Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/_cmrc/include,"$(inherited)");
+				INSTALL_PATH = "";
+				LIBRARY_STYLE = STATIC;
+				LLVM_LTO = YES_THIN;
+				ONLY_ACTIVE_ARCH = NO;
+				OTHER_CPLUSPLUSFLAGS = "       -DNDEBUG '-std=c++20' '-flto=thin' -fPIC -fvisibility=hidden -fvisibility-inlines-hidden -Wno-multichar -fno-math-errno -fno-trapping-math -fno-char8_t -Wno-unused-command-line-argument -Wno-deprecated-declarations '-Werror=inconsistent-missing-override' '-Werror=logical-op-parentheses' '-Werror=dynamic-class-memaccess' '-Werror=undefined-bool-conversion' '-Werror=bitwise-op-parentheses' '-Werror=pointer-bool-conversion' -faligned-allocation -fasm-blocks ";
+				OTHER_LIBTOOLFLAGS = ("");
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = "sst-effects-presets";
+				SECTORDER_FLAGS = "";
+				TARGET_TEMP_DIR = "/Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/build/sst-effects-presets.build/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("$(inherited)");
+			};
+			name = RelWithDebInfo;
+		};
+		8A165BEFA5A044B8A0A5CE34 /* RelWithDebInfo */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COMBINE_HIDPI_IMAGES = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'","$(inherited)");
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				INSTALL_PATH = "";
+				OTHER_LDFLAGS = ("","$(inherited)");
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = ZERO_CHECK;
+				SECTORDER_FLAGS = "";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("$(inherited)");
+			};
+			name = RelWithDebInfo;
+		};
+		9D0AEC764D0844BBB1B37B7A /* RelWithDebInfo */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COMBINE_HIDPI_IMAGES = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'","$(inherited)");
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				INSTALL_PATH = "";
+				OTHER_LDFLAGS = ("","$(inherited)");
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = install;
+				SECTORDER_FLAGS = "";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("$(inherited)");
+			};
+			name = RelWithDebInfo;
+		};
+		9F27E4F041AF4748A64376A8 /* RelWithDebInfo */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COMBINE_HIDPI_IMAGES = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'","$(inherited)");
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				INSTALL_PATH = "";
+				OTHER_LDFLAGS = ("","$(inherited)");
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = ALL_BUILD;
+				SECTORDER_FLAGS = "";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("$(inherited)");
+			};
+			name = RelWithDebInfo;
+		};
+		ABBE4410B0ED419F9521CED8 /* MinSizeRel */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COMBINE_HIDPI_IMAGES = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'","$(inherited)");
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				INSTALL_PATH = "";
+				OTHER_LDFLAGS = ("","$(inherited)");
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = install;
+				SECTORDER_FLAGS = "";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("$(inherited)");
+			};
+			name = MinSizeRel;
+		};
+		AEA218EAF94240B6A81254DB /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = arm64;
+				COMBINE_HIDPI_IMAGES = YES;
+				CONFIGURATION_BUILD_DIR = "/Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-effects/Release${EFFECTIVE_PLATFORM_NAME}";
+				EXECUTABLE_PREFIX = lib;
+				EXECUTABLE_SUFFIX = .a;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 3;
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'","$(inherited)");
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = (/Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/_cmrc/include,"$(inherited)");
+				INSTALL_PATH = "";
+				LIBRARY_STYLE = STATIC;
+				LLVM_LTO = YES_THIN;
+				ONLY_ACTIVE_ARCH = NO;
+				OTHER_CPLUSPLUSFLAGS = "    -DNDEBUG '-std=c++20' '-flto=thin' -fPIC -fvisibility=hidden -fvisibility-inlines-hidden -Wno-multichar -fno-math-errno -fno-trapping-math -fno-char8_t -Wno-unused-command-line-argument -Wno-deprecated-declarations '-Werror=inconsistent-missing-override' '-Werror=logical-op-parentheses' '-Werror=dynamic-class-memaccess' '-Werror=undefined-bool-conversion' '-Werror=bitwise-op-parentheses' '-Werror=pointer-bool-conversion' -faligned-allocation -fasm-blocks ";
+				OTHER_LIBTOOLFLAGS = ("");
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = "sst-effects-presets";
+				SECTORDER_FLAGS = "";
+				TARGET_TEMP_DIR = "/Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/build/sst-effects-presets.build/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("$(inherited)");
+			};
+			name = Release;
+		};
+		C0A994C5AB1E435381F2A56A /* MinSizeRel */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = arm64;
+				COMBINE_HIDPI_IMAGES = YES;
+				CONFIGURATION_BUILD_DIR = "/Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-effects/MinSizeRel${EFFECTIVE_PLATFORM_NAME}";
+				EXECUTABLE_PREFIX = lib;
+				EXECUTABLE_SUFFIX = .a;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = s;
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'","$(inherited)");
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = ("/Volumes/KJSL/workspace/github_kevleyski/surge/libs/sst/sst-effects/src",/Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/_cmrc/include,"$(inherited)");
+				INSTALL_PATH = "";
+				LIBRARY_STYLE = STATIC;
+				LLVM_LTO = YES_THIN;
+				ONLY_ACTIVE_ARCH = NO;
+				OTHER_CPLUSPLUSFLAGS = "    -DNDEBUG '-std=c++20' '-flto=thin' -fPIC -fvisibility=hidden -fvisibility-inlines-hidden -Wno-multichar -fno-math-errno -fno-trapping-math -fno-char8_t -Wno-unused-command-line-argument -Wno-deprecated-declarations '-Werror=inconsistent-missing-override' '-Werror=logical-op-parentheses' '-Werror=dynamic-class-memaccess' '-Werror=undefined-bool-conversion' '-Werror=bitwise-op-parentheses' '-Werror=pointer-bool-conversion' -faligned-allocation -fasm-blocks ";
+				OTHER_LIBTOOLFLAGS = ("");
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = "sst-effects-preset-api";
+				SECTORDER_FLAGS = "";
+				TARGET_TEMP_DIR = "/Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/build/sst-effects-preset-api.build/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("$(inherited)");
+			};
+			name = MinSizeRel;
+		};
+		C40E50766BC546768C90AC02 /* MinSizeRel */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = arm64;
+				COMBINE_HIDPI_IMAGES = YES;
+				CONFIGURATION_BUILD_DIR = "/Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-effects/MinSizeRel${EFFECTIVE_PLATFORM_NAME}";
+				EXECUTABLE_PREFIX = lib;
+				EXECUTABLE_SUFFIX = .a;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = s;
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'","$(inherited)");
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = (/Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/_cmrc/include,"$(inherited)");
+				INSTALL_PATH = "";
+				LIBRARY_STYLE = STATIC;
+				LLVM_LTO = YES_THIN;
+				ONLY_ACTIVE_ARCH = NO;
+				OTHER_CPLUSPLUSFLAGS = "    -DNDEBUG '-std=c++20' '-flto=thin' -fPIC -fvisibility=hidden -fvisibility-inlines-hidden -Wno-multichar -fno-math-errno -fno-trapping-math -fno-char8_t -Wno-unused-command-line-argument -Wno-deprecated-declarations '-Werror=inconsistent-missing-override' '-Werror=logical-op-parentheses' '-Werror=dynamic-class-memaccess' '-Werror=undefined-bool-conversion' '-Werror=bitwise-op-parentheses' '-Werror=pointer-bool-conversion' -faligned-allocation -fasm-blocks ";
+				OTHER_LIBTOOLFLAGS = ("");
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = "sst-effects-presets";
+				SECTORDER_FLAGS = "";
+				TARGET_TEMP_DIR = "/Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/build/sst-effects-presets.build/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("$(inherited)");
+			};
+			name = MinSizeRel;
+		};
+		D1152265389A4737A57127C2 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = arm64;
+				COMBINE_HIDPI_IMAGES = YES;
+				CONFIGURATION_BUILD_DIR = "/Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-effects/Debug${EFFECTIVE_PLATFORM_NAME}";
+				EXECUTABLE_PREFIX = lib;
+				EXECUTABLE_SUFFIX = .a;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'","$(inherited)");
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = ("/Volumes/KJSL/workspace/github_kevleyski/surge/libs/sst/sst-effects/src",/Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/_cmrc/include,"$(inherited)");
+				INSTALL_PATH = "";
+				LIBRARY_STYLE = STATIC;
+				LLVM_LTO = YES_THIN;
+				ONLY_ACTIVE_ARCH = NO;
+				OTHER_CPLUSPLUSFLAGS = "   '-std=c++20' '-flto=thin' -fPIC -fvisibility=hidden -fvisibility-inlines-hidden -Wno-multichar -fno-math-errno -fno-trapping-math -fno-char8_t -Wno-unused-command-line-argument -Wno-deprecated-declarations '-Werror=inconsistent-missing-override' '-Werror=logical-op-parentheses' '-Werror=dynamic-class-memaccess' '-Werror=undefined-bool-conversion' '-Werror=bitwise-op-parentheses' '-Werror=pointer-bool-conversion' -faligned-allocation -fasm-blocks ";
+				OTHER_LIBTOOLFLAGS = ("");
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = "sst-effects-preset-api";
+				SECTORDER_FLAGS = "";
+				TARGET_TEMP_DIR = "/Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/build/sst-effects-preset-api.build/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("$(inherited)");
+			};
+			name = Debug;
+		};
+		D77145E0BB49415582F18135 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COMBINE_HIDPI_IMAGES = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'","$(inherited)");
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				INSTALL_PATH = "";
+				OTHER_LDFLAGS = ("","$(inherited)");
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = ALL_BUILD;
+				SECTORDER_FLAGS = "";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("$(inherited)");
+			};
+			name = Release;
+		};
+		D945C3E8684C4A01A401835D /* MinSizeRel */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COMBINE_HIDPI_IMAGES = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'","$(inherited)");
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				INSTALL_PATH = "";
+				OTHER_LDFLAGS = ("","$(inherited)");
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = ZERO_CHECK;
+				SECTORDER_FLAGS = "";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("$(inherited)");
+			};
+			name = MinSizeRel;
+		};
+		F25A108C9F2A4AAE92584C79 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = arm64;
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = B973YVS5A5;
+				IPHONEOS_DEPLOYMENT_TARGET = 10.15;
+				SDKROOT = iphoneos;
+				SYMROOT = /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/build;
+			};
+			name = Debug;
+		};
+		F76FA4EA2D6F4341883FF708 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = arm64;
+				COMBINE_HIDPI_IMAGES = YES;
+				CONFIGURATION_BUILD_DIR = "/Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-effects/Release${EFFECTIVE_PLATFORM_NAME}";
+				EXECUTABLE_PREFIX = lib;
+				EXECUTABLE_SUFFIX = .a;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 3;
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'","$(inherited)");
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = ("/Volumes/KJSL/workspace/github_kevleyski/surge/libs/sst/sst-effects/src",/Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/_cmrc/include,"$(inherited)");
+				INSTALL_PATH = "";
+				LIBRARY_STYLE = STATIC;
+				LLVM_LTO = YES_THIN;
+				ONLY_ACTIVE_ARCH = NO;
+				OTHER_CPLUSPLUSFLAGS = "    -DNDEBUG '-std=c++20' '-flto=thin' -fPIC -fvisibility=hidden -fvisibility-inlines-hidden -Wno-multichar -fno-math-errno -fno-trapping-math -fno-char8_t -Wno-unused-command-line-argument -Wno-deprecated-declarations '-Werror=inconsistent-missing-override' '-Werror=logical-op-parentheses' '-Werror=dynamic-class-memaccess' '-Werror=undefined-bool-conversion' '-Werror=bitwise-op-parentheses' '-Werror=pointer-bool-conversion' -faligned-allocation -fasm-blocks ";
+				OTHER_LIBTOOLFLAGS = ("");
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = "sst-effects-preset-api";
+				SECTORDER_FLAGS = "";
+				TARGET_TEMP_DIR = "/Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/build/sst-effects-preset-api.build/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("$(inherited)");
+			};
+			name = Release;
+		};
+		F7F8B6BE558A4C04A3A6CC58 /* MinSizeRel */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = arm64;
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = B973YVS5A5;
+				IPHONEOS_DEPLOYMENT_TARGET = 10.15;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SYMROOT = /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/build;
+			};
+			name = MinSizeRel;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		50BE910366FB44EBA83210ED /* Build configuration list for PBXNativeTarget "sst-effects-preset-api" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				D1152265389A4737A57127C2 /* Debug */,
+				F76FA4EA2D6F4341883FF708 /* Release */,
+				C0A994C5AB1E435381F2A56A /* MinSizeRel */,
+				7F277159EE8B4414BE5CCA8C /* RelWithDebInfo */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		6F1E29E048FC41CCB6E158F1 /* Build configuration list for PBXNativeTarget "sst-effects-presets" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				4E0CA387132F44B3B5B784E0 /* Debug */,
+				AEA218EAF94240B6A81254DB /* Release */,
+				C40E50766BC546768C90AC02 /* MinSizeRel */,
+				884FA8FCBF104EAB8A99E534 /* RelWithDebInfo */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		7F762041D2D54699B1BFF4EC /* Build configuration list for PBXProject "sst-effects" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				F25A108C9F2A4AAE92584C79 /* Debug */,
+				5C2F3AE97E464903BF1A6D34 /* Release */,
+				F7F8B6BE558A4C04A3A6CC58 /* MinSizeRel */,
+				7A48ADCDBB0943508E1C748F /* RelWithDebInfo */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		968F04276B8649198C37DB92 /* Build configuration list for PBXAggregateTarget "install" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				7C690C3388C94A86A9A839E3 /* Debug */,
+				856FDF02EAF246A4B83CD075 /* Release */,
+				ABBE4410B0ED419F9521CED8 /* MinSizeRel */,
+				9D0AEC764D0844BBB1B37B7A /* RelWithDebInfo */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		A31450735E614C9DAB5930F8 /* Build configuration list for PBXAggregateTarget "ALL_BUILD" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				7ABEE5546AC74D17BF64A26E /* Debug */,
+				D77145E0BB49415582F18135 /* Release */,
+				7F88612FA2234BB49AF6BEA7 /* MinSizeRel */,
+				9F27E4F041AF4748A64376A8 /* RelWithDebInfo */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		F6C38483793B4846AA200FFB /* Build configuration list for PBXAggregateTarget "ZERO_CHECK" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				13F93493353942629608BD4E /* Debug */,
+				630660C0BBAB4A1FA230D4A4 /* Release */,
+				D945C3E8684C4A01A401835D /* MinSizeRel */,
+				8A165BEFA5A044B8A0A5CE34 /* RelWithDebInfo */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = D4557C6B66A3479C831199A0 /* Project object */;
+}

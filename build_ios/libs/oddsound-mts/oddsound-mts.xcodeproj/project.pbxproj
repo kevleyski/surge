@@ -1,0 +1,920 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXAggregateTarget section */
+		412D95C48532286282373140 /* ALL_BUILD */ = {
+			isa = PBXAggregateTarget;
+			buildConfigurationList = 7383686D22A342D885B7FE78 /* Build configuration list for PBXAggregateTarget "ALL_BUILD" */;
+			buildPhases = (
+				48778CC69767630AB990F130 /* Generate CMakeFiles/ALL_BUILD */,
+			);
+			dependencies = (
+				A122BB7A13674B8FAF6F4B01 /* PBXTargetDependency */,
+				CEF25D7B27F741DC9CE10913 /* PBXTargetDependency */,
+			);
+			name = ALL_BUILD;
+			productName = ALL_BUILD;
+		};
+		77C1A3C52D322D9730269CA7 /* install */ = {
+			isa = PBXAggregateTarget;
+			buildConfigurationList = 5CE0C068A3CC4AA09E5D9E52 /* Build configuration list for PBXAggregateTarget "install" */;
+			buildPhases = (
+				93426DA6A4AC2C2AC9CE883C /* CMake PostBuild Rules */,
+			);
+			dependencies = (
+				CD70D0EF04CB4008B0EFF9F2 /* PBXTargetDependency */,
+			);
+			name = install;
+			productName = install;
+		};
+		89D95F8BA93D09359DDCC172 /* ZERO_CHECK */ = {
+			isa = PBXAggregateTarget;
+			buildConfigurationList = 1B3157292B9E48D295B17415 /* Build configuration list for PBXAggregateTarget "ZERO_CHECK" */;
+			buildPhases = (
+				FDC3817E6B2B198535092BFA /* Generate CMakeFiles/ZERO_CHECK */,
+			);
+			dependencies = (
+			);
+			name = ZERO_CHECK;
+			productName = ZERO_CHECK;
+		};
+/* End PBXAggregateTarget section */
+
+/* Begin PBXBuildFile section */
+		3484A806F784479789BD8F9E /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/oddsound-mts/MTS-ESP/Client/libMTSClient.cpp */ = {isa = PBXBuildFile; fileRef = 201414F355D14E279F84F22F /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/oddsound-mts/MTS-ESP/Client/libMTSClient.cpp */; };
+		74D80770DCBF44E3BE4C4437 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/oddsound-mts/MTS-ESP/Master/libMTSMaster.cpp */ = {isa = PBXBuildFile; fileRef = 7A2C39C199F34817A9A2EDA6 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/oddsound-mts/MTS-ESP/Master/libMTSMaster.cpp */; };
+		7718ADE9587D47DDB68B9B58 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/oddsound-mts/CMakeLists.txt */ = {isa = PBXBuildFile; fileRef = F55A222932604ED3B7398F96 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/oddsound-mts/CMakeLists.txt */; };
+		96B28A37A04843F98C6991A7 /* /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/oddsound-mts/CMakeFiles/oddsound-mts.dir/Info.plist */ = {isa = PBXBuildFile; fileRef = 0CE53DF8B4384294B6971388 /* /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/oddsound-mts/CMakeFiles/oddsound-mts.dir/Info.plist */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXBuildStyle section */
+		2EE41D4427224A5FB254F324 /* MinSizeRel */ = {
+			isa = PBXBuildStyle;
+			buildSettings = {
+				COPY_PHASE_STRIP = NO;
+			};
+			name = MinSizeRel;
+		};
+		6DC2D4EAD9294E9E9125839B /* RelWithDebInfo */ = {
+			isa = PBXBuildStyle;
+			buildSettings = {
+				COPY_PHASE_STRIP = NO;
+			};
+			name = RelWithDebInfo;
+		};
+		744AA69C6E8C47078FA960F6 /* Release */ = {
+			isa = PBXBuildStyle;
+			buildSettings = {
+				COPY_PHASE_STRIP = NO;
+			};
+			name = Release;
+		};
+		8992A2F1DF824C45A675C77B /* Debug */ = {
+			isa = PBXBuildStyle;
+			buildSettings = {
+				COPY_PHASE_STRIP = NO;
+			};
+			name = Debug;
+		};
+/* End PBXBuildStyle section */
+
+/* Begin PBXContainerItemProxy section */
+		065DA1A59E314E9EB7CFFD96 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 38DE85C4405C4E0884ED8E97 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 89D95F8BA93D09359DDCC172;
+			remoteInfo = ZERO_CHECK;
+		};
+		160DCA7CF62F4342B756DEFF /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 38DE85C4405C4E0884ED8E97 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 412D95C48532286282373140;
+			remoteInfo = ALL_BUILD;
+		};
+		37E86033C49140899D850D51 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 38DE85C4405C4E0884ED8E97 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 859C3E0542C4A13E073BC5D9;
+			remoteInfo = "oddsound-mts";
+		};
+		9E56ACB25F854330B103D6E2 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 38DE85C4405C4E0884ED8E97 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 89D95F8BA93D09359DDCC172;
+			remoteInfo = ZERO_CHECK;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		0CE53DF8B4384294B6971388 /* /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/oddsound-mts/CMakeFiles/oddsound-mts.dir/Info.plist */ = {isa = PBXFileReference; explicitFileType = sourcecode.text.plist; fileEncoding = 4; name = Info.plist; path = "/Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/oddsound-mts/CMakeFiles/oddsound-mts.dir/Info.plist"; sourceTree = "<absolute>"; };
+		201414F355D14E279F84F22F /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/oddsound-mts/MTS-ESP/Client/libMTSClient.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = libMTSClient.cpp; path = "MTS-ESP/Client/libMTSClient.cpp"; sourceTree = SOURCE_ROOT; };
+		7A2C39C199F34817A9A2EDA6 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/oddsound-mts/MTS-ESP/Master/libMTSMaster.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = libMTSMaster.cpp; path = "MTS-ESP/Master/libMTSMaster.cpp"; sourceTree = SOURCE_ROOT; };
+		7DA6702AC3854B2C8DE028B8 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/oddsound-mts/CMakeLists.txt */ = {isa = PBXFileReference; explicitFileType = sourcecode.text; fileEncoding = 4; name = CMakeLists.txt; path = CMakeLists.txt; sourceTree = SOURCE_ROOT; };
+		D6BC49C62F3A4E8EB4054147 /* oddsound-mts */ = {isa = PBXFileReference; explicitFileType = archive.ar; path = "liboddsound-mts.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		F55A222932604ED3B7398F96 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/oddsound-mts/CMakeLists.txt */ = {isa = PBXFileReference; explicitFileType = sourcecode.text; fileEncoding = 4; name = CMakeLists.txt; path = CMakeLists.txt; sourceTree = SOURCE_ROOT; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		E31FC66DADB54CAF80330304 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		11497639EA74498E841E039A /* ALL_BUILD */ = {
+			isa = PBXGroup;
+			children = (
+				BE840C6963A84B5BB6D66DEA /* CMake Rules */,
+				7DA6702AC3854B2C8DE028B8 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/oddsound-mts/CMakeLists.txt */,
+			);
+			name = ALL_BUILD;
+			sourceTree = "<group>";
+		};
+		2E8CD8AC7E314EC2A7ED91E2 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				0CE53DF8B4384294B6971388 /* /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/oddsound-mts/CMakeFiles/oddsound-mts.dir/Info.plist */,
+			);
+			name = Resources;
+			sourceTree = "<group>";
+		};
+		6E6F3216D6D1487B9DAC793D /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Resources;
+			sourceTree = "<group>";
+		};
+		74C68D869F94461B8DCD9D11 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				D6BC49C62F3A4E8EB4054147 /* oddsound-mts */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		8C47089840804C41A0C808D1 /* oddsound-mts */ = {
+			isa = PBXGroup;
+			children = (
+				2E8CD8AC7E314EC2A7ED91E2 /* Resources */,
+				B1CD76BFD9604BAD96C91C65 /* Source Files */,
+				F55A222932604ED3B7398F96 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/oddsound-mts/CMakeLists.txt */,
+			);
+			name = "oddsound-mts";
+			sourceTree = "<group>";
+		};
+		B1CD76BFD9604BAD96C91C65 /* Source Files */ = {
+			isa = PBXGroup;
+			children = (
+				201414F355D14E279F84F22F /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/oddsound-mts/MTS-ESP/Client/libMTSClient.cpp */,
+				7A2C39C199F34817A9A2EDA6 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/oddsound-mts/MTS-ESP/Master/libMTSMaster.cpp */,
+			);
+			name = "Source Files";
+			sourceTree = "<group>";
+		};
+		BE840C6963A84B5BB6D66DEA /* CMake Rules */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = "CMake Rules";
+			sourceTree = "<group>";
+		};
+		E9E3C4077A9940988A825F8C /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		F2B34752321847609B7E38C8 = {
+			isa = PBXGroup;
+			children = (
+				11497639EA74498E841E039A /* ALL_BUILD */,
+				8C47089840804C41A0C808D1 /* oddsound-mts */,
+				74C68D869F94461B8DCD9D11 /* Products */,
+				E9E3C4077A9940988A825F8C /* Frameworks */,
+				6E6F3216D6D1487B9DAC793D /* Resources */,
+			);
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		859C3E0542C4A13E073BC5D9 /* oddsound-mts */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = A80E05D7770043BFAA2EE0DC /* Build configuration list for PBXNativeTarget "oddsound-mts" */;
+			buildPhases = (
+				A70F425B355B4B30ABF8C00F /* Sources */,
+				E31FC66DADB54CAF80330304 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				FFD27FBA9CFF4DE5A524666E /* PBXTargetDependency */,
+			);
+			name = "oddsound-mts";
+			productName = "oddsound-mts";
+			productReference = D6BC49C62F3A4E8EB4054147 /* oddsound-mts */;
+			productType = "com.apple.product-type.library.static";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		38DE85C4405C4E0884ED8E97 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 2660;
+			};
+			buildConfigurationList = 9101A9824D5C47B9973B3675 /* Build configuration list for PBXProject "oddsound-mts" */;
+			buildSettings = {
+			};
+			buildStyles = (
+				8992A2F1DF824C45A675C77B /* Debug */,
+				744AA69C6E8C47078FA960F6 /* Release */,
+				2EE41D4427224A5FB254F324 /* MinSizeRel */,
+				6DC2D4EAD9294E9E9125839B /* RelWithDebInfo */,
+			);
+			compatibilityVersion = "Xcode 3.2";
+			hasScannedForEncodings = 0;
+			mainGroup = F2B34752321847609B7E38C8;
+			projectDirPath = "/Volumes/KJSL/workspace/github_kevleyski/surge/libs/oddsound-mts";
+			projectRoot = "";
+			targets = (
+				412D95C48532286282373140 /* ALL_BUILD */,
+				77C1A3C52D322D9730269CA7 /* install */,
+				859C3E0542C4A13E073BC5D9 /* oddsound-mts */,
+				89D95F8BA93D09359DDCC172 /* ZERO_CHECK */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		3C0110FC8322DE7E50886E21 = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "# shell script goes here
+exit 0";
+			showEnvVarsInLog = 0;
+		};
+		48778CC69767630AB990F130 /* Generate CMakeFiles/ALL_BUILD */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "Generate CMakeFiles/ALL_BUILD";
+			outputPaths = (
+"/Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/oddsound-mts/CMakeFiles/ALL_BUILD"			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "set -e
+if test \"$CONFIGURATION\" = \"Debug\"; then :
+  cd /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/oddsound-mts
+  echo Build\\ all\\ projects
+fi
+if test \"$CONFIGURATION\" = \"Release\"; then :
+  cd /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/oddsound-mts
+  echo Build\\ all\\ projects
+fi
+if test \"$CONFIGURATION\" = \"MinSizeRel\"; then :
+  cd /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/oddsound-mts
+  echo Build\\ all\\ projects
+fi
+if test \"$CONFIGURATION\" = \"RelWithDebInfo\"; then :
+  cd /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/oddsound-mts
+  echo Build\\ all\\ projects
+fi
+";
+			showEnvVarsInLog = 0;
+		};
+		87AF4882E018677E2624B544 = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "# shell script goes here
+exit 0";
+			showEnvVarsInLog = 0;
+		};
+		93426DA6A4AC2C2AC9CE883C /* CMake PostBuild Rules */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "CMake PostBuild Rules";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "set -e
+if test \"$CONFIGURATION\" = \"Debug\"; then :
+  cd /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/oddsound-mts
+  /opt/homebrew/bin/cmake -DBUILD_TYPE=$CONFIGURATION -DEFFECTIVE_PLATFORM_NAME=$EFFECTIVE_PLATFORM_NAME -P cmake_install.cmake
+fi
+if test \"$CONFIGURATION\" = \"Release\"; then :
+  cd /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/oddsound-mts
+  /opt/homebrew/bin/cmake -DBUILD_TYPE=$CONFIGURATION -DEFFECTIVE_PLATFORM_NAME=$EFFECTIVE_PLATFORM_NAME -P cmake_install.cmake
+fi
+if test \"$CONFIGURATION\" = \"MinSizeRel\"; then :
+  cd /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/oddsound-mts
+  /opt/homebrew/bin/cmake -DBUILD_TYPE=$CONFIGURATION -DEFFECTIVE_PLATFORM_NAME=$EFFECTIVE_PLATFORM_NAME -P cmake_install.cmake
+fi
+if test \"$CONFIGURATION\" = \"RelWithDebInfo\"; then :
+  cd /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/oddsound-mts
+  /opt/homebrew/bin/cmake -DBUILD_TYPE=$CONFIGURATION -DEFFECTIVE_PLATFORM_NAME=$EFFECTIVE_PLATFORM_NAME -P cmake_install.cmake
+fi
+";
+			showEnvVarsInLog = 0;
+		};
+		9B50530E35CC49C82C2FACCF = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "# shell script goes here
+exit 0";
+			showEnvVarsInLog = 0;
+		};
+		FDC3817E6B2B198535092BFA /* Generate CMakeFiles/ZERO_CHECK */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "Generate CMakeFiles/ZERO_CHECK";
+			outputPaths = (
+"/Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/oddsound-mts/CMakeFiles/ZERO_CHECK"			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "set -e
+if test \"$CONFIGURATION\" = \"Debug\"; then :
+  cd /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/oddsound-mts
+  make -f /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/oddsound-mts/CMakeScripts/ReRunCMake.make
+fi
+if test \"$CONFIGURATION\" = \"Release\"; then :
+  cd /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/oddsound-mts
+  make -f /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/oddsound-mts/CMakeScripts/ReRunCMake.make
+fi
+if test \"$CONFIGURATION\" = \"MinSizeRel\"; then :
+  cd /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/oddsound-mts
+  make -f /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/oddsound-mts/CMakeScripts/ReRunCMake.make
+fi
+if test \"$CONFIGURATION\" = \"RelWithDebInfo\"; then :
+  cd /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/oddsound-mts
+  make -f /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/oddsound-mts/CMakeScripts/ReRunCMake.make
+fi
+";
+			showEnvVarsInLog = 0;
+		};
+/* End PBXShellScriptBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		A70F425B355B4B30ABF8C00F /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				3484A806F784479789BD8F9E /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/oddsound-mts/MTS-ESP/Client/libMTSClient.cpp */,
+				74D80770DCBF44E3BE4C4437 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/oddsound-mts/MTS-ESP/Master/libMTSMaster.cpp */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		A122BB7A13674B8FAF6F4B01 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 859C3E0542C4A13E073BC5D9 /* oddsound-mts */;
+			targetProxy = 37E86033C49140899D850D51 /* PBXContainerItemProxy */;
+		};
+		CD70D0EF04CB4008B0EFF9F2 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 412D95C48532286282373140 /* ALL_BUILD */;
+			targetProxy = 160DCA7CF62F4342B756DEFF /* PBXContainerItemProxy */;
+		};
+		CEF25D7B27F741DC9CE10913 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 89D95F8BA93D09359DDCC172 /* ZERO_CHECK */;
+			targetProxy = 9E56ACB25F854330B103D6E2 /* PBXContainerItemProxy */;
+		};
+		FFD27FBA9CFF4DE5A524666E /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 89D95F8BA93D09359DDCC172 /* ZERO_CHECK */;
+			targetProxy = 065DA1A59E314E9EB7CFFD96 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		0EAD40EEA03D407CA7A0242F /* RelWithDebInfo */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COMBINE_HIDPI_IMAGES = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'","$(inherited)");
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				INSTALL_PATH = "";
+				OTHER_LDFLAGS = ("","$(inherited)");
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = ZERO_CHECK;
+				SECTORDER_FLAGS = "";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("$(inherited)");
+			};
+			name = RelWithDebInfo;
+		};
+		15650DE1AF9A49B989EF7660 /* RelWithDebInfo */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COMBINE_HIDPI_IMAGES = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'","$(inherited)");
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				INSTALL_PATH = "";
+				OTHER_LDFLAGS = ("","$(inherited)");
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = install;
+				SECTORDER_FLAGS = "";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("$(inherited)");
+			};
+			name = RelWithDebInfo;
+		};
+		2D6E4E3043364F38A77EDABE /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COMBINE_HIDPI_IMAGES = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'","$(inherited)");
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				INSTALL_PATH = "";
+				OTHER_LDFLAGS = ("","$(inherited)");
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = ZERO_CHECK;
+				SECTORDER_FLAGS = "";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("$(inherited)");
+			};
+			name = Release;
+		};
+		30528DE0E3B640D3ACA8FEC3 /* MinSizeRel */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = arm64;
+				COMBINE_HIDPI_IMAGES = YES;
+				CONFIGURATION_BUILD_DIR = "/Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/oddsound-mts/MinSizeRel${EFFECTIVE_PLATFORM_NAME}";
+				EXECUTABLE_PREFIX = lib;
+				EXECUTABLE_SUFFIX = .a;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = s;
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'","$(inherited)");
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = ("/Volumes/KJSL/workspace/github_kevleyski/surge/libs/oddsound-mts/MTS-ESP/Client","/Volumes/KJSL/workspace/github_kevleyski/surge/libs/oddsound-mts/MTS-ESP/Master","$(inherited)");
+				INSTALL_PATH = "";
+				LIBRARY_STYLE = STATIC;
+				LLVM_LTO = YES_THIN;
+				ONLY_ACTIVE_ARCH = NO;
+				OTHER_CPLUSPLUSFLAGS = "    -DNDEBUG '-std=c++20' '-flto=thin' -fPIC -fvisibility=hidden -fvisibility-inlines-hidden -Wno-multichar -fno-math-errno -fno-trapping-math -fno-char8_t -Wno-unused-command-line-argument -Wno-deprecated-declarations '-Werror=inconsistent-missing-override' '-Werror=logical-op-parentheses' '-Werror=dynamic-class-memaccess' '-Werror=undefined-bool-conversion' '-Werror=bitwise-op-parentheses' '-Werror=pointer-bool-conversion' -faligned-allocation -fasm-blocks ";
+				OTHER_LIBTOOLFLAGS = ("");
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = "oddsound-mts";
+				SECTORDER_FLAGS = "";
+				TARGET_TEMP_DIR = "/Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/build/oddsound-mts.build/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("$(inherited)");
+			};
+			name = MinSizeRel;
+		};
+		49769B8450004BFFBEC7F1A7 /* MinSizeRel */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COMBINE_HIDPI_IMAGES = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'","$(inherited)");
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				INSTALL_PATH = "";
+				OTHER_LDFLAGS = ("","$(inherited)");
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = ZERO_CHECK;
+				SECTORDER_FLAGS = "";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("$(inherited)");
+			};
+			name = MinSizeRel;
+		};
+		60B248E3E2534AEF99DA8858 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COMBINE_HIDPI_IMAGES = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'","$(inherited)");
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				INSTALL_PATH = "";
+				OTHER_LDFLAGS = ("","$(inherited)");
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = install;
+				SECTORDER_FLAGS = "";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("$(inherited)");
+			};
+			name = Debug;
+		};
+		69FA57EAB579492B9228B7D3 /* MinSizeRel */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COMBINE_HIDPI_IMAGES = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'","$(inherited)");
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				INSTALL_PATH = "";
+				OTHER_LDFLAGS = ("","$(inherited)");
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = install;
+				SECTORDER_FLAGS = "";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("$(inherited)");
+			};
+			name = MinSizeRel;
+		};
+		76E0D1AC97E6448C8F123289 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COMBINE_HIDPI_IMAGES = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'","$(inherited)");
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				INSTALL_PATH = "";
+				OTHER_LDFLAGS = ("","$(inherited)");
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = ALL_BUILD;
+				SECTORDER_FLAGS = "";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("$(inherited)");
+			};
+			name = Release;
+		};
+		7AE1F3DBABFC4750B5E76411 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COMBINE_HIDPI_IMAGES = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'","$(inherited)");
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				INSTALL_PATH = "";
+				OTHER_LDFLAGS = ("","$(inherited)");
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = ZERO_CHECK;
+				SECTORDER_FLAGS = "";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("$(inherited)");
+			};
+			name = Debug;
+		};
+		815BB28FF8BA46429446136C /* RelWithDebInfo */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = arm64;
+				COMBINE_HIDPI_IMAGES = YES;
+				CONFIGURATION_BUILD_DIR = "/Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/oddsound-mts/RelWithDebInfo${EFFECTIVE_PLATFORM_NAME}";
+				EXECUTABLE_PREFIX = lib;
+				EXECUTABLE_SUFFIX = .a;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 2;
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'","$(inherited)");
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = ("/Volumes/KJSL/workspace/github_kevleyski/surge/libs/oddsound-mts/MTS-ESP/Client","/Volumes/KJSL/workspace/github_kevleyski/surge/libs/oddsound-mts/MTS-ESP/Master","$(inherited)");
+				INSTALL_PATH = "";
+				LIBRARY_STYLE = STATIC;
+				LLVM_LTO = YES_THIN;
+				ONLY_ACTIVE_ARCH = NO;
+				OTHER_CPLUSPLUSFLAGS = "       -DNDEBUG '-std=c++20' '-flto=thin' -fPIC -fvisibility=hidden -fvisibility-inlines-hidden -Wno-multichar -fno-math-errno -fno-trapping-math -fno-char8_t -Wno-unused-command-line-argument -Wno-deprecated-declarations '-Werror=inconsistent-missing-override' '-Werror=logical-op-parentheses' '-Werror=dynamic-class-memaccess' '-Werror=undefined-bool-conversion' '-Werror=bitwise-op-parentheses' '-Werror=pointer-bool-conversion' -faligned-allocation -fasm-blocks ";
+				OTHER_LIBTOOLFLAGS = ("");
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = "oddsound-mts";
+				SECTORDER_FLAGS = "";
+				TARGET_TEMP_DIR = "/Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/build/oddsound-mts.build/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("$(inherited)");
+			};
+			name = RelWithDebInfo;
+		};
+		994014E8EE7F45C181A4FF27 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = arm64;
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = B973YVS5A5;
+				IPHONEOS_DEPLOYMENT_TARGET = 10.15;
+				SDKROOT = iphoneos;
+				SYMROOT = /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/build;
+			};
+			name = Debug;
+		};
+		A6E55240925641929F8FF452 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = arm64;
+				COMBINE_HIDPI_IMAGES = YES;
+				CONFIGURATION_BUILD_DIR = "/Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/oddsound-mts/Debug${EFFECTIVE_PLATFORM_NAME}";
+				EXECUTABLE_PREFIX = lib;
+				EXECUTABLE_SUFFIX = .a;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'","$(inherited)");
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = ("/Volumes/KJSL/workspace/github_kevleyski/surge/libs/oddsound-mts/MTS-ESP/Client","/Volumes/KJSL/workspace/github_kevleyski/surge/libs/oddsound-mts/MTS-ESP/Master","$(inherited)");
+				INSTALL_PATH = "";
+				LIBRARY_STYLE = STATIC;
+				LLVM_LTO = YES_THIN;
+				ONLY_ACTIVE_ARCH = NO;
+				OTHER_CPLUSPLUSFLAGS = "   '-std=c++20' '-flto=thin' -fPIC -fvisibility=hidden -fvisibility-inlines-hidden -Wno-multichar -fno-math-errno -fno-trapping-math -fno-char8_t -Wno-unused-command-line-argument -Wno-deprecated-declarations '-Werror=inconsistent-missing-override' '-Werror=logical-op-parentheses' '-Werror=dynamic-class-memaccess' '-Werror=undefined-bool-conversion' '-Werror=bitwise-op-parentheses' '-Werror=pointer-bool-conversion' -faligned-allocation -fasm-blocks ";
+				OTHER_LIBTOOLFLAGS = ("");
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = "oddsound-mts";
+				SECTORDER_FLAGS = "";
+				TARGET_TEMP_DIR = "/Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/build/oddsound-mts.build/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("$(inherited)");
+			};
+			name = Debug;
+		};
+		B7701103E4804FB1B1519658 /* MinSizeRel */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = arm64;
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = B973YVS5A5;
+				IPHONEOS_DEPLOYMENT_TARGET = 10.15;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SYMROOT = /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/build;
+			};
+			name = MinSizeRel;
+		};
+		C1A9B992ACDC468B889977BA /* RelWithDebInfo */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = arm64;
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = B973YVS5A5;
+				IPHONEOS_DEPLOYMENT_TARGET = 10.15;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SYMROOT = /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/build;
+			};
+			name = RelWithDebInfo;
+		};
+		C858AD7BD336442FAD65FD57 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = arm64;
+				COMBINE_HIDPI_IMAGES = YES;
+				CONFIGURATION_BUILD_DIR = "/Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/oddsound-mts/Release${EFFECTIVE_PLATFORM_NAME}";
+				EXECUTABLE_PREFIX = lib;
+				EXECUTABLE_SUFFIX = .a;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 3;
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'","$(inherited)");
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = ("/Volumes/KJSL/workspace/github_kevleyski/surge/libs/oddsound-mts/MTS-ESP/Client","/Volumes/KJSL/workspace/github_kevleyski/surge/libs/oddsound-mts/MTS-ESP/Master","$(inherited)");
+				INSTALL_PATH = "";
+				LIBRARY_STYLE = STATIC;
+				LLVM_LTO = YES_THIN;
+				ONLY_ACTIVE_ARCH = NO;
+				OTHER_CPLUSPLUSFLAGS = "    -DNDEBUG '-std=c++20' '-flto=thin' -fPIC -fvisibility=hidden -fvisibility-inlines-hidden -Wno-multichar -fno-math-errno -fno-trapping-math -fno-char8_t -Wno-unused-command-line-argument -Wno-deprecated-declarations '-Werror=inconsistent-missing-override' '-Werror=logical-op-parentheses' '-Werror=dynamic-class-memaccess' '-Werror=undefined-bool-conversion' '-Werror=bitwise-op-parentheses' '-Werror=pointer-bool-conversion' -faligned-allocation -fasm-blocks ";
+				OTHER_LIBTOOLFLAGS = ("");
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = "oddsound-mts";
+				SECTORDER_FLAGS = "";
+				TARGET_TEMP_DIR = "/Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/build/oddsound-mts.build/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("$(inherited)");
+			};
+			name = Release;
+		};
+		CE12D3AF917F4CA4BE5D5F5F /* RelWithDebInfo */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COMBINE_HIDPI_IMAGES = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'","$(inherited)");
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				INSTALL_PATH = "";
+				OTHER_LDFLAGS = ("","$(inherited)");
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = ALL_BUILD;
+				SECTORDER_FLAGS = "";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("$(inherited)");
+			};
+			name = RelWithDebInfo;
+		};
+		D741A46DD13944388D5D6EF8 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COMBINE_HIDPI_IMAGES = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'","$(inherited)");
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				INSTALL_PATH = "";
+				OTHER_LDFLAGS = ("","$(inherited)");
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = ALL_BUILD;
+				SECTORDER_FLAGS = "";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("$(inherited)");
+			};
+			name = Debug;
+		};
+		D92B4EAF4B3348F88F6BB71C /* MinSizeRel */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COMBINE_HIDPI_IMAGES = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'","$(inherited)");
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				INSTALL_PATH = "";
+				OTHER_LDFLAGS = ("","$(inherited)");
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = ALL_BUILD;
+				SECTORDER_FLAGS = "";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("$(inherited)");
+			};
+			name = MinSizeRel;
+		};
+		EA69026C355B4E778D4C4421 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = arm64;
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = B973YVS5A5;
+				IPHONEOS_DEPLOYMENT_TARGET = 10.15;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SYMROOT = /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/build;
+			};
+			name = Release;
+		};
+		FF074F9F339B4606AAD36D86 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COMBINE_HIDPI_IMAGES = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'","$(inherited)");
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				INSTALL_PATH = "";
+				OTHER_LDFLAGS = ("","$(inherited)");
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = install;
+				SECTORDER_FLAGS = "";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("$(inherited)");
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		1B3157292B9E48D295B17415 /* Build configuration list for PBXAggregateTarget "ZERO_CHECK" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				7AE1F3DBABFC4750B5E76411 /* Debug */,
+				2D6E4E3043364F38A77EDABE /* Release */,
+				49769B8450004BFFBEC7F1A7 /* MinSizeRel */,
+				0EAD40EEA03D407CA7A0242F /* RelWithDebInfo */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		5CE0C068A3CC4AA09E5D9E52 /* Build configuration list for PBXAggregateTarget "install" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				60B248E3E2534AEF99DA8858 /* Debug */,
+				FF074F9F339B4606AAD36D86 /* Release */,
+				69FA57EAB579492B9228B7D3 /* MinSizeRel */,
+				15650DE1AF9A49B989EF7660 /* RelWithDebInfo */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		7383686D22A342D885B7FE78 /* Build configuration list for PBXAggregateTarget "ALL_BUILD" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				D741A46DD13944388D5D6EF8 /* Debug */,
+				76E0D1AC97E6448C8F123289 /* Release */,
+				D92B4EAF4B3348F88F6BB71C /* MinSizeRel */,
+				CE12D3AF917F4CA4BE5D5F5F /* RelWithDebInfo */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		9101A9824D5C47B9973B3675 /* Build configuration list for PBXProject "oddsound-mts" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				994014E8EE7F45C181A4FF27 /* Debug */,
+				EA69026C355B4E778D4C4421 /* Release */,
+				B7701103E4804FB1B1519658 /* MinSizeRel */,
+				C1A9B992ACDC468B889977BA /* RelWithDebInfo */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		A80E05D7770043BFAA2EE0DC /* Build configuration list for PBXNativeTarget "oddsound-mts" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				A6E55240925641929F8FF452 /* Debug */,
+				C858AD7BD336442FAD65FD57 /* Release */,
+				30528DE0E3B640D3ACA8FEC3 /* MinSizeRel */,
+				815BB28FF8BA46429446136C /* RelWithDebInfo */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 38DE85C4405C4E0884ED8E97 /* Project object */;
+}

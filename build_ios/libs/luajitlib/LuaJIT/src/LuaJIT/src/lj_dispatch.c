@@ -103,11 +103,8 @@ void lj_dispatch_init_hotcount(global_State *g)
 #define DISPMODE_PROF	0x40	/* Profiling active. */
 
 /* Update dispatch table depending on various flags. */
-void LJ_FASTCALL lj_dispatch_update(global_State *g, int nolock)
+void lj_dispatch_update(global_State *g)
 {
-#if LJ_HASPROFILE && !LJ_PROFILE_SIGPROF
-  int profile_locked = nolock ? 0 : lj_profile_lock();
-#endif
   uint8_t oldmode = g->dispatchmode;
   uint8_t mode = 0;
 #if LJ_HASJIT
@@ -211,11 +208,6 @@ void LJ_FASTCALL lj_dispatch_update(global_State *g, int nolock)
       lj_dispatch_init_hotcount(g);
 #endif
   }
-#if LJ_HASPROFILE && !LJ_PROFILE_SIGPROF
-  if (profile_locked) lj_profile_unlock();
-#else
-  UNUSED(nolock);
-#endif
 }
 
 /* -- JIT mode setting ---------------------------------------------------- */
@@ -268,7 +260,7 @@ int luaJIT_setmode(lua_State *L, int idx, int mode)
 	G2J(g)->flags &= ~(uint32_t)JIT_F_ON;
       else
 	G2J(g)->flags |= (uint32_t)JIT_F_ON;
-      lj_dispatch_update(g, 0);
+      lj_dispatch_update(g);
     }
     break;
   case LUAJIT_MODE_FUNC:
@@ -343,7 +335,7 @@ LUA_API int lua_sethook(lua_State *L, lua_Hook func, int mask, int count)
   g->hookcount = g->hookcstart = (int32_t)count;
   g->hookmask = (uint8_t)((g->hookmask & ~HOOK_EVENTMASK) | mask);
   lj_trace_abort(g);  /* Abort recording on any hook change. */
-  lj_dispatch_update(g, 0);
+  lj_dispatch_update(g);
   return 1;
 }
 

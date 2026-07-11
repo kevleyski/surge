@@ -379,7 +379,7 @@ FMT_INSTALL:BOOL=OFF
 //Value Computed by CMake
 FMT_IS_TOP_LEVEL:STATIC=OFF
 
-//Build a module library.
+//Build a module instead of a traditional library.
 FMT_MODULE:BOOL=OFF
 
 //Include OS-specific APIs.
@@ -403,6 +403,9 @@ FMT_UNICODE:BOOL=ON
 //Halt the compilation with an error on compiler warnings.
 FMT_WERROR:BOOL=OFF
 
+//Git command line client
+GIT_EXECUTABLE:FILEPATH=/opt/homebrew/bin/git
+
 //Value Computed by CMake
 JUCE_BINARY_DIR:STATIC=/Users/klambert/workspace_KJSL/github_kevleyski/surge/build_ios/JUCE
 
@@ -421,7 +424,7 @@ JUCE_ENABLE_MODULE_SOURCE_GROUPS:BOOL=OFF
 
 //The location, relative to the install prefix, where the JUCE
 // config file will be installed
-JUCE_INSTALL_DESTINATION:STRING=lib/cmake/JUCE-6.1.0
+JUCE_INSTALL_DESTINATION:STRING=lib/cmake/JUCE-8.0.12
 
 //Value Computed by CMake
 JUCE_IS_TOP_LEVEL:STATIC=OFF
@@ -430,11 +433,15 @@ JUCE_IS_TOP_LEVEL:STATIC=OFF
 JUCE_MODULES_ONLY:BOOL=OFF
 
 //Value Computed by CMake
-JUCE_SOURCE_DIR:STATIC=/Users/klambert/workspace_KJSL/github_kevleyski/surge/libs/JUCE
+JUCE_SOURCE_DIR:STATIC=/Volumes/KJSL/workspace/github_kevleyski/surge/libs/JUCE
 
 //The location, relative to the install prefix, where juceaide
 // will be installed
-JUCE_TOOL_INSTALL_DIR:STRING=bin/JUCE-6.1.0
+JUCE_TOOL_INSTALL_DIR:STRING=bin/JUCE-8.0.12
+
+//Location that overrides the default directory where our FindWebView2
+// script is looking for the *Microsoft.Web.WebView2* directory
+JUCE_WEBVIEW2_PACKAGE_LOCATION:BOOL=OFF
 
 //Value Computed by CMake
 LuaJIT_BINARY_DIR:STATIC=/Users/klambert/workspace_KJSL/github_kevleyski/surge/build_ios/libs/luajitlib
@@ -444,6 +451,66 @@ LuaJIT_IS_TOP_LEVEL:STATIC=OFF
 
 //Value Computed by CMake
 LuaJIT_SOURCE_DIR:STATIC=/Users/klambert/workspace_KJSL/github_kevleyski/surge/libs/luajitlib
+
+//Build example programs
+PEGTL_BUILD_EXAMPLES:BOOL=OFF
+
+//Build test programs
+PEGTL_BUILD_TESTS:BOOL=OFF
+
+//The installation cmake directory
+PEGTL_INSTALL_CMAKE_DIR:STRING=share/pegtl/cmake
+
+//The installation doc directory
+PEGTL_INSTALL_DOC_DIR:STRING=share/doc/tao/pegtl
+
+//The installation include directory
+PEGTL_INSTALL_INCLUDE_DIR:STRING=include
+
+//No Native Aliases for Surge XT
+SST_BASIC_BLOCKS_SIMD_OMIT_NATIVE_ALIASES:BOOL=ON
+
+//Add targets for building and running sst-cpputils tests
+SST_CPPUTILS_BUILD_TESTS:BOOL=OFF
+
+//Build the example drivers (which will also acivate tests)
+SST_EFFECTS_BUILD_EXAMPLES:BOOL=OFF
+
+//Build the test harness
+SST_EFFECTS_BUILD_TESTS:BOOL=OFF
+
+//Add targets for building and running sst-filters examples
+SST_FILTERS_BUILD_EXAMPLES:BOOL=OFF
+
+//Add targets for building and running sst-filters tests
+SST_FILTERS_BUILD_TESTS:BOOL=OFF
+
+// Add targets for building and running sst-cpputils tests 
+SST_PLUGININFRA_BUILD_TESTS:BOOL=OFF
+
+//Force GHC filesystem implementation
+SST_PLUGININFRA_FILESYSTEM_FORCE_GHC:BOOL=FALSE
+
+//Use std::filesystem from the platform headers no matter what
+SST_PLUGININFRA_FILESYSTEM_FORCE_PLATFORM:BOOL=OFF
+
+//Provide libzip
+SST_PLUGININFRA_PROVIDE_MINIZ:BOOL=OFF
+
+//Provide patchbase
+SST_PLUGININFRA_PROVIDE_PATCHBASE:BOOL=OFF
+
+//Provide strnatcmp as a target
+SST_PLUGININFRA_PROVIDE_STRNATCMP:BOOL=ON
+
+//Provide tinyxml as a target
+SST_PLUGININFRA_PROVIDE_TINYXML:BOOL=ON
+
+//Add targets for building and running sst-waveshapers examples
+SST_WAVESHAPERS_BUILD_EXAMPLES:BOOL=OFF
+
+//Add targets for building and running sst-waveshapers tests
+SST_WAVESHAPERS_BUILD_TESTS:BOOL=OFF
 
 //Allow non-working Surge XT builds to run on 32-bit Linux
 SURGE_BUILD_32BIT_LINUX:BOOL=OFF
@@ -488,10 +555,14 @@ SURGE_INCLUDE_MELATONIN_INSPECTOR:BOOL=OFF
 SURGE_IOS_DEV_TEAM:STRING=B973YVS5A5
 
 //Path to JUCE library source tree
-SURGE_JUCE_PATH:STRING=/Users/klambert/workspace_KJSL/github_kevleyski/surge/src/../libs/JUCE
+SURGE_JUCE_PATH:STRING=/Volumes/KJSL/workspace/github_kevleyski/surge/src/../libs/JUCE
+
+//Update version info on every build (off: generate only at configuration
+// time)
+SURGE_RELIABLE_VERSION_INFO:BOOL=ON
 
 //Path to simde library source tree
-SURGE_SIMDE_PATH:STRING=/Users/klambert/workspace_KJSL/github_kevleyski/surge/src/../libs/simde
+SURGE_SIMDE_PATH:STRING=/Volumes/KJSL/workspace/github_kevleyski/surge/src/../libs/simde
 
 //No help, variable specified on the command line.
 SURGE_SKIP_DISTRIBUTION:UNINITIALIZED=TRUE
@@ -562,8 +633,11 @@ ZSTD_BUILD_TESTS:BOOL=OFF
 //Build as Apple Framework
 ZSTD_FRAMEWORK:BOOL=OFF
 
+//Legacy support level
+ZSTD_LEGACY_LEVEL:STRING=5
+
 //Enable legacy format support
-ZSTD_LEGACY_SUPPORT:BOOL=OFF
+ZSTD_LEGACY_SUPPORT:BOOL=ON
 
 //LZ4 SUPPORT
 ZSTD_LZ4_SUPPORT:BOOL=OFF
@@ -626,6 +700,15 @@ eurorack_IS_TOP_LEVEL:STATIC=OFF
 eurorack_SOURCE_DIR:STATIC=/Users/klambert/workspace_KJSL/github_kevleyski/surge/libs/eurorack
 
 //Value Computed by CMake
+filesystem_BINARY_DIR:STATIC=/Users/klambert/workspace_KJSL/github_kevleyski/surge/build_ios/libs/sst/sst-plugininfra/libs/filesystem
+
+//Value Computed by CMake
+filesystem_IS_TOP_LEVEL:STATIC=OFF
+
+//Value Computed by CMake
+filesystem_SOURCE_DIR:STATIC=/Users/klambert/workspace_KJSL/github_kevleyski/surge/libs/sst/sst-plugininfra/libs/filesystem
+
+//Value Computed by CMake
 libzstd_BINARY_DIR:STATIC=/Users/klambert/workspace_KJSL/github_kevleyski/surge/build_ios/libs/zstd/build/cmake/lib
 
 //Value Computed by CMake
@@ -642,6 +725,21 @@ oddsound-mts_IS_TOP_LEVEL:STATIC=OFF
 
 //Value Computed by CMake
 oddsound-mts_SOURCE_DIR:STATIC=/Users/klambert/workspace_KJSL/github_kevleyski/surge/libs/oddsound-mts
+
+//Value Computed by CMake
+pegtl_BINARY_DIR:STATIC=/Users/klambert/workspace_KJSL/github_kevleyski/surge/build_ios/libs/PEGTL
+
+pegtl_DIR:PATH=/Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/PEGTL
+
+pegtl_FOUND:BOOL=TRUE
+
+//Value Computed by CMake
+pegtl_IS_TOP_LEVEL:STATIC=OFF
+
+//Value Computed by CMake
+pegtl_SOURCE_DIR:STATIC=/Users/klambert/workspace_KJSL/github_kevleyski/surge/libs/PEGTL
+
+pegtl_VERSION:STRING=2.8.3
 
 //Value Computed by CMake
 pffft_BINARY_DIR:STATIC=/Users/klambert/workspace_KJSL/github_kevleyski/surge/build_ios/libs/pffft
@@ -671,6 +769,15 @@ sqlite_IS_TOP_LEVEL:STATIC=OFF
 sqlite_SOURCE_DIR:STATIC=/Users/klambert/workspace_KJSL/github_kevleyski/surge/libs/sqlite-3.23.3
 
 //Value Computed by CMake
+sst-basic-blocks_BINARY_DIR:STATIC=/Users/klambert/workspace_KJSL/github_kevleyski/surge/build_ios/libs/sst/sst-basic-blocks
+
+//Value Computed by CMake
+sst-basic-blocks_IS_TOP_LEVEL:STATIC=OFF
+
+//Value Computed by CMake
+sst-basic-blocks_SOURCE_DIR:STATIC=/Users/klambert/workspace_KJSL/github_kevleyski/surge/libs/sst/sst-basic-blocks
+
+//Value Computed by CMake
 sst-cmake_BINARY_DIR:STATIC=/Users/klambert/workspace_KJSL/github_kevleyski/surge/build_ios/libs/sst/sst-cmake
 
 //Value Computed by CMake
@@ -680,6 +787,66 @@ sst-cmake_IS_TOP_LEVEL:STATIC=OFF
 sst-cmake_SOURCE_DIR:STATIC=/Users/klambert/workspace_KJSL/github_kevleyski/surge/libs/sst/sst-cmake
 
 //Value Computed by CMake
+sst-cpputils_BINARY_DIR:STATIC=/Users/klambert/workspace_KJSL/github_kevleyski/surge/build_ios/libs/sst/sst-cpputils
+
+//Value Computed by CMake
+sst-cpputils_IS_TOP_LEVEL:STATIC=OFF
+
+//Value Computed by CMake
+sst-cpputils_SOURCE_DIR:STATIC=/Users/klambert/workspace_KJSL/github_kevleyski/surge/libs/sst/sst-cpputils
+
+//Dependencies for the target
+sst-effects-preset-api_LIB_DEPENDS:STATIC=general;sst-effects-presets;
+
+//Value Computed by CMake
+sst-effects_BINARY_DIR:STATIC=/Users/klambert/workspace_KJSL/github_kevleyski/surge/build_ios/libs/sst/sst-effects
+
+//Value Computed by CMake
+sst-effects_IS_TOP_LEVEL:STATIC=OFF
+
+//Value Computed by CMake
+sst-effects_SOURCE_DIR:STATIC=/Users/klambert/workspace_KJSL/github_kevleyski/surge/libs/sst/sst-effects
+
+//Value Computed by CMake
+sst-filters_BINARY_DIR:STATIC=/Users/klambert/workspace_KJSL/github_kevleyski/surge/build_ios/libs/sst/sst-filters
+
+//Value Computed by CMake
+sst-filters_IS_TOP_LEVEL:STATIC=OFF
+
+//Value Computed by CMake
+sst-filters_SOURCE_DIR:STATIC=/Users/klambert/workspace_KJSL/github_kevleyski/surge/libs/sst/sst-filters
+
+//Value Computed by CMake
+sst-plugininfra_BINARY_DIR:STATIC=/Users/klambert/workspace_KJSL/github_kevleyski/surge/build_ios/libs/sst/sst-plugininfra
+
+//Value Computed by CMake
+sst-plugininfra_IS_TOP_LEVEL:STATIC=OFF
+
+//Dependencies for the target
+sst-plugininfra_LIB_DEPENDS:STATIC=general;sst-plugininfra::filesystem;general;sst-plugininfra::strnatcmp;general;-framework Foundation;
+
+//Value Computed by CMake
+sst-plugininfra_SOURCE_DIR:STATIC=/Users/klambert/workspace_KJSL/github_kevleyski/surge/libs/sst/sst-plugininfra
+
+//Value Computed by CMake
+sst-waveshapers_BINARY_DIR:STATIC=/Users/klambert/workspace_KJSL/github_kevleyski/surge/build_ios/libs/sst/sst-waveshapers
+
+//Value Computed by CMake
+sst-waveshapers_IS_TOP_LEVEL:STATIC=OFF
+
+//Value Computed by CMake
+sst-waveshapers_SOURCE_DIR:STATIC=/Users/klambert/workspace_KJSL/github_kevleyski/surge/libs/sst/sst-waveshapers
+
+//Value Computed by CMake
+strnatcmp_BINARY_DIR:STATIC=/Users/klambert/workspace_KJSL/github_kevleyski/surge/build_ios/libs/sst/sst-plugininfra/libs/strnatcmp
+
+//Value Computed by CMake
+strnatcmp_IS_TOP_LEVEL:STATIC=OFF
+
+//Value Computed by CMake
+strnatcmp_SOURCE_DIR:STATIC=/Users/klambert/workspace_KJSL/github_kevleyski/surge/libs/sst/sst-plugininfra/libs/strnatcmp
+
+//Value Computed by CMake
 surge-common_BINARY_DIR:STATIC=/Users/klambert/workspace_KJSL/github_kevleyski/surge/build_ios/src/common
 
 //Value Computed by CMake
@@ -687,6 +854,45 @@ surge-common_IS_TOP_LEVEL:STATIC=OFF
 
 //Value Computed by CMake
 surge-common_SOURCE_DIR:STATIC=/Users/klambert/workspace_KJSL/github_kevleyski/surge/src/common
+
+//Value Computed by CMake
+surge-fx_BINARY_DIR:STATIC=/Users/klambert/workspace_KJSL/github_kevleyski/surge/build_ios/src/surge-fx
+
+//Value Computed by CMake
+surge-fx_IS_TOP_LEVEL:STATIC=OFF
+
+//Value Computed by CMake
+surge-fx_SOURCE_DIR:STATIC=/Users/klambert/workspace_KJSL/github_kevleyski/surge/src/surge-fx
+
+//Value Computed by CMake
+surge-lua-src_BINARY_DIR:STATIC=/Users/klambert/workspace_KJSL/github_kevleyski/surge/build_ios/src/lua
+
+//Value Computed by CMake
+surge-lua-src_IS_TOP_LEVEL:STATIC=OFF
+
+//Value Computed by CMake
+surge-lua-src_SOURCE_DIR:STATIC=/Users/klambert/workspace_KJSL/github_kevleyski/surge/src/lua
+
+//Value Computed by CMake
+surge-platform_BINARY_DIR:STATIC=/Users/klambert/workspace_KJSL/github_kevleyski/surge/build_ios/src/platform
+
+//Value Computed by CMake
+surge-platform_IS_TOP_LEVEL:STATIC=OFF
+
+//Value Computed by CMake
+surge-platform_SOURCE_DIR:STATIC=/Users/klambert/workspace_KJSL/github_kevleyski/surge/src/platform
+
+//Value Computed by CMake
+surge-xt_BINARY_DIR:STATIC=/Users/klambert/workspace_KJSL/github_kevleyski/surge/build_ios/src/surge-xt
+
+//Value Computed by CMake
+surge-xt_IS_TOP_LEVEL:STATIC=OFF
+
+//Value Computed by CMake
+surge-xt_SOURCE_DIR:STATIC=/Users/klambert/workspace_KJSL/github_kevleyski/surge/src/surge-xt
+
+//Dependencies for the target
+tinyxml_LIB_DEPENDS:STATIC=general;sst-plugininfra::filesystem;
 
 //Value Computed by CMake
 tuning-library_BINARY_DIR:STATIC=/Users/klambert/workspace_KJSL/github_kevleyski/surge/build_ios/libs/tuning-library
@@ -720,6 +926,8 @@ zstd_SOURCE_DIR:STATIC=/Users/klambert/workspace_KJSL/github_kevleyski/surge/lib
 # INTERNAL cache entries
 ########################
 
+//Stored Xcode object GUID
+ALL_BUILD_GUID_CMAKE:INTERNAL=412D95C48532286282373140
 //ADVANCED property for variable: CMAKE_ADDR2LINE
 CMAKE_ADDR2LINE-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: CMAKE_AR
@@ -799,7 +1007,7 @@ CMAKE_GENERATOR_TOOLSET:INTERNAL=
 CMAKE_HAVE_LIBC_PTHREAD:INTERNAL=1
 //Source directory with the top level CMakeLists.txt file for this
 // project
-CMAKE_HOME_DIRECTORY:INTERNAL=/Users/klambert/workspace_KJSL/github_kevleyski/surge
+CMAKE_HOME_DIRECTORY:INTERNAL=/Volumes/KJSL/workspace/github_kevleyski/surge
 //ADVANCED property for variable: CMAKE_INSTALL_BINDIR
 CMAKE_INSTALL_BINDIR-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: CMAKE_INSTALL_DATADIR
@@ -851,7 +1059,7 @@ CMAKE_MODULE_LINKER_FLAGS_RELWITHDEBINFO-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: CMAKE_NM
 CMAKE_NM-ADVANCED:INTERNAL=1
 //number of local generators
-CMAKE_NUMBER_OF_MAKEFILES:INTERNAL=26
+CMAKE_NUMBER_OF_MAKEFILES:INTERNAL=40
 //ADVANCED property for variable: CMAKE_OBJCOPY
 CMAKE_OBJCOPY-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: CMAKE_OBJCXX_FLAGS
@@ -954,24 +1162,98 @@ C_FLAG_WSHADOW:INTERNAL=1
 C_FLAG_WSTRICT_PROTOTYPES:INTERNAL=1
 //Test C_FLAG_WUNDEF
 C_FLAG_WUNDEF:INTERNAL=1
+//Details about finding Git
+FIND_PACKAGE_MESSAGE_DETAILS_Git:INTERNAL=[/opt/homebrew/bin/git][v2.45.2()]
 //Details about finding Threads
 FIND_PACKAGE_MESSAGE_DETAILS_Threads:INTERNAL=[TRUE][v()]
+//ADVANCED property for variable: GIT_EXECUTABLE
+GIT_EXECUTABLE-ADVANCED:INTERNAL=1
 //Test HAS_NULLPTR_WARNING
 HAS_NULLPTR_WARNING:INTERNAL=1
 //Test IS_X86
 IS_X86:INTERNAL=
 //The path to the folder holding this file and other resources
-JUCE_CMAKE_UTILS_DIR:INTERNAL=/Users/klambert/workspace_KJSL/github_kevleyski/surge/libs/JUCE/extras/Build/CMake
+JUCE_CMAKE_UTILS_DIR:INTERNAL=/Volumes/KJSL/workspace/github_kevleyski/surge/libs/JUCE/extras/Build/CMake
 //The name of the juceaide program
 JUCE_JUCEAIDE_NAME:INTERNAL=juceaide
 //The path to JUCE modules
-JUCE_MODULES_DIR:INTERNAL=/Users/klambert/workspace_KJSL/github_kevleyski/surge/libs/JUCE/modules
+JUCE_MODULES_DIR:INTERNAL=/Volumes/KJSL/workspace/github_kevleyski/surge/libs/JUCE/modules
 //Test LD_FLAG_WL_Z_NOEXECSTACK
 LD_FLAG_WL_Z_NOEXECSTACK:INTERNAL=
+//Stored Xcode object GUID
+PROJECT_CLAP_GUID_CMAKE:INTERNAL=6A6F97A254D446F79D167BFA
+//Stored Xcode object GUID
+PROJECT_FMT_GUID_CMAKE:INTERNAL=9CE5A732481E42099BD82183
+//Stored Xcode object GUID
+PROJECT_JUCE_GUID_CMAKE:INTERNAL=6C9CB6504C1A49EC9AFF63A5
+//Stored Xcode object GUID
+PROJECT_LuaJIT_GUID_CMAKE:INTERNAL=87C53D70B73748D391D0F9C2
+//Stored Xcode object GUID
+PROJECT_Surge_GUID_CMAKE:INTERNAL=0FE8A5BC47744DCCA2DC0BEF
+//Stored Xcode object GUID
+PROJECT_airwindows_GUID_CMAKE:INTERNAL=B8E33EF644EB4250A76F8BE6
+//Stored Xcode object GUID
+PROJECT_binn_GUID_CMAKE:INTERNAL=7B94FAF0997A4D28A081C977
+//Stored Xcode object GUID
+PROJECT_clap-helpers_GUID_CMAKE:INTERNAL=6FA624E6A73D4EC08A576985
+//Stored Xcode object GUID
+PROJECT_clap-juce-extensions_GUID_CMAKE:INTERNAL=471882C332804FB8839EA419
+//Stored Xcode object GUID
+PROJECT_eurorack_GUID_CMAKE:INTERNAL=7969B6EE0B33401094F98DA1
+//Stored Xcode object GUID
+PROJECT_filesystem_GUID_CMAKE:INTERNAL=EA32A444ED5A455FBC0814F0
+//Stored Xcode object GUID
+PROJECT_libzstd_GUID_CMAKE:INTERNAL=E383FE70DE3146B48C87730C
+//Stored Xcode object GUID
+PROJECT_oddsound-mts_GUID_CMAKE:INTERNAL=38DE85C4405C4E0884ED8E97
+//Stored Xcode object GUID
+PROJECT_pegtl_GUID_CMAKE:INTERNAL=035DEFD15DAE45B0AEF38E88
+//Stored Xcode object GUID
+PROJECT_pffft_GUID_CMAKE:INTERNAL=56C7CA0AFF4F4D398E0FA631
+//Stored Xcode object GUID
+PROJECT_programs_GUID_CMAKE:INTERNAL=846E92C6ABCD444FAFC9C4AE
+//Stored Xcode object GUID
+PROJECT_sqlite_GUID_CMAKE:INTERNAL=E460CD6715DD4B04B9FD616B
+//Stored Xcode object GUID
+PROJECT_sst-basic-blocks_GUID_CMAKE:INTERNAL=48DBBCEFD74B4E3FB6015D58
+//Stored Xcode object GUID
+PROJECT_sst-cmake_GUID_CMAKE:INTERNAL=77E4A2A96C3447D88387B7F0
+//Stored Xcode object GUID
+PROJECT_sst-cpputils_GUID_CMAKE:INTERNAL=97FFE0814F5D4FB6957BFF6F
+//Stored Xcode object GUID
+PROJECT_sst-effects_GUID_CMAKE:INTERNAL=D4557C6B66A3479C831199A0
+//Stored Xcode object GUID
+PROJECT_sst-filters_GUID_CMAKE:INTERNAL=A7FE79861A08496D83CF6D9D
+//Stored Xcode object GUID
+PROJECT_sst-plugininfra_GUID_CMAKE:INTERNAL=93261E0D74CF43A3A63D53A4
+//Stored Xcode object GUID
+PROJECT_sst-waveshapers_GUID_CMAKE:INTERNAL=F5B29F8BD6844312A008A7CD
+//Stored Xcode object GUID
+PROJECT_strnatcmp_GUID_CMAKE:INTERNAL=EB90767AD27C45C4BDBDF02A
+//Stored Xcode object GUID
+PROJECT_surge-common_GUID_CMAKE:INTERNAL=66A47CE9AD984D968356B337
+//Stored Xcode object GUID
+PROJECT_surge-fx_GUID_CMAKE:INTERNAL=25A63B7171134F31844E4193
+//Stored Xcode object GUID
+PROJECT_surge-lua-src_GUID_CMAKE:INTERNAL=6BD7495D31FE44B49585CA3A
+//Stored Xcode object GUID
+PROJECT_surge-platform_GUID_CMAKE:INTERNAL=FF8D16B106B64978B1F64231
+//Stored Xcode object GUID
+PROJECT_surge-xt_GUID_CMAKE:INTERNAL=D65B662D6CDD4241921339B7
+//Stored Xcode object GUID
+PROJECT_tuning-library_GUID_CMAKE:INTERNAL=64C8946D61664FC5A9A92FF5
+//Stored Xcode object GUID
+PROJECT_zstd-superbuild_GUID_CMAKE:INTERNAL=3DC39DFB87BB458C8C7480CA
+//Stored Xcode object GUID
+PROJECT_zstd_GUID_CMAKE:INTERNAL=4D2A85A194224C568EB6498E
+//Test SST_PLUGININFRA_FILESYSTEM_STD_FS_FOUND
+SST_PLUGININFRA_FILESYSTEM_STD_FS_FOUND:INTERNAL=
 //STRINGS property for variable: ZDICTLIB_STATIC_API
 ZDICTLIB_STATIC_API-STRINGS:INTERNAL=;hidden;default;protected;internal
 //STRINGS property for variable: ZDICTLIB_VISIBLE
 ZDICTLIB_VISIBLE-STRINGS:INTERNAL=;hidden;default;protected;internal
+//Stored Xcode object GUID
+ZERO_CHECK_GUID_CMAKE:INTERNAL=89D95F8BA93D09359DDCC172
 //STRINGS property for variable: ZSTDERRORLIB_VISIBLE
 ZSTDERRORLIB_VISIBLE-STRINGS:INTERNAL=;hidden;default;protected;internal
 //STRINGS property for variable: ZSTDLIB_STATIC_API
@@ -984,5 +1266,125 @@ _CMRC_SCRIPT:INTERNAL=/Users/klambert/workspace_KJSL/github_kevleyski/surge/src/
 _CMRC_VERSION:INTERNAL=2.0.0
 //CMAKE_INSTALL_PREFIX during last run
 _GNUInstallDirs_LAST_CMAKE_INSTALL_PREFIX:INTERNAL=/usr/local
+//Stored Xcode object GUID
+airwindows_GUID_CMAKE:INTERNAL=77CABB7CFE05197ECC4D7AA6
+//Stored Xcode object GUID
+binn_GUID_CMAKE:INTERNAL=829F4610F9978E14F9FDA763
+//Stored Xcode object GUID
+clap-tests_GUID_CMAKE:INTERNAL=9B732016F6BA2AED46F8F463
+//Stored Xcode object GUID
+clap_juce_extensions_GUID_CMAKE:INTERNAL=26B64003498897BCCA1C839E
+//Stored Xcode object GUID
+clean-all_GUID_CMAKE:INTERNAL=C1AF6A9BA56B6E283D19830A
 cmrc_hpp:INTERNAL=/Users/klambert/workspace_KJSL/github_kevleyski/surge/build_ios/_cmrc/include/cmrc/cmrc.hpp
+//Stored Xcode object GUID
+code-quality-pipeline-checks_GUID_CMAKE:INTERNAL=2F4B7E1B1A27293BCF6A198F
+//Stored Xcode object GUID
+download-extra-content_GUID_CMAKE:INTERNAL=AE6143A8F1F590BAF79DCFF7
+//Stored Xcode object GUID
+eurorack_GUID_CMAKE:INTERNAL=846EA65D056E59F97C3E5B8E
+//Stored Xcode object GUID
+filesystem_GUID_CMAKE:INTERNAL=FED5DFABA37BB49ADF81500A
+//Stored Xcode object GUID
+fmt_GUID_CMAKE:INTERNAL=AD02BFA0976CA7776A859C69
+//Stored Xcode object GUID
+install-resources-global_GUID_CMAKE:INTERNAL=60333277E0EBF47D8087D679
+//Stored Xcode object GUID
+install-resources-local_GUID_CMAKE:INTERNAL=6F2B0E4025BA7EF35BB0D3D0
+//Stored Xcode object GUID
+install_GUID_CMAKE:INTERNAL=77C1A3C52D322D9730269CA7
+//Stored Xcode object GUID
+libzstd_shared_GUID_CMAKE:INTERNAL=C7E602E7DEFE401A8213E7A8
+//Stored Xcode object GUID
+libzstd_static_GUID_CMAKE:INTERNAL=8FA953BF2107F8A250C19DA0
+//Stored Xcode object GUID
+oddsound-mts_GUID_CMAKE:INTERNAL=859C3E0542C4A13E073BC5D9
+//ADVANCED property for variable: pegtl_DIR
+pegtl_DIR-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: pegtl_FOUND
+pegtl_FOUND-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: pegtl_VERSION
+pegtl_VERSION-ADVANCED:INTERNAL=1
+//Stored Xcode object GUID
+pffft_GUID_CMAKE:INTERNAL=A2536C7D92BFDDDD0D30F309
+//Stored Xcode object GUID
+sqlite_GUID_CMAKE:INTERNAL=9CB4AD065FA7612285052D15
+//Stored Xcode object GUID
+sst-effects-preset-api_GUID_CMAKE:INTERNAL=D20FA1A5DBF5B0A12FFFC625
+//Stored Xcode object GUID
+sst-effects-presets_GUID_CMAKE:INTERNAL=A5840CCDDB5ED83F2D976909
+//Stored Xcode object GUID
+sst-plugininfra_GUID_CMAKE:INTERNAL=3D051EC4B2B52137C1585FA2
+//Stored Xcode object GUID
+stage-extra-content_GUID_CMAKE:INTERNAL=03F226D842793BE1210D1B9E
+//Stored Xcode object GUID
+strnatcmp_GUID_CMAKE:INTERNAL=972F69C82572DBA69857E236
+//Stored Xcode object GUID
+surge-common-binary_GUID_CMAKE:INTERNAL=4E1FA62496E9F0E43E2C84A3
+//Stored Xcode object GUID
+surge-common_GUID_CMAKE:INTERNAL=B347F3DA69DDF98E8EB5D20A
+//Stored Xcode object GUID
+surge-fx-binary_GUID_CMAKE:INTERNAL=8A720B1BC3CBA75AF4156BA0
+//Stored Xcode object GUID
+surge-fx_AUv3_GUID_CMAKE:INTERNAL=02ED6CB6EA48519B5FDEE911
+//Stored Xcode object GUID
+surge-fx_All_GUID_CMAKE:INTERNAL=97B08DDDF2614C400246D220
+//Stored Xcode object GUID
+surge-fx_CLAP_GUID_CMAKE:INTERNAL=219F1F33F16790D6EC62F71F
+//Stored Xcode object GUID
+surge-fx_GUID_CMAKE:INTERNAL=CEADB48551E5DE8C7CE29E49
+//Stored Xcode object GUID
+surge-fx_Packaged_GUID_CMAKE:INTERNAL=DC871AFF458083168ED84F0B
+//Stored Xcode object GUID
+surge-fx_Standalone_GUID_CMAKE:INTERNAL=093BFC15356A862C90594E53
+//Stored Xcode object GUID
+surge-lua-src_GUID_CMAKE:INTERNAL=30095C524B46A3A571AC1930
+//Stored Xcode object GUID
+surge-platform_GUID_CMAKE:INTERNAL=60E3A6D108ED399B022838CF
+//Stored Xcode object GUID
+surge-staged-assets_GUID_CMAKE:INTERNAL=DF939D5C65197C815C42A61B
+//Stored Xcode object GUID
+surge-xt-binary_GUID_CMAKE:INTERNAL=38724FA5BD96041ABAE55165
+//Stored Xcode object GUID
+surge-xt-distribution_GUID_CMAKE:INTERNAL=DA171EFC6B97A27B2495398F
+//Stored Xcode object GUID
+surge-xt_AUv3_GUID_CMAKE:INTERNAL=17AC159E46A7DBB0E2EB574C
+//Stored Xcode object GUID
+surge-xt_All_GUID_CMAKE:INTERNAL=0D3D46A4505074BE3DA4BA2B
+//Stored Xcode object GUID
+surge-xt_CLAP_GUID_CMAKE:INTERNAL=7C5699D1AF74B7CE54CABB30
+//Stored Xcode object GUID
+surge-xt_GUID_CMAKE:INTERNAL=3E04694E8B07411D23F3DD0C
+//Stored Xcode object GUID
+surge-xt_Packaged_GUID_CMAKE:INTERNAL=50B4196FC6E4CE4DA96923C0
+//Stored Xcode object GUID
+surge-xt_Standalone_GUID_CMAKE:INTERNAL=1F3C214E66FF231785758C2F
+//Stored Xcode object GUID
+tinyxml_GUID_CMAKE:INTERNAL=C4CCB3B7998E6ED92EA4CD5F
+//Stored Xcode object GUID
+uninstall_GUID_CMAKE:INTERNAL=8702D77E2A6B6A360DD8D491
+//Stored Xcode object GUID
+unzstd.1_GUID_CMAKE:INTERNAL=AEFFA704DADAA2A0104887DC
+//Stored Xcode object GUID
+unzstd_GUID_CMAKE:INTERNAL=CEB6BC7C8AF9F369EB9FE791
+//Stored Xcode object GUID
+version-info_GUID_CMAKE:INTERNAL=1800F4DCF89F79C721CFF119
+//Stored Xcode object GUID
+version_information_GUID_CMAKE:INTERNAL=5A3F7DDE6030ECA0EB9B7C94
+//Stored Xcode object GUID
+zstd-frugal_GUID_CMAKE:INTERNAL=E99445557D9362644E1CB6F8
+//Stored Xcode object GUID
+zstd.1_GUID_CMAKE:INTERNAL=29A6149857907506414ED082
+//Stored Xcode object GUID
+zstd_GUID_CMAKE:INTERNAL=7D470EE767381EF829A0C348
+//Stored Xcode object GUID
+zstdcat.1_GUID_CMAKE:INTERNAL=A5395D0FFCE4C8BBEE3521F7
+//Stored Xcode object GUID
+zstdcat_GUID_CMAKE:INTERNAL=72137ECC5D51B8C518799BE6
+//Stored Xcode object GUID
+zstdgrep.1_GUID_CMAKE:INTERNAL=EA2C04B799EB791DB9B52D82
+//Stored Xcode object GUID
+zstdless.1_GUID_CMAKE:INTERNAL=CE4C0336913AA6926A7BDA49
+//Stored Xcode object GUID
+zstdmt_GUID_CMAKE:INTERNAL=A6D3B05590499C5F726B2260
 

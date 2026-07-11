@@ -1,0 +1,1843 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXAggregateTarget section */
+		412D95C48532286282373140 /* ALL_BUILD */ = {
+			isa = PBXAggregateTarget;
+			buildConfigurationList = C8E5AAA2B0FB4ABCA02A0492 /* Build configuration list for PBXAggregateTarget "ALL_BUILD" */;
+			buildPhases = (
+				66B13BD0D1D6DA2FEFD0A402 /* Generate CMakeFiles/ALL_BUILD */,
+			);
+			dependencies = (
+				85E8383AB48346B1B360D276 /* PBXTargetDependency */,
+				A8D4CD0A2BC14CE096FF33CB /* PBXTargetDependency */,
+				576F3E038F1641A0BE2EEC9F /* PBXTargetDependency */,
+				4829BBC152B048AA94D72D88 /* PBXTargetDependency */,
+			);
+			name = ALL_BUILD;
+			productName = ALL_BUILD;
+		};
+		77C1A3C52D322D9730269CA7 /* install */ = {
+			isa = PBXAggregateTarget;
+			buildConfigurationList = 7365139594F241D09489E1D0 /* Build configuration list for PBXAggregateTarget "install" */;
+			buildPhases = (
+				93426DA6A4AC2C2AC9CE883C /* CMake PostBuild Rules */,
+			);
+			dependencies = (
+				C89BC1FDD0E84CD28B7C49FE /* PBXTargetDependency */,
+			);
+			name = install;
+			productName = install;
+		};
+		89D95F8BA93D09359DDCC172 /* ZERO_CHECK */ = {
+			isa = PBXAggregateTarget;
+			buildConfigurationList = 2640A0AAD2F0494381096D24 /* Build configuration list for PBXAggregateTarget "ZERO_CHECK" */;
+			buildPhases = (
+				F5D82DABAE8E9412C879E81D /* Generate CMakeFiles/ZERO_CHECK */,
+			);
+			dependencies = (
+			);
+			name = ZERO_CHECK;
+			productName = ZERO_CHECK;
+		};
+/* End PBXAggregateTarget section */
+
+/* Begin PBXBuildFile section */
+		1219F2A91BDE444B8163B661 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/sst/sst-plugininfra/src/paths_macos.mm */ = {isa = PBXBuildFile; fileRef = E7780EADCE814AA089EC32D6 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/sst/sst-plugininfra/src/paths_macos.mm */; };
+		167F62B4D78C44D1A8954A9D /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/sst/sst-plugininfra/libs/filesystem/src/ghc-filesystem.cpp */ = {isa = PBXBuildFile; fileRef = 253D1C83234A4E26BA79623B /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/sst/sst-plugininfra/libs/filesystem/src/ghc-filesystem.cpp */; };
+		1D7B921CF1C44EC2BC8C2D62 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/sst/sst-plugininfra/libs/tinyxml/src/tinystr.cpp */ = {isa = PBXBuildFile; fileRef = 9462BE9628C34CA0BC0C88B7 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/sst/sst-plugininfra/libs/tinyxml/src/tinystr.cpp */; };
+		295CC830ED9E4777A1094F67 /* /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/geninclude/version_information.cpp */ = {isa = PBXBuildFile; fileRef = AFD3B465209B410DAAD31BF7 /* /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/geninclude/version_information.cpp */; };
+		33F293A2356D4D35AE04F17B /* /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-plugininfra/libs/filesystem/CMakeFiles/filesystem.dir/Info.plist */ = {isa = PBXBuildFile; fileRef = 9917381241074519AE6C15A1 /* /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-plugininfra/libs/filesystem/CMakeFiles/filesystem.dir/Info.plist */; };
+		3FF9492F1E7E41A7A81CE683 /* /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-plugininfra/libs/strnatcmp/CMakeFiles/strnatcmp.dir/Info.plist */ = {isa = PBXBuildFile; fileRef = CE82EA2128354B6DA1EB94AC /* /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-plugininfra/libs/strnatcmp/CMakeFiles/strnatcmp.dir/Info.plist */; };
+		42AC1FEE11114EE2A7735173 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/sst/sst-plugininfra/CMakeLists.txt */ = {isa = PBXBuildFile; fileRef = ED2972A336CA468C9347BDF9 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/sst/sst-plugininfra/CMakeLists.txt */; };
+		4EE10751C5344057A4D84708 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/sst/sst-plugininfra/src/cpufeatures.cpp */ = {isa = PBXBuildFile; fileRef = FBBFDF22A74B44689434AA6D /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/sst/sst-plugininfra/src/cpufeatures.cpp */; };
+		516E95AD58A3461A9397B5A8 /* /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-plugininfra/libs/filesystem/include/filesystem/import.h */ = {isa = PBXBuildFile; fileRef = 428DA1DD7E8B42CC9849228D /* /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-plugininfra/libs/filesystem/include/filesystem/import.h */; };
+		557B0209A01843F59D0276D3 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/sst/sst-plugininfra/libs/tinyxml/src/tinyxmlerror.cpp */ = {isa = PBXBuildFile; fileRef = B07367EC57744D4DB63A5750 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/sst/sst-plugininfra/libs/tinyxml/src/tinyxmlerror.cpp */; };
+		5D2995B157DB456E9011E865 /* /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-plugininfra/libs/filesystem/include/filesystem/ghc-filesystem.h */ = {isa = PBXBuildFile; fileRef = 28E8B6EBE72E4D3DB0ED6AFB /* /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-plugininfra/libs/filesystem/include/filesystem/ghc-filesystem.h */; };
+		61AFE837FB20482798FA23D9 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/sst/sst-plugininfra/libs/tinyxml/src/tinyxml.cpp */ = {isa = PBXBuildFile; fileRef = DD0B3332003E47E8ABB36445 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/sst/sst-plugininfra/libs/tinyxml/src/tinyxml.cpp */; };
+		66E5A352A7304A60B9017180 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/sst/sst-plugininfra/src/misc_macos.mm */ = {isa = PBXBuildFile; fileRef = 1BE8906060EA4AA0B0451324 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/sst/sst-plugininfra/src/misc_macos.mm */; };
+		6D1564041A4940CEB59B59C3 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/sst/sst-plugininfra/libs/tinyxml/CMakeLists.txt */ = {isa = PBXBuildFile; fileRef = 0D5C6157DE0D46818AFDD2CE /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/sst/sst-plugininfra/libs/tinyxml/CMakeLists.txt */; };
+		6DD9250749E446478694C33C /* /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-plugininfra/libs/filesystem/include/filesystem/import.h */ = {isa = PBXBuildFile; fileRef = CE4E0C410A9444BDBDE49CE9 /* /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-plugininfra/libs/filesystem/include/filesystem/import.h */; };
+		74433FD3AD1D45AE9E0979E6 /* /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-plugininfra/CMakeFiles/version_information.dir/Info.plist */ = {isa = PBXBuildFile; fileRef = BA1884D0E11D44B0B66C1266 /* /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-plugininfra/CMakeFiles/version_information.dir/Info.plist */; };
+		7602F35993DA4267A2513AC9 /* /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-plugininfra/CMakeFiles/sst-plugininfra.dir/Info.plist */ = {isa = PBXBuildFile; fileRef = C4BCDD6F6D6E4C9DB3E2BF2A /* /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-plugininfra/CMakeFiles/sst-plugininfra.dir/Info.plist */; };
+		B4C2C7D645234AC5B9DA114B /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/sst/sst-plugininfra/CMakeLists.txt */ = {isa = PBXBuildFile; fileRef = DF036BE5AA7E4AB5B1BF8C7A /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/sst/sst-plugininfra/CMakeLists.txt */; };
+		B51F7CD52D024FC9A6F1D926 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/sst/sst-plugininfra/libs/strnatcmp/strnatcmp.cpp */ = {isa = PBXBuildFile; fileRef = F288250A314C400AB20DA5E0 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/sst/sst-plugininfra/libs/strnatcmp/strnatcmp.cpp */; };
+		C54EB2AC7E5F4B618901FA64 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/sst/sst-plugininfra/libs/filesystem/CMakeLists.txt */ = {isa = PBXBuildFile; fileRef = A6D8C6E9CFB84C2387EA96F0 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/sst/sst-plugininfra/libs/filesystem/CMakeLists.txt */; };
+		C86D2D594661468B988D15A4 /* /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-plugininfra/libs/tinyxml/CMakeFiles/tinyxml.dir/Info.plist */ = {isa = PBXBuildFile; fileRef = 96119A6F569F4B5290BFEB94 /* /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-plugininfra/libs/tinyxml/CMakeFiles/tinyxml.dir/Info.plist */; };
+		D4101369512A4B7B81BA7D44 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/sst/sst-plugininfra/libs/strnatcmp/CMakeLists.txt */ = {isa = PBXBuildFile; fileRef = 8607D76F1F644FD8B89F6A3C /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/sst/sst-plugininfra/libs/strnatcmp/CMakeLists.txt */; };
+		E7BA3078590548418C548DBD /* /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/gen/paths_subst.cpp */ = {isa = PBXBuildFile; fileRef = D1DAA38B168E4950BE58E92A /* /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/gen/paths_subst.cpp */; };
+		F432EC4D41524CE283CC1E36 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/sst/sst-plugininfra/libs/tinyxml/src/tinyxmlparser.cpp */ = {isa = PBXBuildFile; fileRef = BA6E16C61F67405287D4CE1E /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/sst/sst-plugininfra/libs/tinyxml/src/tinyxmlparser.cpp */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXBuildStyle section */
+		46C66F2E79F640B995FB1A26 /* RelWithDebInfo */ = {
+			isa = PBXBuildStyle;
+			buildSettings = {
+				COPY_PHASE_STRIP = NO;
+			};
+			name = RelWithDebInfo;
+		};
+		505BA9BB570B424A91BF176F /* MinSizeRel */ = {
+			isa = PBXBuildStyle;
+			buildSettings = {
+				COPY_PHASE_STRIP = NO;
+			};
+			name = MinSizeRel;
+		};
+		86F2F7B45BE1487695B12784 /* Debug */ = {
+			isa = PBXBuildStyle;
+			buildSettings = {
+				COPY_PHASE_STRIP = NO;
+			};
+			name = Debug;
+		};
+		DD28DCCD135A4BE79D7C854B /* Release */ = {
+			isa = PBXBuildStyle;
+			buildSettings = {
+				COPY_PHASE_STRIP = NO;
+			};
+			name = Release;
+		};
+/* End PBXBuildStyle section */
+
+/* Begin PBXContainerItemProxy section */
+		00EA7FEF8B264B1FBCA7B316 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 93261E0D74CF43A3A63D53A4 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = FED5DFABA37BB49ADF81500A;
+			remoteInfo = filesystem;
+		};
+		1EB1F633D86341C2BB826109 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 93261E0D74CF43A3A63D53A4 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 89D95F8BA93D09359DDCC172;
+			remoteInfo = ZERO_CHECK;
+		};
+		3069D2F210A04AC19A08EB52 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 93261E0D74CF43A3A63D53A4 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = FED5DFABA37BB49ADF81500A;
+			remoteInfo = filesystem;
+		};
+		732F8E6ECB7D470EAC86192E /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 93261E0D74CF43A3A63D53A4 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 412D95C48532286282373140;
+			remoteInfo = ALL_BUILD;
+		};
+		893842B9A81E4002A7F1C2CE /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 93261E0D74CF43A3A63D53A4 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = C4CCB3B7998E6ED92EA4CD5F;
+			remoteInfo = tinyxml;
+		};
+		980E132AD1A14A26B5A051B6 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 93261E0D74CF43A3A63D53A4 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 89D95F8BA93D09359DDCC172;
+			remoteInfo = ZERO_CHECK;
+		};
+		A34092AEC9404ABC9C6D5797 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 93261E0D74CF43A3A63D53A4 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = FED5DFABA37BB49ADF81500A;
+			remoteInfo = filesystem;
+		};
+		AAE1BDEE378146EFA9C9D105 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 93261E0D74CF43A3A63D53A4 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 972F69C82572DBA69857E236;
+			remoteInfo = strnatcmp;
+		};
+		AB025D4AE4D4483EBFF046D9 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 93261E0D74CF43A3A63D53A4 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 89D95F8BA93D09359DDCC172;
+			remoteInfo = ZERO_CHECK;
+		};
+		BEF9D335FBD347B1ABF74E57 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 93261E0D74CF43A3A63D53A4 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 972F69C82572DBA69857E236;
+			remoteInfo = strnatcmp;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		0D5C6157DE0D46818AFDD2CE /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/sst/sst-plugininfra/libs/tinyxml/CMakeLists.txt */ = {isa = PBXFileReference; explicitFileType = sourcecode.text; fileEncoding = 4; name = CMakeLists.txt; path = libs/tinyxml/CMakeLists.txt; sourceTree = SOURCE_ROOT; };
+		14DAEFB6E9044CB683A49760 /* sst-plugininfra */ = {isa = PBXFileReference; explicitFileType = archive.ar; path = "libsst-plugininfra.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		1BE8906060EA4AA0B0451324 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/sst/sst-plugininfra/src/misc_macos.mm */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; fileEncoding = 4; name = misc_macos.mm; path = src/misc_macos.mm; sourceTree = SOURCE_ROOT; };
+		253D1C83234A4E26BA79623B /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/sst/sst-plugininfra/libs/filesystem/src/ghc-filesystem.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = "ghc-filesystem.cpp"; path = "libs/filesystem/src/ghc-filesystem.cpp"; sourceTree = SOURCE_ROOT; };
+		28E8B6EBE72E4D3DB0ED6AFB /* /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-plugininfra/libs/filesystem/include/filesystem/ghc-filesystem.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = "ghc-filesystem.h"; path = "/Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-plugininfra/libs/filesystem/include/filesystem/ghc-filesystem.h"; sourceTree = "<absolute>"; };
+		428DA1DD7E8B42CC9849228D /* /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-plugininfra/libs/filesystem/include/filesystem/import.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = import.h; path = "/Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-plugininfra/libs/filesystem/include/filesystem/import.h"; sourceTree = "<absolute>"; };
+		5828893829204B67A96B6009 /* strnatcmp */ = {isa = PBXFileReference; explicitFileType = archive.ar; path = libstrnatcmp.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		5CC5E6716E7142999D1C9A30 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/sst/sst-plugininfra/CMakeLists.txt */ = {isa = PBXFileReference; explicitFileType = sourcecode.text; fileEncoding = 4; name = CMakeLists.txt; path = CMakeLists.txt; sourceTree = SOURCE_ROOT; };
+		84D4407C891F4D3892A8D27E /* tinyxml */ = {isa = PBXFileReference; explicitFileType = archive.ar; path = libtinyxml.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		8607D76F1F644FD8B89F6A3C /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/sst/sst-plugininfra/libs/strnatcmp/CMakeLists.txt */ = {isa = PBXFileReference; explicitFileType = sourcecode.text; fileEncoding = 4; name = CMakeLists.txt; path = libs/strnatcmp/CMakeLists.txt; sourceTree = SOURCE_ROOT; };
+		9462BE9628C34CA0BC0C88B7 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/sst/sst-plugininfra/libs/tinyxml/src/tinystr.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = tinystr.cpp; path = libs/tinyxml/src/tinystr.cpp; sourceTree = SOURCE_ROOT; };
+		96119A6F569F4B5290BFEB94 /* /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-plugininfra/libs/tinyxml/CMakeFiles/tinyxml.dir/Info.plist */ = {isa = PBXFileReference; explicitFileType = sourcecode.text.plist; fileEncoding = 4; name = Info.plist; path = "/Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-plugininfra/libs/tinyxml/CMakeFiles/tinyxml.dir/Info.plist"; sourceTree = "<absolute>"; };
+		9917381241074519AE6C15A1 /* /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-plugininfra/libs/filesystem/CMakeFiles/filesystem.dir/Info.plist */ = {isa = PBXFileReference; explicitFileType = sourcecode.text.plist; fileEncoding = 4; name = Info.plist; path = "/Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-plugininfra/libs/filesystem/CMakeFiles/filesystem.dir/Info.plist"; sourceTree = "<absolute>"; };
+		9E31E9D6097C48D09A1F31F9 /* filesystem */ = {isa = PBXFileReference; explicitFileType = archive.ar; path = libfilesystem.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		A6D8C6E9CFB84C2387EA96F0 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/sst/sst-plugininfra/libs/filesystem/CMakeLists.txt */ = {isa = PBXFileReference; explicitFileType = sourcecode.text; fileEncoding = 4; name = CMakeLists.txt; path = libs/filesystem/CMakeLists.txt; sourceTree = SOURCE_ROOT; };
+		AFD3B465209B410DAAD31BF7 /* /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/geninclude/version_information.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = version_information.cpp; path = /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/geninclude/version_information.cpp; sourceTree = "<absolute>"; };
+		B07367EC57744D4DB63A5750 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/sst/sst-plugininfra/libs/tinyxml/src/tinyxmlerror.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = tinyxmlerror.cpp; path = libs/tinyxml/src/tinyxmlerror.cpp; sourceTree = SOURCE_ROOT; };
+		BA1884D0E11D44B0B66C1266 /* /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-plugininfra/CMakeFiles/version_information.dir/Info.plist */ = {isa = PBXFileReference; explicitFileType = sourcecode.text.plist; fileEncoding = 4; name = Info.plist; path = "/Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-plugininfra/CMakeFiles/version_information.dir/Info.plist"; sourceTree = "<absolute>"; };
+		BA6E16C61F67405287D4CE1E /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/sst/sst-plugininfra/libs/tinyxml/src/tinyxmlparser.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = tinyxmlparser.cpp; path = libs/tinyxml/src/tinyxmlparser.cpp; sourceTree = SOURCE_ROOT; };
+		C4BCDD6F6D6E4C9DB3E2BF2A /* /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-plugininfra/CMakeFiles/sst-plugininfra.dir/Info.plist */ = {isa = PBXFileReference; explicitFileType = sourcecode.text.plist; fileEncoding = 4; name = Info.plist; path = "/Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-plugininfra/CMakeFiles/sst-plugininfra.dir/Info.plist"; sourceTree = "<absolute>"; };
+		CE4E0C410A9444BDBDE49CE9 /* /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-plugininfra/libs/filesystem/include/filesystem/import.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = import.h; path = "/Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-plugininfra/libs/filesystem/include/filesystem/import.h"; sourceTree = "<absolute>"; };
+		CE82EA2128354B6DA1EB94AC /* /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-plugininfra/libs/strnatcmp/CMakeFiles/strnatcmp.dir/Info.plist */ = {isa = PBXFileReference; explicitFileType = sourcecode.text.plist; fileEncoding = 4; name = Info.plist; path = "/Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-plugininfra/libs/strnatcmp/CMakeFiles/strnatcmp.dir/Info.plist"; sourceTree = "<absolute>"; };
+		D1DAA38B168E4950BE58E92A /* /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/gen/paths_subst.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = paths_subst.cpp; path = /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/gen/paths_subst.cpp; sourceTree = "<absolute>"; };
+		D781310D1CBF466F9EA477D9 /* version_information */ = {isa = PBXFileReference; explicitFileType = archive.ar; path = libversion_information.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		DD0B3332003E47E8ABB36445 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/sst/sst-plugininfra/libs/tinyxml/src/tinyxml.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = tinyxml.cpp; path = libs/tinyxml/src/tinyxml.cpp; sourceTree = SOURCE_ROOT; };
+		DF036BE5AA7E4AB5B1BF8C7A /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/sst/sst-plugininfra/CMakeLists.txt */ = {isa = PBXFileReference; explicitFileType = sourcecode.text; fileEncoding = 4; name = CMakeLists.txt; path = CMakeLists.txt; sourceTree = SOURCE_ROOT; };
+		E7780EADCE814AA089EC32D6 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/sst/sst-plugininfra/src/paths_macos.mm */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; fileEncoding = 4; name = paths_macos.mm; path = src/paths_macos.mm; sourceTree = SOURCE_ROOT; };
+		ED2972A336CA468C9347BDF9 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/sst/sst-plugininfra/CMakeLists.txt */ = {isa = PBXFileReference; explicitFileType = sourcecode.text; fileEncoding = 4; name = CMakeLists.txt; path = CMakeLists.txt; sourceTree = SOURCE_ROOT; };
+		F288250A314C400AB20DA5E0 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/sst/sst-plugininfra/libs/strnatcmp/strnatcmp.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = strnatcmp.cpp; path = libs/strnatcmp/strnatcmp.cpp; sourceTree = SOURCE_ROOT; };
+		FBBFDF22A74B44689434AA6D /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/sst/sst-plugininfra/src/cpufeatures.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = cpufeatures.cpp; path = src/cpufeatures.cpp; sourceTree = SOURCE_ROOT; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		18C406FE2C0B4F4BB8F4EDB0 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		4D4A67A6807745E995302A9E /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		727229491F444EC7BD5B022D /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		75781C16A5F940428E42F559 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		BBAA1DE6CA1842B09A690EE3 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		13B787FFCD0142D780ADDAD0 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				C4BCDD6F6D6E4C9DB3E2BF2A /* /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-plugininfra/CMakeFiles/sst-plugininfra.dir/Info.plist */,
+			);
+			name = Resources;
+			sourceTree = "<group>";
+		};
+		2109C723094849EE9FADF132 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				9917381241074519AE6C15A1 /* /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-plugininfra/libs/filesystem/CMakeFiles/filesystem.dir/Info.plist */,
+			);
+			name = Resources;
+			sourceTree = "<group>";
+		};
+		4200A13DD438459D95DCBF9F /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				96119A6F569F4B5290BFEB94 /* /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-plugininfra/libs/tinyxml/CMakeFiles/tinyxml.dir/Info.plist */,
+			);
+			name = Resources;
+			sourceTree = "<group>";
+		};
+		4CAADDA6DE6C4C43BB47A1C3 /* strnatcmp */ = {
+			isa = PBXGroup;
+			children = (
+				D8B7CFA5F2B94545B2AB5011 /* Resources */,
+				93C52F5978464572A5FA6412 /* Source Files */,
+				8607D76F1F644FD8B89F6A3C /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/sst/sst-plugininfra/libs/strnatcmp/CMakeLists.txt */,
+			);
+			name = strnatcmp;
+			sourceTree = "<group>";
+		};
+		5189DEBBF5CA4345803A94CA /* Source Files */ = {
+			isa = PBXGroup;
+			children = (
+				AFD3B465209B410DAAD31BF7 /* /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/geninclude/version_information.cpp */,
+			);
+			name = "Source Files";
+			sourceTree = "<group>";
+		};
+		673F1B4F1E7F49AA8360BA3C /* ALL_BUILD */ = {
+			isa = PBXGroup;
+			children = (
+				BA72BC50D4CA47CB96BD98F0 /* CMake Rules */,
+				5CC5E6716E7142999D1C9A30 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/sst/sst-plugininfra/CMakeLists.txt */,
+			);
+			name = ALL_BUILD;
+			sourceTree = "<group>";
+		};
+		6E277200E10743AB9C599F62 /* Source Files */ = {
+			isa = PBXGroup;
+			children = (
+				9462BE9628C34CA0BC0C88B7 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/sst/sst-plugininfra/libs/tinyxml/src/tinystr.cpp */,
+				DD0B3332003E47E8ABB36445 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/sst/sst-plugininfra/libs/tinyxml/src/tinyxml.cpp */,
+				B07367EC57744D4DB63A5750 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/sst/sst-plugininfra/libs/tinyxml/src/tinyxmlerror.cpp */,
+				BA6E16C61F67405287D4CE1E /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/sst/sst-plugininfra/libs/tinyxml/src/tinyxmlparser.cpp */,
+			);
+			name = "Source Files";
+			sourceTree = "<group>";
+		};
+		818DD5F3315C4B99809191EE /* filesystem */ = {
+			isa = PBXGroup;
+			children = (
+				8E5CFD2AE1B54166AC844C03 /* Header Files */,
+				2109C723094849EE9FADF132 /* Resources */,
+				BEBDBAC9C20C4AECB8D69D2F /* Source Files */,
+				A6D8C6E9CFB84C2387EA96F0 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/sst/sst-plugininfra/libs/filesystem/CMakeLists.txt */,
+			);
+			name = filesystem;
+			sourceTree = "<group>";
+		};
+		8229153728B14BF3AFA132AF /* Header Files */ = {
+			isa = PBXGroup;
+			children = (
+				CE4E0C410A9444BDBDE49CE9 /* /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-plugininfra/libs/filesystem/include/filesystem/import.h */,
+			);
+			name = "Header Files";
+			sourceTree = "<group>";
+		};
+		8E5CFD2AE1B54166AC844C03 /* Header Files */ = {
+			isa = PBXGroup;
+			children = (
+				28E8B6EBE72E4D3DB0ED6AFB /* /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-plugininfra/libs/filesystem/include/filesystem/ghc-filesystem.h */,
+			);
+			name = "Header Files";
+			sourceTree = "<group>";
+		};
+		93C52F5978464572A5FA6412 /* Source Files */ = {
+			isa = PBXGroup;
+			children = (
+				F288250A314C400AB20DA5E0 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/sst/sst-plugininfra/libs/strnatcmp/strnatcmp.cpp */,
+			);
+			name = "Source Files";
+			sourceTree = "<group>";
+		};
+		98D772E17036407C8985B607 /* Source Files */ = {
+			isa = PBXGroup;
+			children = (
+				D1DAA38B168E4950BE58E92A /* /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/gen/paths_subst.cpp */,
+				FBBFDF22A74B44689434AA6D /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/sst/sst-plugininfra/src/cpufeatures.cpp */,
+				1BE8906060EA4AA0B0451324 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/sst/sst-plugininfra/src/misc_macos.mm */,
+				E7780EADCE814AA089EC32D6 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/sst/sst-plugininfra/src/paths_macos.mm */,
+			);
+			name = "Source Files";
+			sourceTree = "<group>";
+		};
+		A80FBF0AE60C4CC982C7954F /* Header Files */ = {
+			isa = PBXGroup;
+			children = (
+				428DA1DD7E8B42CC9849228D /* /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-plugininfra/libs/filesystem/include/filesystem/import.h */,
+			);
+			name = "Header Files";
+			sourceTree = "<group>";
+		};
+		B9A23BC4B6664824838ABAC6 /* sst-plugininfra */ = {
+			isa = PBXGroup;
+			children = (
+				8229153728B14BF3AFA132AF /* Header Files */,
+				13B787FFCD0142D780ADDAD0 /* Resources */,
+				98D772E17036407C8985B607 /* Source Files */,
+				ED2972A336CA468C9347BDF9 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/sst/sst-plugininfra/CMakeLists.txt */,
+			);
+			name = "sst-plugininfra";
+			sourceTree = "<group>";
+		};
+		BA72BC50D4CA47CB96BD98F0 /* CMake Rules */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = "CMake Rules";
+			sourceTree = "<group>";
+		};
+		BEBDBAC9C20C4AECB8D69D2F /* Source Files */ = {
+			isa = PBXGroup;
+			children = (
+				253D1C83234A4E26BA79623B /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/sst/sst-plugininfra/libs/filesystem/src/ghc-filesystem.cpp */,
+			);
+			name = "Source Files";
+			sourceTree = "<group>";
+		};
+		C5B0F28C72D94085A9834D0B /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Resources;
+			sourceTree = "<group>";
+		};
+		D49BB390682944F6B7E4D210 /* tinyxml */ = {
+			isa = PBXGroup;
+			children = (
+				A80FBF0AE60C4CC982C7954F /* Header Files */,
+				4200A13DD438459D95DCBF9F /* Resources */,
+				6E277200E10743AB9C599F62 /* Source Files */,
+				0D5C6157DE0D46818AFDD2CE /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/sst/sst-plugininfra/libs/tinyxml/CMakeLists.txt */,
+			);
+			name = tinyxml;
+			sourceTree = "<group>";
+		};
+		D8B7CFA5F2B94545B2AB5011 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				CE82EA2128354B6DA1EB94AC /* /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-plugininfra/libs/strnatcmp/CMakeFiles/strnatcmp.dir/Info.plist */,
+			);
+			name = Resources;
+			sourceTree = "<group>";
+		};
+		DAB346A9C6DD47FEAC00EF14 /* version_information */ = {
+			isa = PBXGroup;
+			children = (
+				E5572C76D7464BD98C8FC065 /* Resources */,
+				5189DEBBF5CA4345803A94CA /* Source Files */,
+				DF036BE5AA7E4AB5B1BF8C7A /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/sst/sst-plugininfra/CMakeLists.txt */,
+			);
+			name = version_information;
+			sourceTree = "<group>";
+		};
+		DBAED2F63D65403CA53EC1DF /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				9E31E9D6097C48D09A1F31F9 /* filesystem */,
+				14DAEFB6E9044CB683A49760 /* sst-plugininfra */,
+				5828893829204B67A96B6009 /* strnatcmp */,
+				84D4407C891F4D3892A8D27E /* tinyxml */,
+				D781310D1CBF466F9EA477D9 /* version_information */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		E5572C76D7464BD98C8FC065 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				BA1884D0E11D44B0B66C1266 /* /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-plugininfra/CMakeFiles/version_information.dir/Info.plist */,
+			);
+			name = Resources;
+			sourceTree = "<group>";
+		};
+		EC3BF1F7902E4625AA3EFF4B /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		F1E7EEC924824466856D6022 = {
+			isa = PBXGroup;
+			children = (
+				673F1B4F1E7F49AA8360BA3C /* ALL_BUILD */,
+				818DD5F3315C4B99809191EE /* filesystem */,
+				B9A23BC4B6664824838ABAC6 /* sst-plugininfra */,
+				4CAADDA6DE6C4C43BB47A1C3 /* strnatcmp */,
+				D49BB390682944F6B7E4D210 /* tinyxml */,
+				DAB346A9C6DD47FEAC00EF14 /* version_information */,
+				DBAED2F63D65403CA53EC1DF /* Products */,
+				EC3BF1F7902E4625AA3EFF4B /* Frameworks */,
+				C5B0F28C72D94085A9834D0B /* Resources */,
+			);
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		3D051EC4B2B52137C1585FA2 /* sst-plugininfra */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 44FE4D18F2744C2791DB587B /* Build configuration list for PBXNativeTarget "sst-plugininfra" */;
+			buildPhases = (
+				2B27BD759D114E0D80B7F7B6 /* Sources */,
+				18C406FE2C0B4F4BB8F4EDB0 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				1455FCEE1E8F4CA1BBB526D0 /* PBXTargetDependency */,
+				5569A016156B4EC899901167 /* PBXTargetDependency */,
+				A0D544C749D24FCBA3334015 /* PBXTargetDependency */,
+			);
+			name = "sst-plugininfra";
+			productName = "sst-plugininfra";
+			productReference = 14DAEFB6E9044CB683A49760 /* sst-plugininfra */;
+			productType = "com.apple.product-type.library.static";
+		};
+		5A3F7DDE6030ECA0EB9B7C94 /* version_information */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 84BC6610668C4448A2BD12E1 /* Build configuration list for PBXNativeTarget "version_information" */;
+			buildPhases = (
+				74D938265EB540CC9E14CDD1 /* Sources */,
+				75781C16A5F940428E42F559 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				7AD4CF51F723448F8E62D772 /* PBXTargetDependency */,
+			);
+			name = version_information;
+			productName = version_information;
+			productReference = D781310D1CBF466F9EA477D9 /* version_information */;
+			productType = "com.apple.product-type.library.static";
+		};
+		972F69C82572DBA69857E236 /* strnatcmp */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = F54FC561DBAC438485BDCACC /* Build configuration list for PBXNativeTarget "strnatcmp" */;
+			buildPhases = (
+				2B705D5FD1DB4D429F03E127 /* Sources */,
+				BBAA1DE6CA1842B09A690EE3 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = strnatcmp;
+			productName = strnatcmp;
+			productReference = 5828893829204B67A96B6009 /* strnatcmp */;
+			productType = "com.apple.product-type.library.static";
+		};
+		C4CCB3B7998E6ED92EA4CD5F /* tinyxml */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 60B58879A8FD4A9DB660E89C /* Build configuration list for PBXNativeTarget "tinyxml" */;
+			buildPhases = (
+				E5BD14ECB91546FD86F7F38A /* Sources */,
+				4D4A67A6807745E995302A9E /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				6FD39017906545369527C9AF /* PBXTargetDependency */,
+			);
+			name = tinyxml;
+			productName = tinyxml;
+			productReference = 84D4407C891F4D3892A8D27E /* tinyxml */;
+			productType = "com.apple.product-type.library.static";
+		};
+		FED5DFABA37BB49ADF81500A /* filesystem */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 46CEFAA727F645E6942ED2BF /* Build configuration list for PBXNativeTarget "filesystem" */;
+			buildPhases = (
+				C6136FA6D6B24FAFAEA91F19 /* Sources */,
+				727229491F444EC7BD5B022D /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = filesystem;
+			productName = filesystem;
+			productReference = 9E31E9D6097C48D09A1F31F9 /* filesystem */;
+			productType = "com.apple.product-type.library.static";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		93261E0D74CF43A3A63D53A4 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 2660;
+			};
+			buildConfigurationList = EDE8E882C85D4DA2B443C0BB /* Build configuration list for PBXProject "sst-plugininfra" */;
+			buildSettings = {
+			};
+			buildStyles = (
+				86F2F7B45BE1487695B12784 /* Debug */,
+				DD28DCCD135A4BE79D7C854B /* Release */,
+				505BA9BB570B424A91BF176F /* MinSizeRel */,
+				46C66F2E79F640B995FB1A26 /* RelWithDebInfo */,
+			);
+			compatibilityVersion = "Xcode 3.2";
+			hasScannedForEncodings = 0;
+			mainGroup = F1E7EEC924824466856D6022;
+			projectDirPath = "/Volumes/KJSL/workspace/github_kevleyski/surge/libs/sst/sst-plugininfra";
+			projectRoot = "";
+			targets = (
+				412D95C48532286282373140 /* ALL_BUILD */,
+				FED5DFABA37BB49ADF81500A /* filesystem */,
+				77C1A3C52D322D9730269CA7 /* install */,
+				3D051EC4B2B52137C1585FA2 /* sst-plugininfra */,
+				972F69C82572DBA69857E236 /* strnatcmp */,
+				C4CCB3B7998E6ED92EA4CD5F /* tinyxml */,
+				5A3F7DDE6030ECA0EB9B7C94 /* version_information */,
+				89D95F8BA93D09359DDCC172 /* ZERO_CHECK */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		3C0110FC8322DE7E50886E21 = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "# shell script goes here
+exit 0";
+			showEnvVarsInLog = 0;
+		};
+		66B13BD0D1D6DA2FEFD0A402 /* Generate CMakeFiles/ALL_BUILD */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "Generate CMakeFiles/ALL_BUILD";
+			outputPaths = (
+"/Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-plugininfra/CMakeFiles/ALL_BUILD"			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "set -e
+if test \"$CONFIGURATION\" = \"Debug\"; then :
+  cd /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-plugininfra
+  echo Build\\ all\\ projects
+fi
+if test \"$CONFIGURATION\" = \"Release\"; then :
+  cd /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-plugininfra
+  echo Build\\ all\\ projects
+fi
+if test \"$CONFIGURATION\" = \"MinSizeRel\"; then :
+  cd /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-plugininfra
+  echo Build\\ all\\ projects
+fi
+if test \"$CONFIGURATION\" = \"RelWithDebInfo\"; then :
+  cd /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-plugininfra
+  echo Build\\ all\\ projects
+fi
+";
+			showEnvVarsInLog = 0;
+		};
+		87AF4882E018677E2624B544 = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "# shell script goes here
+exit 0";
+			showEnvVarsInLog = 0;
+		};
+		93426DA6A4AC2C2AC9CE883C /* CMake PostBuild Rules */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "CMake PostBuild Rules";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "set -e
+if test \"$CONFIGURATION\" = \"Debug\"; then :
+  cd /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-plugininfra
+  /opt/homebrew/bin/cmake -DBUILD_TYPE=$CONFIGURATION -DEFFECTIVE_PLATFORM_NAME=$EFFECTIVE_PLATFORM_NAME -P cmake_install.cmake
+fi
+if test \"$CONFIGURATION\" = \"Release\"; then :
+  cd /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-plugininfra
+  /opt/homebrew/bin/cmake -DBUILD_TYPE=$CONFIGURATION -DEFFECTIVE_PLATFORM_NAME=$EFFECTIVE_PLATFORM_NAME -P cmake_install.cmake
+fi
+if test \"$CONFIGURATION\" = \"MinSizeRel\"; then :
+  cd /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-plugininfra
+  /opt/homebrew/bin/cmake -DBUILD_TYPE=$CONFIGURATION -DEFFECTIVE_PLATFORM_NAME=$EFFECTIVE_PLATFORM_NAME -P cmake_install.cmake
+fi
+if test \"$CONFIGURATION\" = \"RelWithDebInfo\"; then :
+  cd /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-plugininfra
+  /opt/homebrew/bin/cmake -DBUILD_TYPE=$CONFIGURATION -DEFFECTIVE_PLATFORM_NAME=$EFFECTIVE_PLATFORM_NAME -P cmake_install.cmake
+fi
+";
+			showEnvVarsInLog = 0;
+		};
+		9B50530E35CC49C82C2FACCF = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "# shell script goes here
+exit 0";
+			showEnvVarsInLog = 0;
+		};
+		F5D82DABAE8E9412C879E81D /* Generate CMakeFiles/ZERO_CHECK */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "Generate CMakeFiles/ZERO_CHECK";
+			outputPaths = (
+"/Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-plugininfra/CMakeFiles/ZERO_CHECK"			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "set -e
+if test \"$CONFIGURATION\" = \"Debug\"; then :
+  cd /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-plugininfra
+  make -f /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-plugininfra/CMakeScripts/ReRunCMake.make
+fi
+if test \"$CONFIGURATION\" = \"Release\"; then :
+  cd /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-plugininfra
+  make -f /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-plugininfra/CMakeScripts/ReRunCMake.make
+fi
+if test \"$CONFIGURATION\" = \"MinSizeRel\"; then :
+  cd /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-plugininfra
+  make -f /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-plugininfra/CMakeScripts/ReRunCMake.make
+fi
+if test \"$CONFIGURATION\" = \"RelWithDebInfo\"; then :
+  cd /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-plugininfra
+  make -f /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-plugininfra/CMakeScripts/ReRunCMake.make
+fi
+";
+			showEnvVarsInLog = 0;
+		};
+/* End PBXShellScriptBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		2B27BD759D114E0D80B7F7B6 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				E7BA3078590548418C548DBD /* /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/gen/paths_subst.cpp */,
+				4EE10751C5344057A4D84708 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/sst/sst-plugininfra/src/cpufeatures.cpp */,
+				66E5A352A7304A60B9017180 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/sst/sst-plugininfra/src/misc_macos.mm */,
+				1219F2A91BDE444B8163B661 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/sst/sst-plugininfra/src/paths_macos.mm */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		2B705D5FD1DB4D429F03E127 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B51F7CD52D024FC9A6F1D926 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/sst/sst-plugininfra/libs/strnatcmp/strnatcmp.cpp */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		74D938265EB540CC9E14CDD1 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				295CC830ED9E4777A1094F67 /* /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/geninclude/version_information.cpp */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		C6136FA6D6B24FAFAEA91F19 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				167F62B4D78C44D1A8954A9D /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/sst/sst-plugininfra/libs/filesystem/src/ghc-filesystem.cpp */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		E5BD14ECB91546FD86F7F38A /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				1D7B921CF1C44EC2BC8C2D62 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/sst/sst-plugininfra/libs/tinyxml/src/tinystr.cpp */,
+				61AFE837FB20482798FA23D9 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/sst/sst-plugininfra/libs/tinyxml/src/tinyxml.cpp */,
+				557B0209A01843F59D0276D3 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/sst/sst-plugininfra/libs/tinyxml/src/tinyxmlerror.cpp */,
+				F432EC4D41524CE283CC1E36 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/sst/sst-plugininfra/libs/tinyxml/src/tinyxmlparser.cpp */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		1455FCEE1E8F4CA1BBB526D0 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = FED5DFABA37BB49ADF81500A /* filesystem */;
+			targetProxy = A34092AEC9404ABC9C6D5797 /* PBXContainerItemProxy */;
+		};
+		4829BBC152B048AA94D72D88 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 89D95F8BA93D09359DDCC172 /* ZERO_CHECK */;
+			targetProxy = 980E132AD1A14A26B5A051B6 /* PBXContainerItemProxy */;
+		};
+		5569A016156B4EC899901167 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 972F69C82572DBA69857E236 /* strnatcmp */;
+			targetProxy = BEF9D335FBD347B1ABF74E57 /* PBXContainerItemProxy */;
+		};
+		576F3E038F1641A0BE2EEC9F /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 972F69C82572DBA69857E236 /* strnatcmp */;
+			targetProxy = AAE1BDEE378146EFA9C9D105 /* PBXContainerItemProxy */;
+		};
+		6FD39017906545369527C9AF /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = FED5DFABA37BB49ADF81500A /* filesystem */;
+			targetProxy = 00EA7FEF8B264B1FBCA7B316 /* PBXContainerItemProxy */;
+		};
+		7AD4CF51F723448F8E62D772 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 89D95F8BA93D09359DDCC172 /* ZERO_CHECK */;
+			targetProxy = 1EB1F633D86341C2BB826109 /* PBXContainerItemProxy */;
+		};
+		85E8383AB48346B1B360D276 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = FED5DFABA37BB49ADF81500A /* filesystem */;
+			targetProxy = 3069D2F210A04AC19A08EB52 /* PBXContainerItemProxy */;
+		};
+		A0D544C749D24FCBA3334015 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 89D95F8BA93D09359DDCC172 /* ZERO_CHECK */;
+			targetProxy = AB025D4AE4D4483EBFF046D9 /* PBXContainerItemProxy */;
+		};
+		A8D4CD0A2BC14CE096FF33CB /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = C4CCB3B7998E6ED92EA4CD5F /* tinyxml */;
+			targetProxy = 893842B9A81E4002A7F1C2CE /* PBXContainerItemProxy */;
+		};
+		C89BC1FDD0E84CD28B7C49FE /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 412D95C48532286282373140 /* ALL_BUILD */;
+			targetProxy = 732F8E6ECB7D470EAC86192E /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		12DABB5C296141249C00B031 /* RelWithDebInfo */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = arm64;
+				COMBINE_HIDPI_IMAGES = YES;
+				CONFIGURATION_BUILD_DIR = "/Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-plugininfra/RelWithDebInfo${EFFECTIVE_PLATFORM_NAME}";
+				EXECUTABLE_PREFIX = lib;
+				EXECUTABLE_SUFFIX = .a;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 2;
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'","'SST_PLUGININFRA_HAS_VERSION_INFORMATION=1'","$(inherited)");
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = ("/Volumes/KJSL/workspace/github_kevleyski/surge/libs/sst/sst-plugininfra/include","$(inherited)");
+				INSTALL_PATH = "";
+				LIBRARY_STYLE = STATIC;
+				LLVM_LTO = YES_THIN;
+				ONLY_ACTIVE_ARCH = NO;
+				OTHER_CPLUSPLUSFLAGS = "       -DNDEBUG '-std=c++20' '-flto=thin' -fPIC -fvisibility=hidden -fvisibility-inlines-hidden -Wno-multichar -fno-math-errno -fno-trapping-math -fno-char8_t -Wno-unused-command-line-argument -Wno-deprecated-declarations '-Werror=inconsistent-missing-override' '-Werror=logical-op-parentheses' '-Werror=dynamic-class-memaccess' '-Werror=undefined-bool-conversion' '-Werror=bitwise-op-parentheses' '-Werror=pointer-bool-conversion' -faligned-allocation -fasm-blocks ";
+				OTHER_LIBTOOLFLAGS = ("");
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = version_information;
+				SECTORDER_FLAGS = "";
+				TARGET_TEMP_DIR = "/Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/build/version_information.build/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("$(inherited)");
+			};
+			name = RelWithDebInfo;
+		};
+		1925E548244D41A0B83FC05F /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = arm64;
+				COMBINE_HIDPI_IMAGES = YES;
+				CONFIGURATION_BUILD_DIR = "/Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-plugininfra/libs/tinyxml/Debug${EFFECTIVE_PLATFORM_NAME}";
+				EXECUTABLE_PREFIX = lib;
+				EXECUTABLE_SUFFIX = .a;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'",TIXML_USE_STL,GHC_FILESYSTEM_FWD,GHC_RAISE_UNICODE_ERRORS,GHC_WIN_WSTRING_STRING_TYPE,"$(inherited)");
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = ("/Volumes/KJSL/workspace/github_kevleyski/surge/libs/sst/sst-plugininfra/libs/tinyxml/include","/Volumes/KJSL/workspace/github_kevleyski/surge/libs/sst/sst-plugininfra/libs/tinyxml/include/tinyxml","/Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-plugininfra/libs/filesystem/include","$(inherited)");
+				INSTALL_PATH = "";
+				LIBRARY_STYLE = STATIC;
+				LLVM_LTO = YES_THIN;
+				ONLY_ACTIVE_ARCH = NO;
+				OTHER_CPLUSPLUSFLAGS = "   '-std=c++20' '-flto=thin' -fPIC -fvisibility=hidden -fvisibility-inlines-hidden -Wno-multichar -fno-math-errno -fno-trapping-math -fno-char8_t -Wno-unused-command-line-argument -Wno-deprecated-declarations '-Werror=inconsistent-missing-override' '-Werror=logical-op-parentheses' '-Werror=dynamic-class-memaccess' '-Werror=undefined-bool-conversion' '-Werror=bitwise-op-parentheses' '-Werror=pointer-bool-conversion' -faligned-allocation -fasm-blocks ";
+				OTHER_LIBTOOLFLAGS = ("");
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = tinyxml;
+				SECTORDER_FLAGS = "";
+				TARGET_TEMP_DIR = "/Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/build/tinyxml.build/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("$(inherited)");
+			};
+			name = Debug;
+		};
+		1AC8BAEE088D4BCA8E8E2291 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COMBINE_HIDPI_IMAGES = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'","$(inherited)");
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				INSTALL_PATH = "";
+				OTHER_LDFLAGS = ("","$(inherited)");
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = ALL_BUILD;
+				SECTORDER_FLAGS = "";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("$(inherited)");
+			};
+			name = Release;
+		};
+		1E111D471D1F4EA4B87B4BBF /* MinSizeRel */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = arm64;
+				COMBINE_HIDPI_IMAGES = YES;
+				CONFIGURATION_BUILD_DIR = "/Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-plugininfra/MinSizeRel${EFFECTIVE_PLATFORM_NAME}";
+				EXECUTABLE_PREFIX = lib;
+				EXECUTABLE_SUFFIX = .a;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = s;
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'","'MAC=1'","'SST_COMMAND_CTRL_SAME_KEY=0'",GHC_FILESYSTEM_FWD,GHC_RAISE_UNICODE_ERRORS,GHC_WIN_WSTRING_STRING_TYPE,"$(inherited)");
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = ("/Volumes/KJSL/workspace/github_kevleyski/surge/libs/sst/sst-plugininfra/include","/Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-plugininfra/libs/filesystem/include","/Volumes/KJSL/workspace/github_kevleyski/surge/libs/sst/sst-plugininfra/libs/strnatcmp","$(inherited)");
+				INSTALL_PATH = "";
+				LIBRARY_STYLE = STATIC;
+				LLVM_LTO = YES_THIN;
+				ONLY_ACTIVE_ARCH = NO;
+				OTHER_CPLUSPLUSFLAGS = "    -DNDEBUG '-std=c++20' '-flto=thin' -fPIC -fvisibility=hidden -fvisibility-inlines-hidden -Wno-multichar -fno-math-errno -fno-trapping-math -fno-char8_t -Wno-unused-command-line-argument -Wno-deprecated-declarations '-Werror=inconsistent-missing-override' '-Werror=logical-op-parentheses' '-Werror=dynamic-class-memaccess' '-Werror=undefined-bool-conversion' '-Werror=bitwise-op-parentheses' '-Werror=pointer-bool-conversion' -faligned-allocation -fasm-blocks ";
+				OTHER_LIBTOOLFLAGS = ("");
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = "sst-plugininfra";
+				SECTORDER_FLAGS = "";
+				TARGET_TEMP_DIR = "/Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/build/sst-plugininfra.build/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("$(inherited)");
+			};
+			name = MinSizeRel;
+		};
+		1F42FB1C056142C2AC4A45B7 /* MinSizeRel */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = arm64;
+				COMBINE_HIDPI_IMAGES = YES;
+				CONFIGURATION_BUILD_DIR = "/Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-plugininfra/libs/filesystem/MinSizeRel${EFFECTIVE_PLATFORM_NAME}";
+				EXECUTABLE_PREFIX = lib;
+				EXECUTABLE_SUFFIX = .a;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = s;
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'",GHC_RAISE_UNICODE_ERRORS,GHC_WIN_WSTRING_STRING_TYPE,GHC_FILESYSTEM_IMPLEMENTATION,"$(inherited)");
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = ("/Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-plugininfra/libs/filesystem/include","$(inherited)");
+				INSTALL_PATH = "";
+				LIBRARY_STYLE = STATIC;
+				LLVM_LTO = YES_THIN;
+				ONLY_ACTIVE_ARCH = NO;
+				OTHER_CPLUSPLUSFLAGS = "    -DNDEBUG '-std=c++20' '-flto=thin' -fPIC -fvisibility=hidden -fvisibility-inlines-hidden -Wno-multichar -fno-math-errno -fno-trapping-math -fno-char8_t -Wno-unused-command-line-argument -Wno-deprecated-declarations '-Werror=inconsistent-missing-override' '-Werror=logical-op-parentheses' '-Werror=dynamic-class-memaccess' '-Werror=undefined-bool-conversion' '-Werror=bitwise-op-parentheses' '-Werror=pointer-bool-conversion' -faligned-allocation -fasm-blocks ";
+				OTHER_LIBTOOLFLAGS = ("");
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = filesystem;
+				SECTORDER_FLAGS = "";
+				TARGET_TEMP_DIR = "/Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/build/filesystem.build/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("$(inherited)");
+			};
+			name = MinSizeRel;
+		};
+		3452F641609D4C5B891AB98E /* MinSizeRel */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = arm64;
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = B973YVS5A5;
+				IPHONEOS_DEPLOYMENT_TARGET = 10.15;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SYMROOT = /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/build;
+			};
+			name = MinSizeRel;
+		};
+		34B03B6E62D345949E31704C /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COMBINE_HIDPI_IMAGES = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'","$(inherited)");
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				INSTALL_PATH = "";
+				OTHER_LDFLAGS = ("","$(inherited)");
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = install;
+				SECTORDER_FLAGS = "";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("$(inherited)");
+			};
+			name = Debug;
+		};
+		39986EF9E3584852B4FAE456 /* RelWithDebInfo */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = arm64;
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = B973YVS5A5;
+				IPHONEOS_DEPLOYMENT_TARGET = 10.15;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SYMROOT = /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/build;
+			};
+			name = RelWithDebInfo;
+		};
+		4B2D6320FE2C4876A2B103DA /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = arm64;
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = B973YVS5A5;
+				IPHONEOS_DEPLOYMENT_TARGET = 10.15;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SYMROOT = /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/build;
+			};
+			name = Release;
+		};
+		550D20397B704CE1923CA9EB /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = arm64;
+				COMBINE_HIDPI_IMAGES = YES;
+				CONFIGURATION_BUILD_DIR = "/Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-plugininfra/libs/filesystem/Release${EFFECTIVE_PLATFORM_NAME}";
+				EXECUTABLE_PREFIX = lib;
+				EXECUTABLE_SUFFIX = .a;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 3;
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'",GHC_RAISE_UNICODE_ERRORS,GHC_WIN_WSTRING_STRING_TYPE,GHC_FILESYSTEM_IMPLEMENTATION,"$(inherited)");
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = ("/Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-plugininfra/libs/filesystem/include","$(inherited)");
+				INSTALL_PATH = "";
+				LIBRARY_STYLE = STATIC;
+				LLVM_LTO = YES_THIN;
+				ONLY_ACTIVE_ARCH = NO;
+				OTHER_CPLUSPLUSFLAGS = "    -DNDEBUG '-std=c++20' '-flto=thin' -fPIC -fvisibility=hidden -fvisibility-inlines-hidden -Wno-multichar -fno-math-errno -fno-trapping-math -fno-char8_t -Wno-unused-command-line-argument -Wno-deprecated-declarations '-Werror=inconsistent-missing-override' '-Werror=logical-op-parentheses' '-Werror=dynamic-class-memaccess' '-Werror=undefined-bool-conversion' '-Werror=bitwise-op-parentheses' '-Werror=pointer-bool-conversion' -faligned-allocation -fasm-blocks ";
+				OTHER_LIBTOOLFLAGS = ("");
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = filesystem;
+				SECTORDER_FLAGS = "";
+				TARGET_TEMP_DIR = "/Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/build/filesystem.build/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("$(inherited)");
+			};
+			name = Release;
+		};
+		55A440632D284399B75DB33A /* MinSizeRel */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = arm64;
+				COMBINE_HIDPI_IMAGES = YES;
+				CONFIGURATION_BUILD_DIR = "/Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-plugininfra/MinSizeRel${EFFECTIVE_PLATFORM_NAME}";
+				EXECUTABLE_PREFIX = lib;
+				EXECUTABLE_SUFFIX = .a;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = s;
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'","'SST_PLUGININFRA_HAS_VERSION_INFORMATION=1'","$(inherited)");
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = ("/Volumes/KJSL/workspace/github_kevleyski/surge/libs/sst/sst-plugininfra/include","$(inherited)");
+				INSTALL_PATH = "";
+				LIBRARY_STYLE = STATIC;
+				LLVM_LTO = YES_THIN;
+				ONLY_ACTIVE_ARCH = NO;
+				OTHER_CPLUSPLUSFLAGS = "    -DNDEBUG '-std=c++20' '-flto=thin' -fPIC -fvisibility=hidden -fvisibility-inlines-hidden -Wno-multichar -fno-math-errno -fno-trapping-math -fno-char8_t -Wno-unused-command-line-argument -Wno-deprecated-declarations '-Werror=inconsistent-missing-override' '-Werror=logical-op-parentheses' '-Werror=dynamic-class-memaccess' '-Werror=undefined-bool-conversion' '-Werror=bitwise-op-parentheses' '-Werror=pointer-bool-conversion' -faligned-allocation -fasm-blocks ";
+				OTHER_LIBTOOLFLAGS = ("");
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = version_information;
+				SECTORDER_FLAGS = "";
+				TARGET_TEMP_DIR = "/Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/build/version_information.build/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("$(inherited)");
+			};
+			name = MinSizeRel;
+		};
+		6508EB381AB34CB2B15903F9 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = arm64;
+				COMBINE_HIDPI_IMAGES = YES;
+				CONFIGURATION_BUILD_DIR = "/Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-plugininfra/libs/strnatcmp/Debug${EFFECTIVE_PLATFORM_NAME}";
+				EXECUTABLE_PREFIX = lib;
+				EXECUTABLE_SUFFIX = .a;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'","$(inherited)");
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = ("/Volumes/KJSL/workspace/github_kevleyski/surge/libs/sst/sst-plugininfra/libs/strnatcmp","$(inherited)");
+				INSTALL_PATH = "";
+				LIBRARY_STYLE = STATIC;
+				LLVM_LTO = YES_THIN;
+				ONLY_ACTIVE_ARCH = NO;
+				OTHER_CPLUSPLUSFLAGS = "   '-std=c++20' '-flto=thin' -fPIC -fvisibility=hidden -fvisibility-inlines-hidden -Wno-multichar -fno-math-errno -fno-trapping-math -fno-char8_t -Wno-unused-command-line-argument -Wno-deprecated-declarations '-Werror=inconsistent-missing-override' '-Werror=logical-op-parentheses' '-Werror=dynamic-class-memaccess' '-Werror=undefined-bool-conversion' '-Werror=bitwise-op-parentheses' '-Werror=pointer-bool-conversion' -faligned-allocation -fasm-blocks ";
+				OTHER_LIBTOOLFLAGS = ("");
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = strnatcmp;
+				SECTORDER_FLAGS = "";
+				TARGET_TEMP_DIR = "/Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/build/strnatcmp.build/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("$(inherited)");
+			};
+			name = Debug;
+		};
+		6E662D74E6C344E0A94A1DF6 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COMBINE_HIDPI_IMAGES = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'","$(inherited)");
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				INSTALL_PATH = "";
+				OTHER_LDFLAGS = ("","$(inherited)");
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = ZERO_CHECK;
+				SECTORDER_FLAGS = "";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("$(inherited)");
+			};
+			name = Release;
+		};
+		7E6B6DF67C4F4C639623B648 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COMBINE_HIDPI_IMAGES = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'","$(inherited)");
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				INSTALL_PATH = "";
+				OTHER_LDFLAGS = ("","$(inherited)");
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = ZERO_CHECK;
+				SECTORDER_FLAGS = "";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("$(inherited)");
+			};
+			name = Debug;
+		};
+		86DAB0475086402192D63743 /* RelWithDebInfo */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = arm64;
+				COMBINE_HIDPI_IMAGES = YES;
+				CONFIGURATION_BUILD_DIR = "/Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-plugininfra/libs/tinyxml/RelWithDebInfo${EFFECTIVE_PLATFORM_NAME}";
+				EXECUTABLE_PREFIX = lib;
+				EXECUTABLE_SUFFIX = .a;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 2;
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'",TIXML_USE_STL,GHC_FILESYSTEM_FWD,GHC_RAISE_UNICODE_ERRORS,GHC_WIN_WSTRING_STRING_TYPE,"$(inherited)");
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = ("/Volumes/KJSL/workspace/github_kevleyski/surge/libs/sst/sst-plugininfra/libs/tinyxml/include","/Volumes/KJSL/workspace/github_kevleyski/surge/libs/sst/sst-plugininfra/libs/tinyxml/include/tinyxml","/Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-plugininfra/libs/filesystem/include","$(inherited)");
+				INSTALL_PATH = "";
+				LIBRARY_STYLE = STATIC;
+				LLVM_LTO = YES_THIN;
+				ONLY_ACTIVE_ARCH = NO;
+				OTHER_CPLUSPLUSFLAGS = "       -DNDEBUG '-std=c++20' '-flto=thin' -fPIC -fvisibility=hidden -fvisibility-inlines-hidden -Wno-multichar -fno-math-errno -fno-trapping-math -fno-char8_t -Wno-unused-command-line-argument -Wno-deprecated-declarations '-Werror=inconsistent-missing-override' '-Werror=logical-op-parentheses' '-Werror=dynamic-class-memaccess' '-Werror=undefined-bool-conversion' '-Werror=bitwise-op-parentheses' '-Werror=pointer-bool-conversion' -faligned-allocation -fasm-blocks ";
+				OTHER_LIBTOOLFLAGS = ("");
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = tinyxml;
+				SECTORDER_FLAGS = "";
+				TARGET_TEMP_DIR = "/Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/build/tinyxml.build/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("$(inherited)");
+			};
+			name = RelWithDebInfo;
+		};
+		8D2C28312FE24A4DBF6DEC66 /* MinSizeRel */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = arm64;
+				COMBINE_HIDPI_IMAGES = YES;
+				CONFIGURATION_BUILD_DIR = "/Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-plugininfra/libs/strnatcmp/MinSizeRel${EFFECTIVE_PLATFORM_NAME}";
+				EXECUTABLE_PREFIX = lib;
+				EXECUTABLE_SUFFIX = .a;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = s;
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'","$(inherited)");
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = ("/Volumes/KJSL/workspace/github_kevleyski/surge/libs/sst/sst-plugininfra/libs/strnatcmp","$(inherited)");
+				INSTALL_PATH = "";
+				LIBRARY_STYLE = STATIC;
+				LLVM_LTO = YES_THIN;
+				ONLY_ACTIVE_ARCH = NO;
+				OTHER_CPLUSPLUSFLAGS = "    -DNDEBUG '-std=c++20' '-flto=thin' -fPIC -fvisibility=hidden -fvisibility-inlines-hidden -Wno-multichar -fno-math-errno -fno-trapping-math -fno-char8_t -Wno-unused-command-line-argument -Wno-deprecated-declarations '-Werror=inconsistent-missing-override' '-Werror=logical-op-parentheses' '-Werror=dynamic-class-memaccess' '-Werror=undefined-bool-conversion' '-Werror=bitwise-op-parentheses' '-Werror=pointer-bool-conversion' -faligned-allocation -fasm-blocks ";
+				OTHER_LIBTOOLFLAGS = ("");
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = strnatcmp;
+				SECTORDER_FLAGS = "";
+				TARGET_TEMP_DIR = "/Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/build/strnatcmp.build/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("$(inherited)");
+			};
+			name = MinSizeRel;
+		};
+		8E5055DB913E49F2BDA3EF8A /* RelWithDebInfo */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = arm64;
+				COMBINE_HIDPI_IMAGES = YES;
+				CONFIGURATION_BUILD_DIR = "/Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-plugininfra/RelWithDebInfo${EFFECTIVE_PLATFORM_NAME}";
+				EXECUTABLE_PREFIX = lib;
+				EXECUTABLE_SUFFIX = .a;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 2;
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'","'MAC=1'","'SST_COMMAND_CTRL_SAME_KEY=0'",GHC_FILESYSTEM_FWD,GHC_RAISE_UNICODE_ERRORS,GHC_WIN_WSTRING_STRING_TYPE,"$(inherited)");
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = ("/Volumes/KJSL/workspace/github_kevleyski/surge/libs/sst/sst-plugininfra/include","/Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-plugininfra/libs/filesystem/include","/Volumes/KJSL/workspace/github_kevleyski/surge/libs/sst/sst-plugininfra/libs/strnatcmp","$(inherited)");
+				INSTALL_PATH = "";
+				LIBRARY_STYLE = STATIC;
+				LLVM_LTO = YES_THIN;
+				ONLY_ACTIVE_ARCH = NO;
+				OTHER_CPLUSPLUSFLAGS = "       -DNDEBUG '-std=c++20' '-flto=thin' -fPIC -fvisibility=hidden -fvisibility-inlines-hidden -Wno-multichar -fno-math-errno -fno-trapping-math -fno-char8_t -Wno-unused-command-line-argument -Wno-deprecated-declarations '-Werror=inconsistent-missing-override' '-Werror=logical-op-parentheses' '-Werror=dynamic-class-memaccess' '-Werror=undefined-bool-conversion' '-Werror=bitwise-op-parentheses' '-Werror=pointer-bool-conversion' -faligned-allocation -fasm-blocks ";
+				OTHER_LIBTOOLFLAGS = ("");
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = "sst-plugininfra";
+				SECTORDER_FLAGS = "";
+				TARGET_TEMP_DIR = "/Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/build/sst-plugininfra.build/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("$(inherited)");
+			};
+			name = RelWithDebInfo;
+		};
+		8F0EDB039D5244E5B7F4D297 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = arm64;
+				COMBINE_HIDPI_IMAGES = YES;
+				CONFIGURATION_BUILD_DIR = "/Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-plugininfra/Debug${EFFECTIVE_PLATFORM_NAME}";
+				EXECUTABLE_PREFIX = lib;
+				EXECUTABLE_SUFFIX = .a;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'","'SST_PLUGININFRA_HAS_VERSION_INFORMATION=1'","$(inherited)");
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = ("/Volumes/KJSL/workspace/github_kevleyski/surge/libs/sst/sst-plugininfra/include","$(inherited)");
+				INSTALL_PATH = "";
+				LIBRARY_STYLE = STATIC;
+				LLVM_LTO = YES_THIN;
+				ONLY_ACTIVE_ARCH = NO;
+				OTHER_CPLUSPLUSFLAGS = "   '-std=c++20' '-flto=thin' -fPIC -fvisibility=hidden -fvisibility-inlines-hidden -Wno-multichar -fno-math-errno -fno-trapping-math -fno-char8_t -Wno-unused-command-line-argument -Wno-deprecated-declarations '-Werror=inconsistent-missing-override' '-Werror=logical-op-parentheses' '-Werror=dynamic-class-memaccess' '-Werror=undefined-bool-conversion' '-Werror=bitwise-op-parentheses' '-Werror=pointer-bool-conversion' -faligned-allocation -fasm-blocks ";
+				OTHER_LIBTOOLFLAGS = ("");
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = version_information;
+				SECTORDER_FLAGS = "";
+				TARGET_TEMP_DIR = "/Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/build/version_information.build/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("$(inherited)");
+			};
+			name = Debug;
+		};
+		911C3BDB4FE841A5B72D9750 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = arm64;
+				COMBINE_HIDPI_IMAGES = YES;
+				CONFIGURATION_BUILD_DIR = "/Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-plugininfra/Debug${EFFECTIVE_PLATFORM_NAME}";
+				EXECUTABLE_PREFIX = lib;
+				EXECUTABLE_SUFFIX = .a;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'","'MAC=1'","'SST_COMMAND_CTRL_SAME_KEY=0'",GHC_FILESYSTEM_FWD,GHC_RAISE_UNICODE_ERRORS,GHC_WIN_WSTRING_STRING_TYPE,"$(inherited)");
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = ("/Volumes/KJSL/workspace/github_kevleyski/surge/libs/sst/sst-plugininfra/include","/Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-plugininfra/libs/filesystem/include","/Volumes/KJSL/workspace/github_kevleyski/surge/libs/sst/sst-plugininfra/libs/strnatcmp","$(inherited)");
+				INSTALL_PATH = "";
+				LIBRARY_STYLE = STATIC;
+				LLVM_LTO = YES_THIN;
+				ONLY_ACTIVE_ARCH = NO;
+				OTHER_CPLUSPLUSFLAGS = "   '-std=c++20' '-flto=thin' -fPIC -fvisibility=hidden -fvisibility-inlines-hidden -Wno-multichar -fno-math-errno -fno-trapping-math -fno-char8_t -Wno-unused-command-line-argument -Wno-deprecated-declarations '-Werror=inconsistent-missing-override' '-Werror=logical-op-parentheses' '-Werror=dynamic-class-memaccess' '-Werror=undefined-bool-conversion' '-Werror=bitwise-op-parentheses' '-Werror=pointer-bool-conversion' -faligned-allocation -fasm-blocks ";
+				OTHER_LIBTOOLFLAGS = ("");
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = "sst-plugininfra";
+				SECTORDER_FLAGS = "";
+				TARGET_TEMP_DIR = "/Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/build/sst-plugininfra.build/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("$(inherited)");
+			};
+			name = Debug;
+		};
+		92EA6105753D499B8AC65C23 /* RelWithDebInfo */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = arm64;
+				COMBINE_HIDPI_IMAGES = YES;
+				CONFIGURATION_BUILD_DIR = "/Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-plugininfra/libs/filesystem/RelWithDebInfo${EFFECTIVE_PLATFORM_NAME}";
+				EXECUTABLE_PREFIX = lib;
+				EXECUTABLE_SUFFIX = .a;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 2;
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'",GHC_RAISE_UNICODE_ERRORS,GHC_WIN_WSTRING_STRING_TYPE,GHC_FILESYSTEM_IMPLEMENTATION,"$(inherited)");
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = ("/Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-plugininfra/libs/filesystem/include","$(inherited)");
+				INSTALL_PATH = "";
+				LIBRARY_STYLE = STATIC;
+				LLVM_LTO = YES_THIN;
+				ONLY_ACTIVE_ARCH = NO;
+				OTHER_CPLUSPLUSFLAGS = "       -DNDEBUG '-std=c++20' '-flto=thin' -fPIC -fvisibility=hidden -fvisibility-inlines-hidden -Wno-multichar -fno-math-errno -fno-trapping-math -fno-char8_t -Wno-unused-command-line-argument -Wno-deprecated-declarations '-Werror=inconsistent-missing-override' '-Werror=logical-op-parentheses' '-Werror=dynamic-class-memaccess' '-Werror=undefined-bool-conversion' '-Werror=bitwise-op-parentheses' '-Werror=pointer-bool-conversion' -faligned-allocation -fasm-blocks ";
+				OTHER_LIBTOOLFLAGS = ("");
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = filesystem;
+				SECTORDER_FLAGS = "";
+				TARGET_TEMP_DIR = "/Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/build/filesystem.build/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("$(inherited)");
+			};
+			name = RelWithDebInfo;
+		};
+		9CF3347E94BE476EA676FCE8 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = arm64;
+				COMBINE_HIDPI_IMAGES = YES;
+				CONFIGURATION_BUILD_DIR = "/Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-plugininfra/libs/tinyxml/Release${EFFECTIVE_PLATFORM_NAME}";
+				EXECUTABLE_PREFIX = lib;
+				EXECUTABLE_SUFFIX = .a;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 3;
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'",TIXML_USE_STL,GHC_FILESYSTEM_FWD,GHC_RAISE_UNICODE_ERRORS,GHC_WIN_WSTRING_STRING_TYPE,"$(inherited)");
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = ("/Volumes/KJSL/workspace/github_kevleyski/surge/libs/sst/sst-plugininfra/libs/tinyxml/include","/Volumes/KJSL/workspace/github_kevleyski/surge/libs/sst/sst-plugininfra/libs/tinyxml/include/tinyxml","/Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-plugininfra/libs/filesystem/include","$(inherited)");
+				INSTALL_PATH = "";
+				LIBRARY_STYLE = STATIC;
+				LLVM_LTO = YES_THIN;
+				ONLY_ACTIVE_ARCH = NO;
+				OTHER_CPLUSPLUSFLAGS = "    -DNDEBUG '-std=c++20' '-flto=thin' -fPIC -fvisibility=hidden -fvisibility-inlines-hidden -Wno-multichar -fno-math-errno -fno-trapping-math -fno-char8_t -Wno-unused-command-line-argument -Wno-deprecated-declarations '-Werror=inconsistent-missing-override' '-Werror=logical-op-parentheses' '-Werror=dynamic-class-memaccess' '-Werror=undefined-bool-conversion' '-Werror=bitwise-op-parentheses' '-Werror=pointer-bool-conversion' -faligned-allocation -fasm-blocks ";
+				OTHER_LIBTOOLFLAGS = ("");
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = tinyxml;
+				SECTORDER_FLAGS = "";
+				TARGET_TEMP_DIR = "/Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/build/tinyxml.build/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("$(inherited)");
+			};
+			name = Release;
+		};
+		A1E6DE02BA084E4DAF607802 /* MinSizeRel */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COMBINE_HIDPI_IMAGES = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'","$(inherited)");
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				INSTALL_PATH = "";
+				OTHER_LDFLAGS = ("","$(inherited)");
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = ALL_BUILD;
+				SECTORDER_FLAGS = "";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("$(inherited)");
+			};
+			name = MinSizeRel;
+		};
+		A4F0FDA7049C4BB3814B6091 /* MinSizeRel */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COMBINE_HIDPI_IMAGES = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'","$(inherited)");
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				INSTALL_PATH = "";
+				OTHER_LDFLAGS = ("","$(inherited)");
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = ZERO_CHECK;
+				SECTORDER_FLAGS = "";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("$(inherited)");
+			};
+			name = MinSizeRel;
+		};
+		B20E6B6D12B14B0F8DD3ADA1 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = arm64;
+				COMBINE_HIDPI_IMAGES = YES;
+				CONFIGURATION_BUILD_DIR = "/Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-plugininfra/libs/strnatcmp/Release${EFFECTIVE_PLATFORM_NAME}";
+				EXECUTABLE_PREFIX = lib;
+				EXECUTABLE_SUFFIX = .a;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 3;
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'","$(inherited)");
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = ("/Volumes/KJSL/workspace/github_kevleyski/surge/libs/sst/sst-plugininfra/libs/strnatcmp","$(inherited)");
+				INSTALL_PATH = "";
+				LIBRARY_STYLE = STATIC;
+				LLVM_LTO = YES_THIN;
+				ONLY_ACTIVE_ARCH = NO;
+				OTHER_CPLUSPLUSFLAGS = "    -DNDEBUG '-std=c++20' '-flto=thin' -fPIC -fvisibility=hidden -fvisibility-inlines-hidden -Wno-multichar -fno-math-errno -fno-trapping-math -fno-char8_t -Wno-unused-command-line-argument -Wno-deprecated-declarations '-Werror=inconsistent-missing-override' '-Werror=logical-op-parentheses' '-Werror=dynamic-class-memaccess' '-Werror=undefined-bool-conversion' '-Werror=bitwise-op-parentheses' '-Werror=pointer-bool-conversion' -faligned-allocation -fasm-blocks ";
+				OTHER_LIBTOOLFLAGS = ("");
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = strnatcmp;
+				SECTORDER_FLAGS = "";
+				TARGET_TEMP_DIR = "/Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/build/strnatcmp.build/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("$(inherited)");
+			};
+			name = Release;
+		};
+		B5060607FDFF400181AD34D2 /* RelWithDebInfo */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = arm64;
+				COMBINE_HIDPI_IMAGES = YES;
+				CONFIGURATION_BUILD_DIR = "/Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-plugininfra/libs/strnatcmp/RelWithDebInfo${EFFECTIVE_PLATFORM_NAME}";
+				EXECUTABLE_PREFIX = lib;
+				EXECUTABLE_SUFFIX = .a;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 2;
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'","$(inherited)");
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = ("/Volumes/KJSL/workspace/github_kevleyski/surge/libs/sst/sst-plugininfra/libs/strnatcmp","$(inherited)");
+				INSTALL_PATH = "";
+				LIBRARY_STYLE = STATIC;
+				LLVM_LTO = YES_THIN;
+				ONLY_ACTIVE_ARCH = NO;
+				OTHER_CPLUSPLUSFLAGS = "       -DNDEBUG '-std=c++20' '-flto=thin' -fPIC -fvisibility=hidden -fvisibility-inlines-hidden -Wno-multichar -fno-math-errno -fno-trapping-math -fno-char8_t -Wno-unused-command-line-argument -Wno-deprecated-declarations '-Werror=inconsistent-missing-override' '-Werror=logical-op-parentheses' '-Werror=dynamic-class-memaccess' '-Werror=undefined-bool-conversion' '-Werror=bitwise-op-parentheses' '-Werror=pointer-bool-conversion' -faligned-allocation -fasm-blocks ";
+				OTHER_LIBTOOLFLAGS = ("");
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = strnatcmp;
+				SECTORDER_FLAGS = "";
+				TARGET_TEMP_DIR = "/Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/build/strnatcmp.build/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("$(inherited)");
+			};
+			name = RelWithDebInfo;
+		};
+		C3EB04C2E4094890BA60BF73 /* RelWithDebInfo */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COMBINE_HIDPI_IMAGES = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'","$(inherited)");
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				INSTALL_PATH = "";
+				OTHER_LDFLAGS = ("","$(inherited)");
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = ALL_BUILD;
+				SECTORDER_FLAGS = "";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("$(inherited)");
+			};
+			name = RelWithDebInfo;
+		};
+		D21643823C9D407796AE058A /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COMBINE_HIDPI_IMAGES = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'","$(inherited)");
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				INSTALL_PATH = "";
+				OTHER_LDFLAGS = ("","$(inherited)");
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = install;
+				SECTORDER_FLAGS = "";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("$(inherited)");
+			};
+			name = Release;
+		};
+		D35B09EBC19B497DAF474551 /* RelWithDebInfo */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COMBINE_HIDPI_IMAGES = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'","$(inherited)");
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				INSTALL_PATH = "";
+				OTHER_LDFLAGS = ("","$(inherited)");
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = install;
+				SECTORDER_FLAGS = "";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("$(inherited)");
+			};
+			name = RelWithDebInfo;
+		};
+		D3DB1257F25243A587E7559E /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = arm64;
+				COMBINE_HIDPI_IMAGES = YES;
+				CONFIGURATION_BUILD_DIR = "/Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-plugininfra/Release${EFFECTIVE_PLATFORM_NAME}";
+				EXECUTABLE_PREFIX = lib;
+				EXECUTABLE_SUFFIX = .a;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 3;
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'","'SST_PLUGININFRA_HAS_VERSION_INFORMATION=1'","$(inherited)");
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = ("/Volumes/KJSL/workspace/github_kevleyski/surge/libs/sst/sst-plugininfra/include","$(inherited)");
+				INSTALL_PATH = "";
+				LIBRARY_STYLE = STATIC;
+				LLVM_LTO = YES_THIN;
+				ONLY_ACTIVE_ARCH = NO;
+				OTHER_CPLUSPLUSFLAGS = "    -DNDEBUG '-std=c++20' '-flto=thin' -fPIC -fvisibility=hidden -fvisibility-inlines-hidden -Wno-multichar -fno-math-errno -fno-trapping-math -fno-char8_t -Wno-unused-command-line-argument -Wno-deprecated-declarations '-Werror=inconsistent-missing-override' '-Werror=logical-op-parentheses' '-Werror=dynamic-class-memaccess' '-Werror=undefined-bool-conversion' '-Werror=bitwise-op-parentheses' '-Werror=pointer-bool-conversion' -faligned-allocation -fasm-blocks ";
+				OTHER_LIBTOOLFLAGS = ("");
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = version_information;
+				SECTORDER_FLAGS = "";
+				TARGET_TEMP_DIR = "/Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/build/version_information.build/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("$(inherited)");
+			};
+			name = Release;
+		};
+		D602F4A4EF54459096A656D2 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = arm64;
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = B973YVS5A5;
+				IPHONEOS_DEPLOYMENT_TARGET = 10.15;
+				SDKROOT = iphoneos;
+				SYMROOT = /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/build;
+			};
+			name = Debug;
+		};
+		E22615FDA59F4329A60F0676 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COMBINE_HIDPI_IMAGES = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'","$(inherited)");
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				INSTALL_PATH = "";
+				OTHER_LDFLAGS = ("","$(inherited)");
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = ALL_BUILD;
+				SECTORDER_FLAGS = "";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("$(inherited)");
+			};
+			name = Debug;
+		};
+		E4B8C914AD44428499FAF7D0 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = arm64;
+				COMBINE_HIDPI_IMAGES = YES;
+				CONFIGURATION_BUILD_DIR = "/Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-plugininfra/libs/filesystem/Debug${EFFECTIVE_PLATFORM_NAME}";
+				EXECUTABLE_PREFIX = lib;
+				EXECUTABLE_SUFFIX = .a;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'",GHC_RAISE_UNICODE_ERRORS,GHC_WIN_WSTRING_STRING_TYPE,GHC_FILESYSTEM_IMPLEMENTATION,"$(inherited)");
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = ("/Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-plugininfra/libs/filesystem/include","$(inherited)");
+				INSTALL_PATH = "";
+				LIBRARY_STYLE = STATIC;
+				LLVM_LTO = YES_THIN;
+				ONLY_ACTIVE_ARCH = NO;
+				OTHER_CPLUSPLUSFLAGS = "   '-std=c++20' '-flto=thin' -fPIC -fvisibility=hidden -fvisibility-inlines-hidden -Wno-multichar -fno-math-errno -fno-trapping-math -fno-char8_t -Wno-unused-command-line-argument -Wno-deprecated-declarations '-Werror=inconsistent-missing-override' '-Werror=logical-op-parentheses' '-Werror=dynamic-class-memaccess' '-Werror=undefined-bool-conversion' '-Werror=bitwise-op-parentheses' '-Werror=pointer-bool-conversion' -faligned-allocation -fasm-blocks ";
+				OTHER_LIBTOOLFLAGS = ("");
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = filesystem;
+				SECTORDER_FLAGS = "";
+				TARGET_TEMP_DIR = "/Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/build/filesystem.build/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("$(inherited)");
+			};
+			name = Debug;
+		};
+		E5574DCDA1354765BAF06327 /* RelWithDebInfo */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COMBINE_HIDPI_IMAGES = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'","$(inherited)");
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				INSTALL_PATH = "";
+				OTHER_LDFLAGS = ("","$(inherited)");
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = ZERO_CHECK;
+				SECTORDER_FLAGS = "";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("$(inherited)");
+			};
+			name = RelWithDebInfo;
+		};
+		E64010CAA9C94886BD812196 /* MinSizeRel */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COMBINE_HIDPI_IMAGES = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'","$(inherited)");
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				INSTALL_PATH = "";
+				OTHER_LDFLAGS = ("","$(inherited)");
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = install;
+				SECTORDER_FLAGS = "";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("$(inherited)");
+			};
+			name = MinSizeRel;
+		};
+		EF9AE1D87154494999A921D3 /* MinSizeRel */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = arm64;
+				COMBINE_HIDPI_IMAGES = YES;
+				CONFIGURATION_BUILD_DIR = "/Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-plugininfra/libs/tinyxml/MinSizeRel${EFFECTIVE_PLATFORM_NAME}";
+				EXECUTABLE_PREFIX = lib;
+				EXECUTABLE_SUFFIX = .a;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = s;
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'",TIXML_USE_STL,GHC_FILESYSTEM_FWD,GHC_RAISE_UNICODE_ERRORS,GHC_WIN_WSTRING_STRING_TYPE,"$(inherited)");
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = ("/Volumes/KJSL/workspace/github_kevleyski/surge/libs/sst/sst-plugininfra/libs/tinyxml/include","/Volumes/KJSL/workspace/github_kevleyski/surge/libs/sst/sst-plugininfra/libs/tinyxml/include/tinyxml","/Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-plugininfra/libs/filesystem/include","$(inherited)");
+				INSTALL_PATH = "";
+				LIBRARY_STYLE = STATIC;
+				LLVM_LTO = YES_THIN;
+				ONLY_ACTIVE_ARCH = NO;
+				OTHER_CPLUSPLUSFLAGS = "    -DNDEBUG '-std=c++20' '-flto=thin' -fPIC -fvisibility=hidden -fvisibility-inlines-hidden -Wno-multichar -fno-math-errno -fno-trapping-math -fno-char8_t -Wno-unused-command-line-argument -Wno-deprecated-declarations '-Werror=inconsistent-missing-override' '-Werror=logical-op-parentheses' '-Werror=dynamic-class-memaccess' '-Werror=undefined-bool-conversion' '-Werror=bitwise-op-parentheses' '-Werror=pointer-bool-conversion' -faligned-allocation -fasm-blocks ";
+				OTHER_LIBTOOLFLAGS = ("");
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = tinyxml;
+				SECTORDER_FLAGS = "";
+				TARGET_TEMP_DIR = "/Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/build/tinyxml.build/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("$(inherited)");
+			};
+			name = MinSizeRel;
+		};
+		FC01E010E9A1432FB2AA381D /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = arm64;
+				COMBINE_HIDPI_IMAGES = YES;
+				CONFIGURATION_BUILD_DIR = "/Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-plugininfra/Release${EFFECTIVE_PLATFORM_NAME}";
+				EXECUTABLE_PREFIX = lib;
+				EXECUTABLE_SUFFIX = .a;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 3;
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'","'MAC=1'","'SST_COMMAND_CTRL_SAME_KEY=0'",GHC_FILESYSTEM_FWD,GHC_RAISE_UNICODE_ERRORS,GHC_WIN_WSTRING_STRING_TYPE,"$(inherited)");
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = ("/Volumes/KJSL/workspace/github_kevleyski/surge/libs/sst/sst-plugininfra/include","/Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/sst/sst-plugininfra/libs/filesystem/include","/Volumes/KJSL/workspace/github_kevleyski/surge/libs/sst/sst-plugininfra/libs/strnatcmp","$(inherited)");
+				INSTALL_PATH = "";
+				LIBRARY_STYLE = STATIC;
+				LLVM_LTO = YES_THIN;
+				ONLY_ACTIVE_ARCH = NO;
+				OTHER_CPLUSPLUSFLAGS = "    -DNDEBUG '-std=c++20' '-flto=thin' -fPIC -fvisibility=hidden -fvisibility-inlines-hidden -Wno-multichar -fno-math-errno -fno-trapping-math -fno-char8_t -Wno-unused-command-line-argument -Wno-deprecated-declarations '-Werror=inconsistent-missing-override' '-Werror=logical-op-parentheses' '-Werror=dynamic-class-memaccess' '-Werror=undefined-bool-conversion' '-Werror=bitwise-op-parentheses' '-Werror=pointer-bool-conversion' -faligned-allocation -fasm-blocks ";
+				OTHER_LIBTOOLFLAGS = ("");
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = "sst-plugininfra";
+				SECTORDER_FLAGS = "";
+				TARGET_TEMP_DIR = "/Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/build/sst-plugininfra.build/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("$(inherited)");
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		2640A0AAD2F0494381096D24 /* Build configuration list for PBXAggregateTarget "ZERO_CHECK" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				7E6B6DF67C4F4C639623B648 /* Debug */,
+				6E662D74E6C344E0A94A1DF6 /* Release */,
+				A4F0FDA7049C4BB3814B6091 /* MinSizeRel */,
+				E5574DCDA1354765BAF06327 /* RelWithDebInfo */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		44FE4D18F2744C2791DB587B /* Build configuration list for PBXNativeTarget "sst-plugininfra" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				911C3BDB4FE841A5B72D9750 /* Debug */,
+				FC01E010E9A1432FB2AA381D /* Release */,
+				1E111D471D1F4EA4B87B4BBF /* MinSizeRel */,
+				8E5055DB913E49F2BDA3EF8A /* RelWithDebInfo */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		46CEFAA727F645E6942ED2BF /* Build configuration list for PBXNativeTarget "filesystem" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				E4B8C914AD44428499FAF7D0 /* Debug */,
+				550D20397B704CE1923CA9EB /* Release */,
+				1F42FB1C056142C2AC4A45B7 /* MinSizeRel */,
+				92EA6105753D499B8AC65C23 /* RelWithDebInfo */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		60B58879A8FD4A9DB660E89C /* Build configuration list for PBXNativeTarget "tinyxml" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				1925E548244D41A0B83FC05F /* Debug */,
+				9CF3347E94BE476EA676FCE8 /* Release */,
+				EF9AE1D87154494999A921D3 /* MinSizeRel */,
+				86DAB0475086402192D63743 /* RelWithDebInfo */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		7365139594F241D09489E1D0 /* Build configuration list for PBXAggregateTarget "install" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				34B03B6E62D345949E31704C /* Debug */,
+				D21643823C9D407796AE058A /* Release */,
+				E64010CAA9C94886BD812196 /* MinSizeRel */,
+				D35B09EBC19B497DAF474551 /* RelWithDebInfo */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		84BC6610668C4448A2BD12E1 /* Build configuration list for PBXNativeTarget "version_information" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				8F0EDB039D5244E5B7F4D297 /* Debug */,
+				D3DB1257F25243A587E7559E /* Release */,
+				55A440632D284399B75DB33A /* MinSizeRel */,
+				12DABB5C296141249C00B031 /* RelWithDebInfo */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		C8E5AAA2B0FB4ABCA02A0492 /* Build configuration list for PBXAggregateTarget "ALL_BUILD" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				E22615FDA59F4329A60F0676 /* Debug */,
+				1AC8BAEE088D4BCA8E8E2291 /* Release */,
+				A1E6DE02BA084E4DAF607802 /* MinSizeRel */,
+				C3EB04C2E4094890BA60BF73 /* RelWithDebInfo */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		EDE8E882C85D4DA2B443C0BB /* Build configuration list for PBXProject "sst-plugininfra" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				D602F4A4EF54459096A656D2 /* Debug */,
+				4B2D6320FE2C4876A2B103DA /* Release */,
+				3452F641609D4C5B891AB98E /* MinSizeRel */,
+				39986EF9E3584852B4FAE456 /* RelWithDebInfo */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		F54FC561DBAC438485BDCACC /* Build configuration list for PBXNativeTarget "strnatcmp" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				6508EB381AB34CB2B15903F9 /* Debug */,
+				B20E6B6D12B14B0F8DD3ADA1 /* Release */,
+				8D2C28312FE24A4DBF6DEC66 /* MinSizeRel */,
+				B5060607FDFF400181AD34D2 /* RelWithDebInfo */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 93261E0D74CF43A3A63D53A4 /* Project object */;
+}

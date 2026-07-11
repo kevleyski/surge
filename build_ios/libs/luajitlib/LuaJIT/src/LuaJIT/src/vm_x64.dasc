@@ -1411,15 +1411,17 @@ static void build_subroutines(BuildCtx *ctx)
   |  checkint RA, ->fff_fallback
   |.else
   |  checknumtp [BASE+8], ->fff_fallback
-  |  cvttsd2si RAd, qword [BASE+8]
+  |  movsd xmm0, qword [BASE+8]
   |.endif
   |  mov PC, [BASE-8]
-  |  add RAd, 1
   |.if DUALNUM
+  |  add RAd, 1
   |  setint ITYPE, RA
   |  mov [BASE-16], ITYPE
   |.else
-  |  cvtsi2sd xmm0, RAd
+  |  sseconst_1 xmm1, TMPR
+  |  addsd xmm0, xmm1
+  |  cvttsd2si RAd, xmm0
   |  movsd qword [BASE-16], xmm0
   |.endif
   |  cmp RAd, TAB:RB->asize;  jae >2	// Not in array part?

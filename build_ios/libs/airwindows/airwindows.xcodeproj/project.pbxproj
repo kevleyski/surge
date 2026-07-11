@@ -1,0 +1,1730 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXAggregateTarget section */
+		412D95C48532286282373140 /* ALL_BUILD */ = {
+			isa = PBXAggregateTarget;
+			buildConfigurationList = CE370F15E36948BD97AF68D7 /* Build configuration list for PBXAggregateTarget "ALL_BUILD" */;
+			buildPhases = (
+				15100753D62992536EEA127D /* Generate CMakeFiles/ALL_BUILD */,
+			);
+			dependencies = (
+				4370221A78AA4932B5CEC5FC /* PBXTargetDependency */,
+				72C19163CC8C4B9EB2F34B3D /* PBXTargetDependency */,
+			);
+			name = ALL_BUILD;
+			productName = ALL_BUILD;
+		};
+		77C1A3C52D322D9730269CA7 /* install */ = {
+			isa = PBXAggregateTarget;
+			buildConfigurationList = 85D42EF8F7024D28ABCA3428 /* Build configuration list for PBXAggregateTarget "install" */;
+			buildPhases = (
+				93426DA6A4AC2C2AC9CE883C /* CMake PostBuild Rules */,
+			);
+			dependencies = (
+				CAE4FC19526742F5B1F04DC2 /* PBXTargetDependency */,
+			);
+			name = install;
+			productName = install;
+		};
+		89D95F8BA93D09359DDCC172 /* ZERO_CHECK */ = {
+			isa = PBXAggregateTarget;
+			buildConfigurationList = A8154006A21C4F938C36937A /* Build configuration list for PBXAggregateTarget "ZERO_CHECK" */;
+			buildPhases = (
+				5A872F54FC05B8BB24073B22 /* Generate CMakeFiles/ZERO_CHECK */,
+			);
+			dependencies = (
+			);
+			name = ZERO_CHECK;
+			productName = ZERO_CHECK;
+		};
+/* End PBXAggregateTarget section */
+
+/* Begin PBXBuildFile section */
+		007AF1551A5F467F91946594 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/BlockParty.cpp */ = {isa = PBXBuildFile; fileRef = 49AA31E335034FD2B5289111 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/BlockParty.cpp */; };
+		0089C606B6694F42B1763210 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/PointProc.cpp */ = {isa = PBXBuildFile; fileRef = F3ADBB953A96411FBB5B6F41 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/PointProc.cpp */; };
+		00F9E2DE3A614E0AA304E177 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/ZLowpass2Proc.cpp */ = {isa = PBXBuildFile; fileRef = 92344ED71C4D4F44A6EE83D0 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/ZLowpass2Proc.cpp */; };
+		0250EB03591740EC9CF301F9 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/YHighpass.h */ = {isa = PBXBuildFile; fileRef = F72492796AC7440F80506FA7 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/YHighpass.h */; };
+		05D180A8C2774540B52C75A6 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/ADClip7.cpp */ = {isa = PBXBuildFile; fileRef = 555BDFD6A81B4FC88DBD2A92 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/ADClip7.cpp */; };
+		06067C807EA7463DB8A5261D /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/MackityProc.cpp */ = {isa = PBXBuildFile; fileRef = 9F92817463664AC7A163E75B /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/MackityProc.cpp */; };
+		0755DC5DAC3D40358EC40A7C /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/YLowpass.h */ = {isa = PBXBuildFile; fileRef = B9E2A14393C8462F997550DD /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/YLowpass.h */; };
+		075A416FC42D49AE91254A54 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Pressure4.h */ = {isa = PBXBuildFile; fileRef = 381BB8BFC87E48F98C00C414 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Pressure4.h */; };
+		0994102BA35248FFA95FB79C /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Melt.cpp */ = {isa = PBXBuildFile; fileRef = DB1E68C6DA944785B1DD6E17 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Melt.cpp */; };
+		0AF0D9EF219A415CA190B25E /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/BitGlitterProc.cpp */ = {isa = PBXBuildFile; fileRef = 7CB886E9154D4210BE8D0D9A /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/BitGlitterProc.cpp */; };
+		0B2E2A69EFA64869A01B980A /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/ToTape6Proc.cpp */ = {isa = PBXBuildFile; fileRef = DD4C1A46E8C94DB2B856319A /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/ToTape6Proc.cpp */; };
+		0B7E50082A5944CC99DACC7A /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Focus.cpp */ = {isa = PBXBuildFile; fileRef = 9933C3A2D4844795A5551DBB /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Focus.cpp */; };
+		0CC59B39024A491FB9159532 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/OneCornerClip.cpp */ = {isa = PBXBuildFile; fileRef = F2F57BEC2B524A6A86DFEC62 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/OneCornerClip.cpp */; };
+		0D3C9A1AE05B46EF8F2C86B3 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/ApicolypseProc.cpp */ = {isa = PBXBuildFile; fileRef = DD4C0236509C47038B2D2A88 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/ApicolypseProc.cpp */; };
+		0E33B27413BD4E498F91CB9B /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/CapacitorProc.cpp */ = {isa = PBXBuildFile; fileRef = 3EBF420407A242639893FA1C /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/CapacitorProc.cpp */; };
+		122E12D6B13E434C83B5246E /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/AirWinBaseClass_pluginRegistry.cpp */ = {isa = PBXBuildFile; fileRef = 0239854720854CD5BD5AE0FA /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/AirWinBaseClass_pluginRegistry.cpp */; };
+		12583750335644A688BCB5A6 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Noise.h */ = {isa = PBXBuildFile; fileRef = 121DA91F51F640B68F0BB939 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Noise.h */; };
+		1442C14AFA384946BC541E95 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/DeckWreckaProc.cpp */ = {isa = PBXBuildFile; fileRef = 4099B1B140E0456EBC7B83CB /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/DeckWreckaProc.cpp */; };
+		14F260A407E74AB3ACD16262 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Apicolypse.h */ = {isa = PBXBuildFile; fileRef = 8430B542685347B8B3300297 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Apicolypse.h */; };
+		162A5DEE4659434CA27C4BF0 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/PowerSag.cpp */ = {isa = PBXBuildFile; fileRef = 8CE858CD3B3B4CAFA704EF86 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/PowerSag.cpp */; };
+		17AF3B75FA4E4B2094FF7ABF /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/IronOxide5.cpp */ = {isa = PBXBuildFile; fileRef = A384086BF43C4504BC099128 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/IronOxide5.cpp */; };
+		1A0E5673221142FD9E9E8EF4 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/FireAmpProc.cpp */ = {isa = PBXBuildFile; fileRef = 96875AB0356B4DDD99048086 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/FireAmpProc.cpp */; };
+		1A248BE75D4044E080E3FC9E /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Air.cpp */ = {isa = PBXBuildFile; fileRef = 542C4636D0844F048B2BEFCB /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Air.cpp */; };
+		1D99802E77B546148E418382 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/DeEssProc.cpp */ = {isa = PBXBuildFile; fileRef = 7FC760917C824F17835F8FE1 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/DeEssProc.cpp */; };
+		1E43C79DD4E34E6B8E1BEA86 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/YLowpassProc.cpp */ = {isa = PBXBuildFile; fileRef = 28AAABCADCC2492F96E13F37 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/YLowpassProc.cpp */; };
+		1F977CAF33B04261A260DC2C /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/DubSub.cpp */ = {isa = PBXBuildFile; fileRef = 05A77166E8DC45D0A16C3D23 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/DubSub.cpp */; };
+		200FBB2B3111410D9DEB4DC4 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Capacitor.h */ = {isa = PBXBuildFile; fileRef = 975CE1050A084FD89C127C74 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Capacitor.h */; };
+		212C44CEBD674A66A2169E5A /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/MojoProc.cpp */ = {isa = PBXBuildFile; fileRef = 224F94252A104F45A5CFE3F2 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/MojoProc.cpp */; };
+		2405B58E3DBB4BDE896A48C4 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/TapeDustProc.cpp */ = {isa = PBXBuildFile; fileRef = DA8DE38B7A6D4380B6010F27 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/TapeDustProc.cpp */; };
+		26515019BA8849D1B4ED1A04 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Air.h */ = {isa = PBXBuildFile; fileRef = 082F1470BF4247CEB3656526 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Air.h */; };
+		2E752E9AC70F485083F9CC90 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/NonlinearSpace.cpp */ = {isa = PBXBuildFile; fileRef = 3D8E6693EE72424C93D56287 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/NonlinearSpace.cpp */; };
+		2F31AE7CB7ED4A068A9306AB /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/DeRez2Proc.cpp */ = {isa = PBXBuildFile; fileRef = 4BDDBA7F535847F281A1A799 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/DeRez2Proc.cpp */; };
+		2F480A744BEA43FFA495AD7A /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/PyeWacket.cpp */ = {isa = PBXBuildFile; fileRef = 835F27290B524172BB9C3854 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/PyeWacket.cpp */; };
+		2F4F554C5B854765BFFAC079 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/VariMuProc.cpp */ = {isa = PBXBuildFile; fileRef = B9376FBEBF704155B563E537 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/VariMuProc.cpp */; };
+		2F88160051E34B6C93150B2F /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/PocketVerbs.h */ = {isa = PBXBuildFile; fileRef = 7452616F22CC489DABD723A8 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/PocketVerbs.h */; };
+		30295EDB6AAC48478D77DD93 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Mackity.h */ = {isa = PBXBuildFile; fileRef = 85B7A4123A23480F9ED399D9 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Mackity.h */; };
+		324091203AB04BC386B4852D /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Cabs.cpp */ = {isa = PBXBuildFile; fileRef = D067DA7E55C64557BB40C73D /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Cabs.cpp */; };
+		32E372F65D7D425A83795281 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Cojones.cpp */ = {isa = PBXBuildFile; fileRef = B8B1D8A271E24B488F872D20 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Cojones.cpp */; };
+		3366FA8628354EFA95091A4B /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Galactic.h */ = {isa = PBXBuildFile; fileRef = ED30228A586C436AB17BBC2D /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Galactic.h */; };
+		361C204E4FB54BFBB4D41CFB /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Logical4.h */ = {isa = PBXBuildFile; fileRef = B60D33BD904646D48579ADAB /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Logical4.h */; };
+		361D00B375C8478488156F37 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/ToVinyl4Proc.cpp */ = {isa = PBXBuildFile; fileRef = F72B7FEE6EB949E18C0BAFAC /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/ToVinyl4Proc.cpp */; };
+		3631DB6D2108463BA7D2E64D /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/DubCenter.cpp */ = {isa = PBXBuildFile; fileRef = F537360407154B3AA5E1261E /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/DubCenter.cpp */; };
+		38FF336F6A8C45A59B3F8124 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/ZNotch2.h */ = {isa = PBXBuildFile; fileRef = A76B291FDE4345CEA9F690E6 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/ZNotch2.h */; };
+		394EFBCEFFFC418795AC0D54 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/CrunchyGrooveWearProc.cpp */ = {isa = PBXBuildFile; fileRef = 8EF361BE6A4B48A4ABD18299 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/CrunchyGrooveWearProc.cpp */; };
+		3A0653FABD444264BD8A9D9E /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/UnBoxProc.cpp */ = {isa = PBXBuildFile; fileRef = 67071B020F574859A9B32316 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/UnBoxProc.cpp */; };
+		3B1C0DDB28E844C4AA97C3E7 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/ADClip7Proc.cpp */ = {isa = PBXBuildFile; fileRef = 335BED85BD12450D91494481 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/ADClip7Proc.cpp */; };
+		3B6E2815282048868A000B85 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Mojo.cpp */ = {isa = PBXBuildFile; fileRef = 733156B31AF14C4DA08ABB9A /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Mojo.cpp */; };
+		3F00D01AB3A6498EB00A26BB /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/ButterComp2Proc.cpp */ = {isa = PBXBuildFile; fileRef = 58BFBF199BC54A3090998B3F /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/ButterComp2Proc.cpp */; };
+		3F66B2F336FC40DCB0F5D4DC /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/CabsProc.cpp */ = {isa = PBXBuildFile; fileRef = 89CDD8B3C5474179A4774720 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/CabsProc.cpp */; };
+		3F925C74A7C44F0685777A19 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/ZLowpass2.h */ = {isa = PBXBuildFile; fileRef = 4931DF60964B4083B035FFB7 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/ZLowpass2.h */; };
+		3FC0D4B8D59949E3B37CE549 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/ButterComp2.cpp */ = {isa = PBXBuildFile; fileRef = B7794DFE9C704C5BAE1264AB /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/ButterComp2.cpp */; };
+		416F6B616E4F4DC9BC033ADA /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/GrooveWearProc.cpp */ = {isa = PBXBuildFile; fileRef = 817AE4CDAB05485E8E829CA9 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/GrooveWearProc.cpp */; };
+		4210B2C220264AFFB4138402 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/ZHighpass2Proc.cpp */ = {isa = PBXBuildFile; fileRef = B4A5C86847B54C59BF9AC1F4 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/ZHighpass2Proc.cpp */; };
+		43BCE2D2376B4BC59D9B6181 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Loud.cpp */ = {isa = PBXBuildFile; fileRef = 40C2E584C6DC4AF99FA9A231 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Loud.cpp */; };
+		44B7566C48504EDDB4299F12 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Spiral2.h */ = {isa = PBXBuildFile; fileRef = 272DD870C3E647C3914658EA /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Spiral2.h */; };
+		45E07529208941359B326E7D /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/LoudProc.cpp */ = {isa = PBXBuildFile; fileRef = 75D7F5B0902C4F938098EE68 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/LoudProc.cpp */; };
+		465DC52108F84642B9B1E2AB /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/DeckWrecka.h */ = {isa = PBXBuildFile; fileRef = 881DF5A2F17C4BECA203060B /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/DeckWrecka.h */; };
+		46BF91211D7C401F90E293A0 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Cabs.h */ = {isa = PBXBuildFile; fileRef = 96A8EDBEAC8B452C95AB4AAF /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Cabs.h */; };
+		46DF0BC3B2AF4FE898BD43B9 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Fracture.cpp */ = {isa = PBXBuildFile; fileRef = CD257A04A9054AF1978DEA14 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Fracture.cpp */; };
+		4846454DA6294AFA9721D380 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/SingleEndedTriode.cpp */ = {isa = PBXBuildFile; fileRef = ED2E119E466049859FBF6221 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/SingleEndedTriode.cpp */; };
+		4A9D6DEA794D43A3BDE0AC40 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Pafnuty.cpp */ = {isa = PBXBuildFile; fileRef = 07FE4803F34A4B0EAB712A7A /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Pafnuty.cpp */; };
+		4AE808BA9BD44D3C9406F4B8 /* /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/airwindows/CMakeFiles/airwindows.dir/Info.plist */ = {isa = PBXBuildFile; fileRef = 49D7D2EC6A98463E99B1CC80 /* /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/airwindows/CMakeFiles/airwindows.dir/Info.plist */; };
+		4AEE77B307E0494D9F612E8D /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/BassDrive.h */ = {isa = PBXBuildFile; fileRef = 0DEBB295A30A4409826F7190 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/BassDrive.h */; };
+		4B1EE2999E91489490E06652 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Pressure4Proc.cpp */ = {isa = PBXBuildFile; fileRef = 135E9EBBEC1B426594B592BD /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Pressure4Proc.cpp */; };
+		4E7AB1A8C97B4DC988F7B014 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Slew2.cpp */ = {isa = PBXBuildFile; fileRef = F80E5CCA6F23425E9B498C17 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Slew2.cpp */; };
+		4EC1792C882B451086250DB7 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/InfinityProc.cpp */ = {isa = PBXBuildFile; fileRef = 4449BE3C5A674A35A7E60FEC /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/InfinityProc.cpp */; };
+		4EED9BFCA290445D900A98D8 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/PopProc.cpp */ = {isa = PBXBuildFile; fileRef = 2DB231D3116F46F393DF79B0 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/PopProc.cpp */; };
+		4F393C9C16FC41C08A488534 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Point.h */ = {isa = PBXBuildFile; fileRef = 017EFD6E38DB45C7AC0F2476 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Point.h */; };
+		506A8DE404264FB1B55FD1D8 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/BlockPartyProc.cpp */ = {isa = PBXBuildFile; fileRef = C6A48AA144DE4CFEBD4D09DE /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/BlockPartyProc.cpp */; };
+		51BA7C63C0184BC29C1072A3 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/YNotch.cpp */ = {isa = PBXBuildFile; fileRef = 1FD583E89C684AD29DFE6522 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/YNotch.cpp */; };
+		529E8DA82E304C2FB21C6266 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/MackEQProc.cpp */ = {isa = PBXBuildFile; fileRef = 56D4E5AB8CD9437881B7CB4A /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/MackEQProc.cpp */; };
+		52A79E0317DE4860ACF4C6DA /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/FireAmp.cpp */ = {isa = PBXBuildFile; fileRef = 54E62A30171241B9926C6581 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/FireAmp.cpp */; };
+		539482E9CA214EC29BC2F117 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/VerbityProc.cpp */ = {isa = PBXBuildFile; fileRef = 6F73D963542D42B993EB4490 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/VerbityProc.cpp */; };
+		5458E457809D44DEB9A7BFF6 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Spiral2.cpp */ = {isa = PBXBuildFile; fileRef = FDBEEDB511F24183A42594C1 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Spiral2.cpp */; };
+		5497638EF37D4DAEAC825924 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/DeckWrecka.cpp */ = {isa = PBXBuildFile; fileRef = FD6A7F45058D410B9AC617D6 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/DeckWrecka.cpp */; };
+		54E8B5967CDC4281A1C0981D /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/ZNotch2.cpp */ = {isa = PBXBuildFile; fileRef = 391A7D7384134D51BAC4914D /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/ZNotch2.cpp */; };
+		5618803BB10E42F79C8AA908 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/SlewProc.cpp */ = {isa = PBXBuildFile; fileRef = 56502DD801704FBBAA7B48B2 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/SlewProc.cpp */; };
+		56B72D3C29F04597ADC8CEEA /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/GrooveWear.h */ = {isa = PBXBuildFile; fileRef = 5177F4CBEF344A7F80159A53 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/GrooveWear.h */; };
+		57325CFAE5AA43FB82C04C09 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/BassDrive.cpp */ = {isa = PBXBuildFile; fileRef = 2FB6176F48C4431594FE16BE /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/BassDrive.cpp */; };
+		587DBC9C82634A168C80F214 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Density.h */ = {isa = PBXBuildFile; fileRef = C2F77A9295EA4356BD832759 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Density.h */; };
+		5A8D0E3A7CE84FFBA844EA2F /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/ZBandpass2.h */ = {isa = PBXBuildFile; fileRef = 2C8553F575B74F3493703C64 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/ZBandpass2.h */; };
+		5F649D163486453D8D35E8F7 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/YBandpassProc.cpp */ = {isa = PBXBuildFile; fileRef = 199E9A937C724962A9483FC2 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/YBandpassProc.cpp */; };
+		5FD1F13FAC854E5A987169CF /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/MackEQ.h */ = {isa = PBXBuildFile; fileRef = 86ECD7733E3843B689252F49 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/MackEQ.h */; };
+		614BA95EF8944DC29BDDF616 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/SingleEndedTriode.h */ = {isa = PBXBuildFile; fileRef = D5FB8C7FA93743C78DF316AF /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/SingleEndedTriode.h */; };
+		61E94B0FB6A54C78AF734E08 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/ChromeOxide.cpp */ = {isa = PBXBuildFile; fileRef = 1EA3555AC8FB49AE80B703F4 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/ChromeOxide.cpp */; };
+		62BB39ECEBEB41B781D5D70F /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/YHighpass.cpp */ = {isa = PBXBuildFile; fileRef = 549BBC3374AA44A184BBFBA1 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/YHighpass.cpp */; };
+		6474E2CC336542019E6E4168 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/ToTape6.h */ = {isa = PBXBuildFile; fileRef = 4BDFA88583774EB58D5226E3 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/ToTape6.h */; };
+		64E3AE511EF144A5A70D36FD /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Pressure4.cpp */ = {isa = PBXBuildFile; fileRef = A913E8E52EDA45979B31DAB4 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Pressure4.cpp */; };
+		65FF5207E5414CC698809810 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/DrumSlam.cpp */ = {isa = PBXBuildFile; fileRef = 3ABCD8F905BE4B92ABFB3EEE /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/DrumSlam.cpp */; };
+		681A4437C14942ECA4969684 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/FractureProc.cpp */ = {isa = PBXBuildFile; fileRef = 9CB926D993AD4DC18EAC4DA3 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/FractureProc.cpp */; };
+		68380C9040044B088103E70A /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/MatrixVerbProc.cpp */ = {isa = PBXBuildFile; fileRef = 259A4DED3CDB4DCC9F81FEE6 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/MatrixVerbProc.cpp */; };
+		6996435EB1704E97AE753694 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/DustBunnyProc.cpp */ = {isa = PBXBuildFile; fileRef = 65984E61F23A402896A618D0 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/DustBunnyProc.cpp */; };
+		6AC92A3295E6444291D3D9BD /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/BlockParty.h */ = {isa = PBXBuildFile; fileRef = FFCA559AB81C4F19849F161D /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/BlockParty.h */; };
+		6BA03E98791C4ADE99AE2FA8 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/VariMu.cpp */ = {isa = PBXBuildFile; fileRef = 194A92C022CF4BFB9226661E /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/VariMu.cpp */; };
+		6C1348A0986C49208D306084 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Density.cpp */ = {isa = PBXBuildFile; fileRef = 229FBEAB7AA84498952DD08A /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Density.cpp */; };
+		6C1FE1FADAD847CE923F23F9 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/ButterComp2.h */ = {isa = PBXBuildFile; fileRef = 3C2F7E92DF364B6E8A0E2E22 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/ButterComp2.h */; };
+		6C72BBA149594AC99BB717C4 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/HardVacuum.h */ = {isa = PBXBuildFile; fileRef = 507A3741E35045FEB9D62F80 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/HardVacuum.h */; };
+		6DEBA2AAC2794D87B06AE003 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/MackEQ.cpp */ = {isa = PBXBuildFile; fileRef = C352C186BF154C6C95FEBB67 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/MackEQ.cpp */; };
+		6E0D127E9F504DFC8FBF1F3F /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Mackity.cpp */ = {isa = PBXBuildFile; fileRef = 13BEF36CB44D4AC3813B63D4 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Mackity.cpp */; };
+		6E427A8AD2594604BF5CB809 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Point.cpp */ = {isa = PBXBuildFile; fileRef = A9DDC531670149158467B204 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Point.cpp */; };
+		6E8D482F669E4861A9D5F518 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/BussColors4.h */ = {isa = PBXBuildFile; fileRef = 72AB61C640C14A25917E7E90 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/BussColors4.h */; };
+		72214A74A49E45548E2C24D1 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/YHighpassProc.cpp */ = {isa = PBXBuildFile; fileRef = EA0791866FAA494CBC9B7E06 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/YHighpassProc.cpp */; };
+		7246B13100E148389BC419ED /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/TripleSpread.h */ = {isa = PBXBuildFile; fileRef = F0BB8F7B7AE5440FAF463916 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/TripleSpread.h */; };
+		7462DB58ECEF461E819530EB /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Slew.cpp */ = {isa = PBXBuildFile; fileRef = F5356422EC4F4C76BEE21317 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Slew.cpp */; };
+		77135C39C3524F8B9FCC9470 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Spiral2Proc.cpp */ = {isa = PBXBuildFile; fileRef = 145E74EAAFB346909FF1C350 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Spiral2Proc.cpp */; };
+		77E072EBEF4748759077BC97 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/StarChildProc.cpp */ = {isa = PBXBuildFile; fileRef = 0E072B183767429FB46B02FF /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/StarChildProc.cpp */; };
+		7A5FAC02F49C459E831760BA /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Hombre.cpp */ = {isa = PBXBuildFile; fileRef = CB160D240EFD4672A38C06E8 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Hombre.cpp */; };
+		7B5A160995384F5D8E1FB8BD /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/MatrixVerb.h */ = {isa = PBXBuildFile; fileRef = CB085295B89E41A1A6C7D045 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/MatrixVerb.h */; };
+		7BDBE39677934491931B3D42 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Slew2.h */ = {isa = PBXBuildFile; fileRef = E1F14DC717024A2491E1E8A7 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Slew2.h */; };
+		7C5FFD8F55764F0D803CAC8B /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/StarChild.cpp */ = {isa = PBXBuildFile; fileRef = E9CE97D6FCD6491E81785761 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/StarChild.cpp */; };
+		7F0BC0614E4743079F36D825 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/PyeWacket.h */ = {isa = PBXBuildFile; fileRef = 6FF6F9D3B81D4CC48406C5C5 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/PyeWacket.h */; };
+		805571E54F074D32AC7502E7 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/DubCenterProc.cpp */ = {isa = PBXBuildFile; fileRef = 1FF3D8476B03487CA5240469 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/DubCenterProc.cpp */; };
+		80B71D94BFE649769CD42DAF /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Cojones.h */ = {isa = PBXBuildFile; fileRef = 806B9CC98EB445A68B2BF629 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Cojones.h */; };
+		824E6CCCFC3947E881E2EFAD /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/OneCornerClip.h */ = {isa = PBXBuildFile; fileRef = A78D5D954F744507B1BF4CF0 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/OneCornerClip.h */; };
+		82EB887112264B588BAAA5E4 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/CompresaturatorProc.cpp */ = {isa = PBXBuildFile; fileRef = 6634CCD2CDDA4757B62BDB28 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/CompresaturatorProc.cpp */; };
+		837802FCA81E473C842FCA76 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/IronOxide5.h */ = {isa = PBXBuildFile; fileRef = 549177595F1745A2872EB98E /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/IronOxide5.h */; };
+		8665054BCFB7492F91D6F542 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/TripleSpread.cpp */ = {isa = PBXBuildFile; fileRef = F2832A282A334C2C984D501B /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/TripleSpread.cpp */; };
+		866A01E07C6542F69C542F06 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Verbity.cpp */ = {isa = PBXBuildFile; fileRef = 45C478AF53884B8CBA63D8CE /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Verbity.cpp */; };
+		890028958F8441D8BBA7BF09 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/MatrixVerb.cpp */ = {isa = PBXBuildFile; fileRef = 960D2BB25FF84E0BAFA6707E /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/MatrixVerb.cpp */; };
+		89C2F44C4C2D4D54A57E25D9 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/BrightAmbience2Proc.cpp */ = {isa = PBXBuildFile; fileRef = 4DB3CE50C90B482699481271 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/BrightAmbience2Proc.cpp */; };
+		8AB77326466A48EFAD7867EE /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/ToVinyl4.cpp */ = {isa = PBXBuildFile; fileRef = 8706869D52F94E12BA83D9FF /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/ToVinyl4.cpp */; };
+		8E6010DE7D10423CA5D900AC /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/PocketVerbs.cpp */ = {isa = PBXBuildFile; fileRef = AB821CAD5FD4445B89D15783 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/PocketVerbs.cpp */; };
+		8F16198BE78F48F9AD54827B /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Mojo.h */ = {isa = PBXBuildFile; fileRef = A6673AEC20654F379B6686CA /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Mojo.h */; };
+		91709FD59BFB4927833BC048 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/DustBunny.cpp */ = {isa = PBXBuildFile; fileRef = 3C87514387EF4B37B2ED38B7 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/DustBunny.cpp */; };
+		927EEDEB20CD47768A136A69 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Loud.h */ = {isa = PBXBuildFile; fileRef = 0482218C5866443AA76CCB9D /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Loud.h */; };
+		93627C8A0F434396901055BA /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/BrightAmbience2.cpp */ = {isa = PBXBuildFile; fileRef = 466C350A822947D1B7B9AD5C /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/BrightAmbience2.cpp */; };
+		9507DADC5E954FC6844EB539 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/CMakeLists.txt */ = {isa = PBXBuildFile; fileRef = 34600E50A74C4B00B8481962 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/CMakeLists.txt */; };
+		958D259929634793990B02E7 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/VoiceOfTheStarshipProc.cpp */ = {isa = PBXBuildFile; fileRef = 7129E1280CB148A2AB85ACBA /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/VoiceOfTheStarshipProc.cpp */; };
+		990E498F730146F785E49ECE /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/NCSeventeenProc.cpp */ = {isa = PBXBuildFile; fileRef = C2E91841A1CE4B7BA3B0C641 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/NCSeventeenProc.cpp */; };
+		99CF6E9F0F5346949BE77A89 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/ChromeOxideProc.cpp */ = {isa = PBXBuildFile; fileRef = 78724B5AACAF40BC9FC7014D /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/ChromeOxideProc.cpp */; };
+		9A844AB0BA9545CC80F3E061 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/BrightAmbience2.h */ = {isa = PBXBuildFile; fileRef = D6AAAB0ADEAB4EC2BC327148 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/BrightAmbience2.h */; };
+		9A927217C3DF4AAF8E1B8283 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/GrooveWear.cpp */ = {isa = PBXBuildFile; fileRef = D049B6561ABE4712835A9FE5 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/GrooveWear.cpp */; };
+		9C1FCDCEECC142328862B230 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/DeEss.h */ = {isa = PBXBuildFile; fileRef = 2F00ADFC83F74956A36263F2 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/DeEss.h */; };
+		9C701A2FE4194487AB4A6730 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/MeltProc.cpp */ = {isa = PBXBuildFile; fileRef = A66F0F1FEF0F4446BBE062D9 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/MeltProc.cpp */; };
+		9C864B02624F47C88D5E4279 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/DeRez2.h */ = {isa = PBXBuildFile; fileRef = EC8FC6AAB3DA4D86A6AFC204 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/DeRez2.h */; };
+		9DC3649F97034FC8BDBEC21E /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Logical4.cpp */ = {isa = PBXBuildFile; fileRef = 1EAFB251AC9F4221A90E49E1 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Logical4.cpp */; };
+		9DD75A3D037E4617B80B3277 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/SingleEndedTriodeProc.cpp */ = {isa = PBXBuildFile; fileRef = 5B5EAB5A24E34664862826FA /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/SingleEndedTriodeProc.cpp */; };
+		9DE28B0E04DE4C72BD0B1DE2 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Pop.cpp */ = {isa = PBXBuildFile; fileRef = E8F03AB41D74425CB2F91028 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Pop.cpp */; };
+		9EA6260F2FC141D0BD2356DD /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/OneCornerClipProc.cpp */ = {isa = PBXBuildFile; fileRef = CD5D9E07CAA44FCF8EB283D2 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/OneCornerClipProc.cpp */; };
+		9F25172925EB4AB8B342387F /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/BassDriveProc.cpp */ = {isa = PBXBuildFile; fileRef = 679642F5ABA342068E8ACCCD /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/BassDriveProc.cpp */; };
+		9F73EFB34D06418BABDBA782 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/TapeDust.cpp */ = {isa = PBXBuildFile; fileRef = D7B62031CA2A41A09E138C08 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/TapeDust.cpp */; };
+		9FA4B59F368E4357945FD083 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Focus.h */ = {isa = PBXBuildFile; fileRef = 7DF179E9B92F4670B33E30FD /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Focus.h */; };
+		9FF2F275368449C39AE51186 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/DeEss.cpp */ = {isa = PBXBuildFile; fileRef = AF35E99531094FF08280E4D8 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/DeEss.cpp */; };
+		A09C7D96DBF641E7B7C446CA /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/NCSeventeen.cpp */ = {isa = PBXBuildFile; fileRef = DB3683DFB2304EF0B3C84D32 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/NCSeventeen.cpp */; };
+		A5BE4B27256D4187AE5CB667 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/PyeWacketProc.cpp */ = {isa = PBXBuildFile; fileRef = F3DECDFF0F834A54A9275FA0 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/PyeWacketProc.cpp */; };
+		A734ABBE2B8D415D842CA137 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/ADClip7.h */ = {isa = PBXBuildFile; fileRef = 1BCDA1CC078847028A5F629B /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/ADClip7.h */; };
+		A73B87FDE2274B9DBF413D68 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Melt.h */ = {isa = PBXBuildFile; fileRef = 0532D2A22BED4F4FABCBA816 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Melt.h */; };
+		A758EF77BE5043E896783E7D /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/BitGlitter.cpp */ = {isa = PBXBuildFile; fileRef = 19108A0D25DE430A9B7F0CBC /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/BitGlitter.cpp */; };
+		A98DA650EF0F451EB7940E1B /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/FocusProc.cpp */ = {isa = PBXBuildFile; fileRef = 41CE1D7E8D9149FAB1B32AB5 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/FocusProc.cpp */; };
+		A9F9679A2DC8407CAFCD4DBD /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/CrunchyGrooveWear.cpp */ = {isa = PBXBuildFile; fileRef = 88510A2CA0074AA3803C6E59 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/CrunchyGrooveWear.cpp */; };
+		AB28406753A74C0680BFDC46 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Infinity.h */ = {isa = PBXBuildFile; fileRef = 6EA11C6A7CB340ED9049F52A /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Infinity.h */; };
+		AE3DE18BECE3488EBF2AA215 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/DrumSlam.h */ = {isa = PBXBuildFile; fileRef = D59577A376FF446C9174D845 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/DrumSlam.h */; };
+		AF7CE94FE64A4CA6B0E1A44B /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Slew.h */ = {isa = PBXBuildFile; fileRef = 7583FE67CCFC429FB158F230 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Slew.h */; };
+		AFD7E0BEB09E4BF3B682E2BF /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/GlitchShifter.cpp */ = {isa = PBXBuildFile; fileRef = 2E130A49620A4D0392D6139A /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/GlitchShifter.cpp */; };
+		B00C8DF8F8814159BF132F22 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/IronOxide5Proc.cpp */ = {isa = PBXBuildFile; fileRef = AB4CEB40613F44E99CB33178 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/IronOxide5Proc.cpp */; };
+		B02B11ED00E441B5822F5F51 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/HombreProc.cpp */ = {isa = PBXBuildFile; fileRef = 66375DA283464DA78C223C95 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/HombreProc.cpp */; };
+		B0829FACA6AE4EBABCC62C96 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/NoiseProc.cpp */ = {isa = PBXBuildFile; fileRef = 5B7F675397FC4854A7C753D4 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/NoiseProc.cpp */; };
+		B105B7EB1211412B992675F3 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/AirProc.cpp */ = {isa = PBXBuildFile; fileRef = C02B8D0334DE4BA3B954F66C /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/AirProc.cpp */; };
+		B113611FAE6D487EA24802D5 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Verbity.h */ = {isa = PBXBuildFile; fileRef = 4E2F0E5E21FF4C05B94D3298 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Verbity.h */; };
+		B2706635CDCB44DF9D2F27D8 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Drive.h */ = {isa = PBXBuildFile; fileRef = 303443FF194E49CFB94259E3 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Drive.h */; };
+		B2F6983284DA42EC9EBACC51 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/PafnutyProc.cpp */ = {isa = PBXBuildFile; fileRef = 2316832951614F59A48D4B03 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/PafnutyProc.cpp */; };
+		B33829A5411A4A669A084917 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/ZLowpass2.cpp */ = {isa = PBXBuildFile; fileRef = 1FEB1D0819FD4D00B120D1A7 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/ZLowpass2.cpp */; };
+		B558E3CE46EB4AB9B62A72AE /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/DubSubProc.cpp */ = {isa = PBXBuildFile; fileRef = D9A4C7E5376C44509AC66AC3 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/DubSubProc.cpp */; };
+		B578E493B6FD4CA4A17F21F0 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/YLowpass.cpp */ = {isa = PBXBuildFile; fileRef = D6FD2ED37E324DBB9141A663 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/YLowpass.cpp */; };
+		B592CE92301D47DF92D34E9E /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Galactic.cpp */ = {isa = PBXBuildFile; fileRef = 3F89153955C344069727B9B3 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Galactic.cpp */; };
+		B5E3A60CB2C14179AA43715C /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Infinity.cpp */ = {isa = PBXBuildFile; fileRef = D0335BA5F50B44369AECA1A5 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Infinity.cpp */; };
+		B6A9C88C79B84EBF9A543DC1 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Logical4Proc.cpp */ = {isa = PBXBuildFile; fileRef = F6C948023005488A9B521FFD /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Logical4Proc.cpp */; };
+		B6FC841E84C0425C890CC129 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/DustBunny.h */ = {isa = PBXBuildFile; fileRef = C35E13D5747A46B2930B5BC4 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/DustBunny.h */; };
+		B7ECA419E26C41AD80200E89 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Pop.h */ = {isa = PBXBuildFile; fileRef = C2FB4C20D4154B8BBA66BC97 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Pop.h */; };
+		B84284A886034010B9BEF24B /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/YBandpass.cpp */ = {isa = PBXBuildFile; fileRef = FD27D56508854A0280AAD788 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/YBandpass.cpp */; };
+		BDC25FA065A242828EE72484 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Apicolypse.cpp */ = {isa = PBXBuildFile; fileRef = D8D18AF3767E40DB86A41093 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Apicolypse.cpp */; };
+		C0838B83E499451685716122 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Capacitor.cpp */ = {isa = PBXBuildFile; fileRef = 41233C2B5E6D49229BB47878 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Capacitor.cpp */; };
+		C15833F888F841A296CDF3E0 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Drive.cpp */ = {isa = PBXBuildFile; fileRef = C314C0E4155F43ECA359282E /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Drive.cpp */; };
+		C3BCEACE2596469B8B7A3776 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/BitGlitter.h */ = {isa = PBXBuildFile; fileRef = 678436D643D54D1DA1AD02C5 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/BitGlitter.h */; };
+		C44299941C124A09AB2A4BD6 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/ZBandpass2.cpp */ = {isa = PBXBuildFile; fileRef = 82F8CF6D7D104C1AAB536036 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/ZBandpass2.cpp */; };
+		C4C2323E49FA43F2815DE666 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/ToTape6.cpp */ = {isa = PBXBuildFile; fileRef = 8F8A6E0F8C8F4758A639027C /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/ToTape6.cpp */; };
+		C4C3B519B13345F5B2702912 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Surge.cpp */ = {isa = PBXBuildFile; fileRef = E2A558E5D0444EC09A36DBBB /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Surge.cpp */; };
+		C5729348506A4FDFB4CC0862 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/NCSeventeen.h */ = {isa = PBXBuildFile; fileRef = 4B69D3CB02EB4511BC614F90 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/NCSeventeen.h */; };
+		C5A0A8D8B8F1407390783788 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/ZBandpass2Proc.cpp */ = {isa = PBXBuildFile; fileRef = 9E9F3496394944E1919B895D /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/ZBandpass2Proc.cpp */; };
+		C5A8E83216E7463495A8B648 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Fracture.h */ = {isa = PBXBuildFile; fileRef = 060AA56890874263A1455DCE /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Fracture.h */; };
+		C688F61C31AE43A78514E8E4 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/YNotchProc.cpp */ = {isa = PBXBuildFile; fileRef = 71C097584AE54ACFB7367334 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/YNotchProc.cpp */; };
+		C8F2BE696AF2438089E32EAA /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Compresaturator.cpp */ = {isa = PBXBuildFile; fileRef = 1A6556DDB2454BB09A8D3859 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Compresaturator.cpp */; };
+		C932E97FC2B24795A9D355E9 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/SurgeProc.cpp */ = {isa = PBXBuildFile; fileRef = 445BA432D4BB4691AD9E770A /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/SurgeProc.cpp */; };
+		C9E6362E23C247ACB36CADA8 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/HardVacuumProc.cpp */ = {isa = PBXBuildFile; fileRef = D1ED22A281414D86B67C1D7F /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/HardVacuumProc.cpp */; };
+		C9E9991B2B2A49CD9BA66A55 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/DriveProc.cpp */ = {isa = PBXBuildFile; fileRef = DC78437E508E42FE96DAE917 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/DriveProc.cpp */; };
+		CABDC000EC9146659DBCBE11 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/UnBox.cpp */ = {isa = PBXBuildFile; fileRef = 944233CA30344BABA6FB84E1 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/UnBox.cpp */; };
+		CD19AD88D7E644139F421DD7 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Surge.h */ = {isa = PBXBuildFile; fileRef = FE90244097BB46049C12111F /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Surge.h */; };
+		CD83FC65B5F44F08917BF6DA /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/PocketVerbsProc.cpp */ = {isa = PBXBuildFile; fileRef = 07F3FEB613F046E38CDC5118 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/PocketVerbsProc.cpp */; };
+		CEC5E79078324D4E979B8EB5 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/DeBess.cpp */ = {isa = PBXBuildFile; fileRef = 37CD69FD2A2449BEA7229CE1 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/DeBess.cpp */; };
+		CFAE2ED8ED814FD299625FF7 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Compresaturator.h */ = {isa = PBXBuildFile; fileRef = C697F51C49FA4E6F9BFFB446 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Compresaturator.h */; };
+		D16DA9E6496B485AB04065D0 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/BussColors4Proc.cpp */ = {isa = PBXBuildFile; fileRef = 3AC6D023818043ADAA8A5738 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/BussColors4Proc.cpp */; };
+		D22EC8CBEB644368B2D3A120 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/ZHighpass2.cpp */ = {isa = PBXBuildFile; fileRef = 2E9C446FB0744C80B30B3604 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/ZHighpass2.cpp */; };
+		D4D0DA003CAC41259385C1D7 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/ChamberProc.cpp */ = {isa = PBXBuildFile; fileRef = C0CC175EF4B6487480B355BB /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/ChamberProc.cpp */; };
+		D601E67EC46E481081B94A97 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/NonlinearSpaceProc.cpp */ = {isa = PBXBuildFile; fileRef = 1939E32B34CF487DA351EC76 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/NonlinearSpaceProc.cpp */; };
+		D6B3270706E34CA38C0188BC /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/CrunchyGrooveWear.h */ = {isa = PBXBuildFile; fileRef = DE0184374EAA448189767747 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/CrunchyGrooveWear.h */; };
+		D71E2BEE021647D69A7D36E7 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/PowerSagProc.cpp */ = {isa = PBXBuildFile; fileRef = 3D411201290C431ABBEFBB0B /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/PowerSagProc.cpp */; };
+		D7B78DC170BA47D2B2247784 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/HardVacuum.cpp */ = {isa = PBXBuildFile; fileRef = EB1F1EC5F6BC49DCB5FDBB39 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/HardVacuum.cpp */; };
+		D8D825D4EA3D4DACBA52BBC1 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/GlitchShifterProc.cpp */ = {isa = PBXBuildFile; fileRef = E05C58361C184118BE985CA2 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/GlitchShifterProc.cpp */; };
+		D9FAC43B47C74C9493AC733D /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/UnBox.h */ = {isa = PBXBuildFile; fileRef = FFA5A3659146423BB48B07E3 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/UnBox.h */; };
+		DB5A4B61384E4128B3B969EA /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/StarChild.h */ = {isa = PBXBuildFile; fileRef = AD3CAE7E248B4ADB9B1D9BF8 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/StarChild.h */; };
+		DD544FF4FDB54C4CAE346660 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/DrumSlamProc.cpp */ = {isa = PBXBuildFile; fileRef = 076752388CBC421A88E3B2CF /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/DrumSlamProc.cpp */; };
+		E57D7C14ACBE40A6946BBE86 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/ZNotch2Proc.cpp */ = {isa = PBXBuildFile; fileRef = F2D33EE4B4D3440597196A38 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/ZNotch2Proc.cpp */; };
+		E5D818422A404AA58706DF0D /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Hombre.h */ = {isa = PBXBuildFile; fileRef = 7D08F19403CD40FA812C7DB4 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Hombre.h */; };
+		E89F0E8552F441A19F165A8D /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/include/airwindows/AirWinBaseClass.h */ = {isa = PBXBuildFile; fileRef = 8E84E04306424525976B4A9C /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/include/airwindows/AirWinBaseClass.h */; };
+		E9659EE41DD0472FBF37B192 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/DensityProc.cpp */ = {isa = PBXBuildFile; fileRef = 90851C5ADA514A7DBB176EAC /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/DensityProc.cpp */; };
+		E981E6549E6844EDB008ABF5 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/VoiceOfTheStarship.h */ = {isa = PBXBuildFile; fileRef = A74630808E4B462896A2EE92 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/VoiceOfTheStarship.h */; };
+		EA93727D296B48B9A8AB5F8E /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/CojonesProc.cpp */ = {isa = PBXBuildFile; fileRef = 24DE5BCDB1254FA1B8C681AC /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/CojonesProc.cpp */; };
+		EFE12124B7BE4C0DB23E717F /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Chamber.cpp */ = {isa = PBXBuildFile; fileRef = 7DB8F3929AA94D9F9C4A77E2 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Chamber.cpp */; };
+		F25F4330B60A47FDB563BF92 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/TripleSpreadProc.cpp */ = {isa = PBXBuildFile; fileRef = C29BDAB4091A46F59A5B22AA /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/TripleSpreadProc.cpp */; };
+		F371524F73634B2582B17360 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/YBandpass.h */ = {isa = PBXBuildFile; fileRef = 7778666C5B0B4AD0873D1A77 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/YBandpass.h */; };
+		F47CB15C3BAA4ADDAAA51659 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/BussColors4.cpp */ = {isa = PBXBuildFile; fileRef = DF1DA2AEF51347E5AA77C03B /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/BussColors4.cpp */; };
+		F5425192E6714923BEE3DF4A /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/DeRez2.cpp */ = {isa = PBXBuildFile; fileRef = 972FB5F8CD9245639684AA9C /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/DeRez2.cpp */; };
+		F5E3E22C3E8E43AAA14E0EBF /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Noise.cpp */ = {isa = PBXBuildFile; fileRef = 279F19C450B04EA593702A8B /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Noise.cpp */; };
+		F7F618A714B743F89E4FD477 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/DeBess.h */ = {isa = PBXBuildFile; fileRef = 11441BFAB88B4EC88378A7E1 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/DeBess.h */; };
+		F821996003614D3BA56D8E9D /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/GalacticProc.cpp */ = {isa = PBXBuildFile; fileRef = C974E8F5834B46D6A857E6B9 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/GalacticProc.cpp */; };
+		F831297C5EEE4C61A656669E /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/ZHighpass2.h */ = {isa = PBXBuildFile; fileRef = F5970FC4B0B04D4B8DC8E934 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/ZHighpass2.h */; };
+		F93A9BA81337445C883F6445 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/DeBessProc.cpp */ = {isa = PBXBuildFile; fileRef = D063F8078B4340149A74E218 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/DeBessProc.cpp */; };
+		F9BC4E2133AA49AEB920CB9E /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/VoiceOfTheStarship.cpp */ = {isa = PBXBuildFile; fileRef = 094DD655BBF84674BCA4FE89 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/VoiceOfTheStarship.cpp */; };
+		FE26E75D65054034A87CE1A7 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Slew2Proc.cpp */ = {isa = PBXBuildFile; fileRef = 40DA9DB3259B41828BAD6012 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Slew2Proc.cpp */; };
+		FE2BAD12B2BC4D7E87F2D01B /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/YNotch.h */ = {isa = PBXBuildFile; fileRef = 9CA0B277E39347ACAF625F74 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/YNotch.h */; };
+		FF2EA9DB9D1D47C8857AE682 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/VariMu.h */ = {isa = PBXBuildFile; fileRef = FBD5B53E532D40398166229F /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/VariMu.h */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXBuildStyle section */
+		3FDB5A7A09DD47028AA6E7F8 /* RelWithDebInfo */ = {
+			isa = PBXBuildStyle;
+			buildSettings = {
+				COPY_PHASE_STRIP = NO;
+			};
+			name = RelWithDebInfo;
+		};
+		42F8E18F84DF430CBA744FA9 /* Release */ = {
+			isa = PBXBuildStyle;
+			buildSettings = {
+				COPY_PHASE_STRIP = NO;
+			};
+			name = Release;
+		};
+		8ADA4C1EBE6449A8B8A1281D /* Debug */ = {
+			isa = PBXBuildStyle;
+			buildSettings = {
+				COPY_PHASE_STRIP = NO;
+			};
+			name = Debug;
+		};
+		AB7694128A484D248AD4D5A8 /* MinSizeRel */ = {
+			isa = PBXBuildStyle;
+			buildSettings = {
+				COPY_PHASE_STRIP = NO;
+			};
+			name = MinSizeRel;
+		};
+/* End PBXBuildStyle section */
+
+/* Begin PBXContainerItemProxy section */
+		6BFFDBF9603A4E9FAC55985B /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = B8E33EF644EB4250A76F8BE6 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 412D95C48532286282373140;
+			remoteInfo = ALL_BUILD;
+		};
+		C306A043F51647D7AE4304B3 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = B8E33EF644EB4250A76F8BE6 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 77CABB7CFE05197ECC4D7AA6;
+			remoteInfo = airwindows;
+		};
+		C7CDB0066D634F669792EFC4 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = B8E33EF644EB4250A76F8BE6 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 89D95F8BA93D09359DDCC172;
+			remoteInfo = ZERO_CHECK;
+		};
+		C91E5C9FEC2945CE8428EDA3 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = B8E33EF644EB4250A76F8BE6 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 89D95F8BA93D09359DDCC172;
+			remoteInfo = ZERO_CHECK;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		017EFD6E38DB45C7AC0F2476 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Point.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = Point.h; path = src/Point.h; sourceTree = SOURCE_ROOT; };
+		0239854720854CD5BD5AE0FA /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/AirWinBaseClass_pluginRegistry.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = AirWinBaseClass_pluginRegistry.cpp; path = src/AirWinBaseClass_pluginRegistry.cpp; sourceTree = SOURCE_ROOT; };
+		033F016D4A474F1BA7E8B6F2 /* airwindows */ = {isa = PBXFileReference; explicitFileType = archive.ar; path = libairwindows.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		0482218C5866443AA76CCB9D /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Loud.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = Loud.h; path = src/Loud.h; sourceTree = SOURCE_ROOT; };
+		0532D2A22BED4F4FABCBA816 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Melt.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = Melt.h; path = src/Melt.h; sourceTree = SOURCE_ROOT; };
+		05A77166E8DC45D0A16C3D23 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/DubSub.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = DubSub.cpp; path = src/DubSub.cpp; sourceTree = SOURCE_ROOT; };
+		060AA56890874263A1455DCE /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Fracture.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = Fracture.h; path = src/Fracture.h; sourceTree = SOURCE_ROOT; };
+		076752388CBC421A88E3B2CF /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/DrumSlamProc.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = DrumSlamProc.cpp; path = src/DrumSlamProc.cpp; sourceTree = SOURCE_ROOT; };
+		07F3FEB613F046E38CDC5118 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/PocketVerbsProc.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = PocketVerbsProc.cpp; path = src/PocketVerbsProc.cpp; sourceTree = SOURCE_ROOT; };
+		07FE4803F34A4B0EAB712A7A /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Pafnuty.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = Pafnuty.cpp; path = src/Pafnuty.cpp; sourceTree = SOURCE_ROOT; };
+		082F1470BF4247CEB3656526 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Air.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = Air.h; path = src/Air.h; sourceTree = SOURCE_ROOT; };
+		094DD655BBF84674BCA4FE89 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/VoiceOfTheStarship.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = VoiceOfTheStarship.cpp; path = src/VoiceOfTheStarship.cpp; sourceTree = SOURCE_ROOT; };
+		0DEBB295A30A4409826F7190 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/BassDrive.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = BassDrive.h; path = src/BassDrive.h; sourceTree = SOURCE_ROOT; };
+		0E072B183767429FB46B02FF /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/StarChildProc.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = StarChildProc.cpp; path = src/StarChildProc.cpp; sourceTree = SOURCE_ROOT; };
+		11441BFAB88B4EC88378A7E1 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/DeBess.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = DeBess.h; path = src/DeBess.h; sourceTree = SOURCE_ROOT; };
+		121DA91F51F640B68F0BB939 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Noise.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = Noise.h; path = src/Noise.h; sourceTree = SOURCE_ROOT; };
+		135E9EBBEC1B426594B592BD /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Pressure4Proc.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = Pressure4Proc.cpp; path = src/Pressure4Proc.cpp; sourceTree = SOURCE_ROOT; };
+		13BEF36CB44D4AC3813B63D4 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Mackity.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = Mackity.cpp; path = src/Mackity.cpp; sourceTree = SOURCE_ROOT; };
+		145E74EAAFB346909FF1C350 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Spiral2Proc.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = Spiral2Proc.cpp; path = src/Spiral2Proc.cpp; sourceTree = SOURCE_ROOT; };
+		19108A0D25DE430A9B7F0CBC /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/BitGlitter.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = BitGlitter.cpp; path = src/BitGlitter.cpp; sourceTree = SOURCE_ROOT; };
+		1939E32B34CF487DA351EC76 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/NonlinearSpaceProc.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = NonlinearSpaceProc.cpp; path = src/NonlinearSpaceProc.cpp; sourceTree = SOURCE_ROOT; };
+		194A92C022CF4BFB9226661E /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/VariMu.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = VariMu.cpp; path = src/VariMu.cpp; sourceTree = SOURCE_ROOT; };
+		199E9A937C724962A9483FC2 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/YBandpassProc.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = YBandpassProc.cpp; path = src/YBandpassProc.cpp; sourceTree = SOURCE_ROOT; };
+		1A6556DDB2454BB09A8D3859 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Compresaturator.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = Compresaturator.cpp; path = src/Compresaturator.cpp; sourceTree = SOURCE_ROOT; };
+		1BCDA1CC078847028A5F629B /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/ADClip7.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = ADClip7.h; path = src/ADClip7.h; sourceTree = SOURCE_ROOT; };
+		1EA3555AC8FB49AE80B703F4 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/ChromeOxide.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = ChromeOxide.cpp; path = src/ChromeOxide.cpp; sourceTree = SOURCE_ROOT; };
+		1EAFB251AC9F4221A90E49E1 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Logical4.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = Logical4.cpp; path = src/Logical4.cpp; sourceTree = SOURCE_ROOT; };
+		1FD583E89C684AD29DFE6522 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/YNotch.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = YNotch.cpp; path = src/YNotch.cpp; sourceTree = SOURCE_ROOT; };
+		1FEB1D0819FD4D00B120D1A7 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/ZLowpass2.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = ZLowpass2.cpp; path = src/ZLowpass2.cpp; sourceTree = SOURCE_ROOT; };
+		1FF3D8476B03487CA5240469 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/DubCenterProc.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = DubCenterProc.cpp; path = src/DubCenterProc.cpp; sourceTree = SOURCE_ROOT; };
+		224F94252A104F45A5CFE3F2 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/MojoProc.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = MojoProc.cpp; path = src/MojoProc.cpp; sourceTree = SOURCE_ROOT; };
+		229FBEAB7AA84498952DD08A /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Density.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = Density.cpp; path = src/Density.cpp; sourceTree = SOURCE_ROOT; };
+		2316832951614F59A48D4B03 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/PafnutyProc.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = PafnutyProc.cpp; path = src/PafnutyProc.cpp; sourceTree = SOURCE_ROOT; };
+		24DE5BCDB1254FA1B8C681AC /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/CojonesProc.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = CojonesProc.cpp; path = src/CojonesProc.cpp; sourceTree = SOURCE_ROOT; };
+		259A4DED3CDB4DCC9F81FEE6 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/MatrixVerbProc.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = MatrixVerbProc.cpp; path = src/MatrixVerbProc.cpp; sourceTree = SOURCE_ROOT; };
+		272DD870C3E647C3914658EA /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Spiral2.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = Spiral2.h; path = src/Spiral2.h; sourceTree = SOURCE_ROOT; };
+		279F19C450B04EA593702A8B /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Noise.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = Noise.cpp; path = src/Noise.cpp; sourceTree = SOURCE_ROOT; };
+		28AAABCADCC2492F96E13F37 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/YLowpassProc.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = YLowpassProc.cpp; path = src/YLowpassProc.cpp; sourceTree = SOURCE_ROOT; };
+		2C8553F575B74F3493703C64 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/ZBandpass2.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = ZBandpass2.h; path = src/ZBandpass2.h; sourceTree = SOURCE_ROOT; };
+		2DB231D3116F46F393DF79B0 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/PopProc.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = PopProc.cpp; path = src/PopProc.cpp; sourceTree = SOURCE_ROOT; };
+		2E130A49620A4D0392D6139A /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/GlitchShifter.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = GlitchShifter.cpp; path = src/GlitchShifter.cpp; sourceTree = SOURCE_ROOT; };
+		2E9C446FB0744C80B30B3604 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/ZHighpass2.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = ZHighpass2.cpp; path = src/ZHighpass2.cpp; sourceTree = SOURCE_ROOT; };
+		2F00ADFC83F74956A36263F2 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/DeEss.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = DeEss.h; path = src/DeEss.h; sourceTree = SOURCE_ROOT; };
+		2FB6176F48C4431594FE16BE /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/BassDrive.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = BassDrive.cpp; path = src/BassDrive.cpp; sourceTree = SOURCE_ROOT; };
+		303443FF194E49CFB94259E3 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Drive.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = Drive.h; path = src/Drive.h; sourceTree = SOURCE_ROOT; };
+		335BED85BD12450D91494481 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/ADClip7Proc.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = ADClip7Proc.cpp; path = src/ADClip7Proc.cpp; sourceTree = SOURCE_ROOT; };
+		34600E50A74C4B00B8481962 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/CMakeLists.txt */ = {isa = PBXFileReference; explicitFileType = sourcecode.text; fileEncoding = 4; name = CMakeLists.txt; path = CMakeLists.txt; sourceTree = SOURCE_ROOT; };
+		37CD69FD2A2449BEA7229CE1 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/DeBess.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = DeBess.cpp; path = src/DeBess.cpp; sourceTree = SOURCE_ROOT; };
+		381BB8BFC87E48F98C00C414 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Pressure4.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = Pressure4.h; path = src/Pressure4.h; sourceTree = SOURCE_ROOT; };
+		391A7D7384134D51BAC4914D /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/ZNotch2.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = ZNotch2.cpp; path = src/ZNotch2.cpp; sourceTree = SOURCE_ROOT; };
+		3ABCD8F905BE4B92ABFB3EEE /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/DrumSlam.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = DrumSlam.cpp; path = src/DrumSlam.cpp; sourceTree = SOURCE_ROOT; };
+		3AC6D023818043ADAA8A5738 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/BussColors4Proc.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = BussColors4Proc.cpp; path = src/BussColors4Proc.cpp; sourceTree = SOURCE_ROOT; };
+		3C2F7E92DF364B6E8A0E2E22 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/ButterComp2.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = ButterComp2.h; path = src/ButterComp2.h; sourceTree = SOURCE_ROOT; };
+		3C87514387EF4B37B2ED38B7 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/DustBunny.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = DustBunny.cpp; path = src/DustBunny.cpp; sourceTree = SOURCE_ROOT; };
+		3D411201290C431ABBEFBB0B /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/PowerSagProc.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = PowerSagProc.cpp; path = src/PowerSagProc.cpp; sourceTree = SOURCE_ROOT; };
+		3D8E6693EE72424C93D56287 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/NonlinearSpace.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = NonlinearSpace.cpp; path = src/NonlinearSpace.cpp; sourceTree = SOURCE_ROOT; };
+		3EBF420407A242639893FA1C /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/CapacitorProc.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = CapacitorProc.cpp; path = src/CapacitorProc.cpp; sourceTree = SOURCE_ROOT; };
+		3F89153955C344069727B9B3 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Galactic.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = Galactic.cpp; path = src/Galactic.cpp; sourceTree = SOURCE_ROOT; };
+		4099B1B140E0456EBC7B83CB /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/DeckWreckaProc.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = DeckWreckaProc.cpp; path = src/DeckWreckaProc.cpp; sourceTree = SOURCE_ROOT; };
+		40C2E584C6DC4AF99FA9A231 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Loud.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = Loud.cpp; path = src/Loud.cpp; sourceTree = SOURCE_ROOT; };
+		40DA9DB3259B41828BAD6012 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Slew2Proc.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = Slew2Proc.cpp; path = src/Slew2Proc.cpp; sourceTree = SOURCE_ROOT; };
+		41233C2B5E6D49229BB47878 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Capacitor.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = Capacitor.cpp; path = src/Capacitor.cpp; sourceTree = SOURCE_ROOT; };
+		41CE1D7E8D9149FAB1B32AB5 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/FocusProc.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = FocusProc.cpp; path = src/FocusProc.cpp; sourceTree = SOURCE_ROOT; };
+		4449BE3C5A674A35A7E60FEC /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/InfinityProc.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = InfinityProc.cpp; path = src/InfinityProc.cpp; sourceTree = SOURCE_ROOT; };
+		445BA432D4BB4691AD9E770A /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/SurgeProc.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = SurgeProc.cpp; path = src/SurgeProc.cpp; sourceTree = SOURCE_ROOT; };
+		45C478AF53884B8CBA63D8CE /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Verbity.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = Verbity.cpp; path = src/Verbity.cpp; sourceTree = SOURCE_ROOT; };
+		466C350A822947D1B7B9AD5C /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/BrightAmbience2.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = BrightAmbience2.cpp; path = src/BrightAmbience2.cpp; sourceTree = SOURCE_ROOT; };
+		4931DF60964B4083B035FFB7 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/ZLowpass2.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = ZLowpass2.h; path = src/ZLowpass2.h; sourceTree = SOURCE_ROOT; };
+		49AA31E335034FD2B5289111 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/BlockParty.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = BlockParty.cpp; path = src/BlockParty.cpp; sourceTree = SOURCE_ROOT; };
+		49D7D2EC6A98463E99B1CC80 /* /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/airwindows/CMakeFiles/airwindows.dir/Info.plist */ = {isa = PBXFileReference; explicitFileType = sourcecode.text.plist; fileEncoding = 4; name = Info.plist; path = /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/airwindows/CMakeFiles/airwindows.dir/Info.plist; sourceTree = "<absolute>"; };
+		4B69D3CB02EB4511BC614F90 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/NCSeventeen.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = NCSeventeen.h; path = src/NCSeventeen.h; sourceTree = SOURCE_ROOT; };
+		4BDDBA7F535847F281A1A799 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/DeRez2Proc.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = DeRez2Proc.cpp; path = src/DeRez2Proc.cpp; sourceTree = SOURCE_ROOT; };
+		4BDFA88583774EB58D5226E3 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/ToTape6.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = ToTape6.h; path = src/ToTape6.h; sourceTree = SOURCE_ROOT; };
+		4DB3CE50C90B482699481271 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/BrightAmbience2Proc.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = BrightAmbience2Proc.cpp; path = src/BrightAmbience2Proc.cpp; sourceTree = SOURCE_ROOT; };
+		4E2F0E5E21FF4C05B94D3298 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Verbity.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = Verbity.h; path = src/Verbity.h; sourceTree = SOURCE_ROOT; };
+		4E698E8836E44B7E858D4DD3 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/CMakeLists.txt */ = {isa = PBXFileReference; explicitFileType = sourcecode.text; fileEncoding = 4; name = CMakeLists.txt; path = CMakeLists.txt; sourceTree = SOURCE_ROOT; };
+		507A3741E35045FEB9D62F80 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/HardVacuum.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = HardVacuum.h; path = src/HardVacuum.h; sourceTree = SOURCE_ROOT; };
+		5177F4CBEF344A7F80159A53 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/GrooveWear.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = GrooveWear.h; path = src/GrooveWear.h; sourceTree = SOURCE_ROOT; };
+		542C4636D0844F048B2BEFCB /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Air.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = Air.cpp; path = src/Air.cpp; sourceTree = SOURCE_ROOT; };
+		549177595F1745A2872EB98E /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/IronOxide5.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = IronOxide5.h; path = src/IronOxide5.h; sourceTree = SOURCE_ROOT; };
+		549BBC3374AA44A184BBFBA1 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/YHighpass.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = YHighpass.cpp; path = src/YHighpass.cpp; sourceTree = SOURCE_ROOT; };
+		54E62A30171241B9926C6581 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/FireAmp.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = FireAmp.cpp; path = src/FireAmp.cpp; sourceTree = SOURCE_ROOT; };
+		555BDFD6A81B4FC88DBD2A92 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/ADClip7.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = ADClip7.cpp; path = src/ADClip7.cpp; sourceTree = SOURCE_ROOT; };
+		56502DD801704FBBAA7B48B2 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/SlewProc.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = SlewProc.cpp; path = src/SlewProc.cpp; sourceTree = SOURCE_ROOT; };
+		56D4E5AB8CD9437881B7CB4A /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/MackEQProc.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = MackEQProc.cpp; path = src/MackEQProc.cpp; sourceTree = SOURCE_ROOT; };
+		58BFBF199BC54A3090998B3F /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/ButterComp2Proc.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = ButterComp2Proc.cpp; path = src/ButterComp2Proc.cpp; sourceTree = SOURCE_ROOT; };
+		5B5EAB5A24E34664862826FA /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/SingleEndedTriodeProc.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = SingleEndedTriodeProc.cpp; path = src/SingleEndedTriodeProc.cpp; sourceTree = SOURCE_ROOT; };
+		5B7F675397FC4854A7C753D4 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/NoiseProc.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = NoiseProc.cpp; path = src/NoiseProc.cpp; sourceTree = SOURCE_ROOT; };
+		65984E61F23A402896A618D0 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/DustBunnyProc.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = DustBunnyProc.cpp; path = src/DustBunnyProc.cpp; sourceTree = SOURCE_ROOT; };
+		6634CCD2CDDA4757B62BDB28 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/CompresaturatorProc.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = CompresaturatorProc.cpp; path = src/CompresaturatorProc.cpp; sourceTree = SOURCE_ROOT; };
+		66375DA283464DA78C223C95 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/HombreProc.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = HombreProc.cpp; path = src/HombreProc.cpp; sourceTree = SOURCE_ROOT; };
+		67071B020F574859A9B32316 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/UnBoxProc.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = UnBoxProc.cpp; path = src/UnBoxProc.cpp; sourceTree = SOURCE_ROOT; };
+		678436D643D54D1DA1AD02C5 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/BitGlitter.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = BitGlitter.h; path = src/BitGlitter.h; sourceTree = SOURCE_ROOT; };
+		679642F5ABA342068E8ACCCD /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/BassDriveProc.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = BassDriveProc.cpp; path = src/BassDriveProc.cpp; sourceTree = SOURCE_ROOT; };
+		6EA11C6A7CB340ED9049F52A /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Infinity.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = Infinity.h; path = src/Infinity.h; sourceTree = SOURCE_ROOT; };
+		6F73D963542D42B993EB4490 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/VerbityProc.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = VerbityProc.cpp; path = src/VerbityProc.cpp; sourceTree = SOURCE_ROOT; };
+		6FF6F9D3B81D4CC48406C5C5 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/PyeWacket.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = PyeWacket.h; path = src/PyeWacket.h; sourceTree = SOURCE_ROOT; };
+		7129E1280CB148A2AB85ACBA /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/VoiceOfTheStarshipProc.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = VoiceOfTheStarshipProc.cpp; path = src/VoiceOfTheStarshipProc.cpp; sourceTree = SOURCE_ROOT; };
+		71C097584AE54ACFB7367334 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/YNotchProc.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = YNotchProc.cpp; path = src/YNotchProc.cpp; sourceTree = SOURCE_ROOT; };
+		72AB61C640C14A25917E7E90 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/BussColors4.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = BussColors4.h; path = src/BussColors4.h; sourceTree = SOURCE_ROOT; };
+		733156B31AF14C4DA08ABB9A /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Mojo.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = Mojo.cpp; path = src/Mojo.cpp; sourceTree = SOURCE_ROOT; };
+		7452616F22CC489DABD723A8 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/PocketVerbs.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = PocketVerbs.h; path = src/PocketVerbs.h; sourceTree = SOURCE_ROOT; };
+		7583FE67CCFC429FB158F230 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Slew.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = Slew.h; path = src/Slew.h; sourceTree = SOURCE_ROOT; };
+		75D7F5B0902C4F938098EE68 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/LoudProc.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = LoudProc.cpp; path = src/LoudProc.cpp; sourceTree = SOURCE_ROOT; };
+		7778666C5B0B4AD0873D1A77 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/YBandpass.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = YBandpass.h; path = src/YBandpass.h; sourceTree = SOURCE_ROOT; };
+		78724B5AACAF40BC9FC7014D /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/ChromeOxideProc.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = ChromeOxideProc.cpp; path = src/ChromeOxideProc.cpp; sourceTree = SOURCE_ROOT; };
+		7CB886E9154D4210BE8D0D9A /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/BitGlitterProc.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = BitGlitterProc.cpp; path = src/BitGlitterProc.cpp; sourceTree = SOURCE_ROOT; };
+		7D08F19403CD40FA812C7DB4 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Hombre.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = Hombre.h; path = src/Hombre.h; sourceTree = SOURCE_ROOT; };
+		7DB8F3929AA94D9F9C4A77E2 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Chamber.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = Chamber.cpp; path = src/Chamber.cpp; sourceTree = SOURCE_ROOT; };
+		7DF179E9B92F4670B33E30FD /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Focus.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = Focus.h; path = src/Focus.h; sourceTree = SOURCE_ROOT; };
+		7FC760917C824F17835F8FE1 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/DeEssProc.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = DeEssProc.cpp; path = src/DeEssProc.cpp; sourceTree = SOURCE_ROOT; };
+		806B9CC98EB445A68B2BF629 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Cojones.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = Cojones.h; path = src/Cojones.h; sourceTree = SOURCE_ROOT; };
+		817AE4CDAB05485E8E829CA9 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/GrooveWearProc.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = GrooveWearProc.cpp; path = src/GrooveWearProc.cpp; sourceTree = SOURCE_ROOT; };
+		82F8CF6D7D104C1AAB536036 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/ZBandpass2.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = ZBandpass2.cpp; path = src/ZBandpass2.cpp; sourceTree = SOURCE_ROOT; };
+		835F27290B524172BB9C3854 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/PyeWacket.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = PyeWacket.cpp; path = src/PyeWacket.cpp; sourceTree = SOURCE_ROOT; };
+		8430B542685347B8B3300297 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Apicolypse.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = Apicolypse.h; path = src/Apicolypse.h; sourceTree = SOURCE_ROOT; };
+		85B7A4123A23480F9ED399D9 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Mackity.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = Mackity.h; path = src/Mackity.h; sourceTree = SOURCE_ROOT; };
+		86ECD7733E3843B689252F49 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/MackEQ.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = MackEQ.h; path = src/MackEQ.h; sourceTree = SOURCE_ROOT; };
+		8706869D52F94E12BA83D9FF /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/ToVinyl4.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = ToVinyl4.cpp; path = src/ToVinyl4.cpp; sourceTree = SOURCE_ROOT; };
+		881DF5A2F17C4BECA203060B /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/DeckWrecka.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = DeckWrecka.h; path = src/DeckWrecka.h; sourceTree = SOURCE_ROOT; };
+		88510A2CA0074AA3803C6E59 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/CrunchyGrooveWear.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = CrunchyGrooveWear.cpp; path = src/CrunchyGrooveWear.cpp; sourceTree = SOURCE_ROOT; };
+		89CDD8B3C5474179A4774720 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/CabsProc.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = CabsProc.cpp; path = src/CabsProc.cpp; sourceTree = SOURCE_ROOT; };
+		8CE858CD3B3B4CAFA704EF86 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/PowerSag.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = PowerSag.cpp; path = src/PowerSag.cpp; sourceTree = SOURCE_ROOT; };
+		8E84E04306424525976B4A9C /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/include/airwindows/AirWinBaseClass.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = AirWinBaseClass.h; path = include/airwindows/AirWinBaseClass.h; sourceTree = SOURCE_ROOT; };
+		8EF361BE6A4B48A4ABD18299 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/CrunchyGrooveWearProc.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = CrunchyGrooveWearProc.cpp; path = src/CrunchyGrooveWearProc.cpp; sourceTree = SOURCE_ROOT; };
+		8F8A6E0F8C8F4758A639027C /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/ToTape6.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = ToTape6.cpp; path = src/ToTape6.cpp; sourceTree = SOURCE_ROOT; };
+		90851C5ADA514A7DBB176EAC /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/DensityProc.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = DensityProc.cpp; path = src/DensityProc.cpp; sourceTree = SOURCE_ROOT; };
+		92344ED71C4D4F44A6EE83D0 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/ZLowpass2Proc.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = ZLowpass2Proc.cpp; path = src/ZLowpass2Proc.cpp; sourceTree = SOURCE_ROOT; };
+		944233CA30344BABA6FB84E1 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/UnBox.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = UnBox.cpp; path = src/UnBox.cpp; sourceTree = SOURCE_ROOT; };
+		960D2BB25FF84E0BAFA6707E /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/MatrixVerb.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = MatrixVerb.cpp; path = src/MatrixVerb.cpp; sourceTree = SOURCE_ROOT; };
+		96875AB0356B4DDD99048086 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/FireAmpProc.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = FireAmpProc.cpp; path = src/FireAmpProc.cpp; sourceTree = SOURCE_ROOT; };
+		96A8EDBEAC8B452C95AB4AAF /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Cabs.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = Cabs.h; path = src/Cabs.h; sourceTree = SOURCE_ROOT; };
+		972FB5F8CD9245639684AA9C /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/DeRez2.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = DeRez2.cpp; path = src/DeRez2.cpp; sourceTree = SOURCE_ROOT; };
+		975CE1050A084FD89C127C74 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Capacitor.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = Capacitor.h; path = src/Capacitor.h; sourceTree = SOURCE_ROOT; };
+		9933C3A2D4844795A5551DBB /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Focus.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = Focus.cpp; path = src/Focus.cpp; sourceTree = SOURCE_ROOT; };
+		9CA0B277E39347ACAF625F74 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/YNotch.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = YNotch.h; path = src/YNotch.h; sourceTree = SOURCE_ROOT; };
+		9CB926D993AD4DC18EAC4DA3 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/FractureProc.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = FractureProc.cpp; path = src/FractureProc.cpp; sourceTree = SOURCE_ROOT; };
+		9E9F3496394944E1919B895D /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/ZBandpass2Proc.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = ZBandpass2Proc.cpp; path = src/ZBandpass2Proc.cpp; sourceTree = SOURCE_ROOT; };
+		9F92817463664AC7A163E75B /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/MackityProc.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = MackityProc.cpp; path = src/MackityProc.cpp; sourceTree = SOURCE_ROOT; };
+		A384086BF43C4504BC099128 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/IronOxide5.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = IronOxide5.cpp; path = src/IronOxide5.cpp; sourceTree = SOURCE_ROOT; };
+		A6673AEC20654F379B6686CA /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Mojo.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = Mojo.h; path = src/Mojo.h; sourceTree = SOURCE_ROOT; };
+		A66F0F1FEF0F4446BBE062D9 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/MeltProc.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = MeltProc.cpp; path = src/MeltProc.cpp; sourceTree = SOURCE_ROOT; };
+		A74630808E4B462896A2EE92 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/VoiceOfTheStarship.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = VoiceOfTheStarship.h; path = src/VoiceOfTheStarship.h; sourceTree = SOURCE_ROOT; };
+		A76B291FDE4345CEA9F690E6 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/ZNotch2.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = ZNotch2.h; path = src/ZNotch2.h; sourceTree = SOURCE_ROOT; };
+		A78D5D954F744507B1BF4CF0 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/OneCornerClip.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = OneCornerClip.h; path = src/OneCornerClip.h; sourceTree = SOURCE_ROOT; };
+		A913E8E52EDA45979B31DAB4 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Pressure4.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = Pressure4.cpp; path = src/Pressure4.cpp; sourceTree = SOURCE_ROOT; };
+		A9DDC531670149158467B204 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Point.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = Point.cpp; path = src/Point.cpp; sourceTree = SOURCE_ROOT; };
+		AB4CEB40613F44E99CB33178 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/IronOxide5Proc.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = IronOxide5Proc.cpp; path = src/IronOxide5Proc.cpp; sourceTree = SOURCE_ROOT; };
+		AB821CAD5FD4445B89D15783 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/PocketVerbs.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = PocketVerbs.cpp; path = src/PocketVerbs.cpp; sourceTree = SOURCE_ROOT; };
+		AD3CAE7E248B4ADB9B1D9BF8 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/StarChild.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = StarChild.h; path = src/StarChild.h; sourceTree = SOURCE_ROOT; };
+		AF35E99531094FF08280E4D8 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/DeEss.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = DeEss.cpp; path = src/DeEss.cpp; sourceTree = SOURCE_ROOT; };
+		B4A5C86847B54C59BF9AC1F4 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/ZHighpass2Proc.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = ZHighpass2Proc.cpp; path = src/ZHighpass2Proc.cpp; sourceTree = SOURCE_ROOT; };
+		B60D33BD904646D48579ADAB /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Logical4.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = Logical4.h; path = src/Logical4.h; sourceTree = SOURCE_ROOT; };
+		B7794DFE9C704C5BAE1264AB /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/ButterComp2.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = ButterComp2.cpp; path = src/ButterComp2.cpp; sourceTree = SOURCE_ROOT; };
+		B8B1D8A271E24B488F872D20 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Cojones.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = Cojones.cpp; path = src/Cojones.cpp; sourceTree = SOURCE_ROOT; };
+		B9376FBEBF704155B563E537 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/VariMuProc.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = VariMuProc.cpp; path = src/VariMuProc.cpp; sourceTree = SOURCE_ROOT; };
+		B9E2A14393C8462F997550DD /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/YLowpass.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = YLowpass.h; path = src/YLowpass.h; sourceTree = SOURCE_ROOT; };
+		C02B8D0334DE4BA3B954F66C /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/AirProc.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = AirProc.cpp; path = src/AirProc.cpp; sourceTree = SOURCE_ROOT; };
+		C0CC175EF4B6487480B355BB /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/ChamberProc.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = ChamberProc.cpp; path = src/ChamberProc.cpp; sourceTree = SOURCE_ROOT; };
+		C29BDAB4091A46F59A5B22AA /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/TripleSpreadProc.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = TripleSpreadProc.cpp; path = src/TripleSpreadProc.cpp; sourceTree = SOURCE_ROOT; };
+		C2E91841A1CE4B7BA3B0C641 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/NCSeventeenProc.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = NCSeventeenProc.cpp; path = src/NCSeventeenProc.cpp; sourceTree = SOURCE_ROOT; };
+		C2F77A9295EA4356BD832759 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Density.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = Density.h; path = src/Density.h; sourceTree = SOURCE_ROOT; };
+		C2FB4C20D4154B8BBA66BC97 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Pop.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = Pop.h; path = src/Pop.h; sourceTree = SOURCE_ROOT; };
+		C314C0E4155F43ECA359282E /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Drive.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = Drive.cpp; path = src/Drive.cpp; sourceTree = SOURCE_ROOT; };
+		C352C186BF154C6C95FEBB67 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/MackEQ.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = MackEQ.cpp; path = src/MackEQ.cpp; sourceTree = SOURCE_ROOT; };
+		C35E13D5747A46B2930B5BC4 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/DustBunny.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = DustBunny.h; path = src/DustBunny.h; sourceTree = SOURCE_ROOT; };
+		C697F51C49FA4E6F9BFFB446 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Compresaturator.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = Compresaturator.h; path = src/Compresaturator.h; sourceTree = SOURCE_ROOT; };
+		C6A48AA144DE4CFEBD4D09DE /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/BlockPartyProc.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = BlockPartyProc.cpp; path = src/BlockPartyProc.cpp; sourceTree = SOURCE_ROOT; };
+		C974E8F5834B46D6A857E6B9 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/GalacticProc.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = GalacticProc.cpp; path = src/GalacticProc.cpp; sourceTree = SOURCE_ROOT; };
+		CB085295B89E41A1A6C7D045 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/MatrixVerb.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = MatrixVerb.h; path = src/MatrixVerb.h; sourceTree = SOURCE_ROOT; };
+		CB160D240EFD4672A38C06E8 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Hombre.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = Hombre.cpp; path = src/Hombre.cpp; sourceTree = SOURCE_ROOT; };
+		CD257A04A9054AF1978DEA14 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Fracture.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = Fracture.cpp; path = src/Fracture.cpp; sourceTree = SOURCE_ROOT; };
+		CD5D9E07CAA44FCF8EB283D2 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/OneCornerClipProc.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = OneCornerClipProc.cpp; path = src/OneCornerClipProc.cpp; sourceTree = SOURCE_ROOT; };
+		D0335BA5F50B44369AECA1A5 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Infinity.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = Infinity.cpp; path = src/Infinity.cpp; sourceTree = SOURCE_ROOT; };
+		D049B6561ABE4712835A9FE5 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/GrooveWear.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = GrooveWear.cpp; path = src/GrooveWear.cpp; sourceTree = SOURCE_ROOT; };
+		D063F8078B4340149A74E218 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/DeBessProc.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = DeBessProc.cpp; path = src/DeBessProc.cpp; sourceTree = SOURCE_ROOT; };
+		D067DA7E55C64557BB40C73D /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Cabs.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = Cabs.cpp; path = src/Cabs.cpp; sourceTree = SOURCE_ROOT; };
+		D1ED22A281414D86B67C1D7F /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/HardVacuumProc.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = HardVacuumProc.cpp; path = src/HardVacuumProc.cpp; sourceTree = SOURCE_ROOT; };
+		D59577A376FF446C9174D845 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/DrumSlam.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = DrumSlam.h; path = src/DrumSlam.h; sourceTree = SOURCE_ROOT; };
+		D5FB8C7FA93743C78DF316AF /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/SingleEndedTriode.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = SingleEndedTriode.h; path = src/SingleEndedTriode.h; sourceTree = SOURCE_ROOT; };
+		D6AAAB0ADEAB4EC2BC327148 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/BrightAmbience2.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = BrightAmbience2.h; path = src/BrightAmbience2.h; sourceTree = SOURCE_ROOT; };
+		D6FD2ED37E324DBB9141A663 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/YLowpass.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = YLowpass.cpp; path = src/YLowpass.cpp; sourceTree = SOURCE_ROOT; };
+		D7B62031CA2A41A09E138C08 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/TapeDust.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = TapeDust.cpp; path = src/TapeDust.cpp; sourceTree = SOURCE_ROOT; };
+		D8D18AF3767E40DB86A41093 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Apicolypse.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = Apicolypse.cpp; path = src/Apicolypse.cpp; sourceTree = SOURCE_ROOT; };
+		D9A4C7E5376C44509AC66AC3 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/DubSubProc.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = DubSubProc.cpp; path = src/DubSubProc.cpp; sourceTree = SOURCE_ROOT; };
+		DA8DE38B7A6D4380B6010F27 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/TapeDustProc.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = TapeDustProc.cpp; path = src/TapeDustProc.cpp; sourceTree = SOURCE_ROOT; };
+		DB1E68C6DA944785B1DD6E17 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Melt.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = Melt.cpp; path = src/Melt.cpp; sourceTree = SOURCE_ROOT; };
+		DB3683DFB2304EF0B3C84D32 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/NCSeventeen.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = NCSeventeen.cpp; path = src/NCSeventeen.cpp; sourceTree = SOURCE_ROOT; };
+		DC78437E508E42FE96DAE917 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/DriveProc.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = DriveProc.cpp; path = src/DriveProc.cpp; sourceTree = SOURCE_ROOT; };
+		DD4C0236509C47038B2D2A88 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/ApicolypseProc.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = ApicolypseProc.cpp; path = src/ApicolypseProc.cpp; sourceTree = SOURCE_ROOT; };
+		DD4C1A46E8C94DB2B856319A /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/ToTape6Proc.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = ToTape6Proc.cpp; path = src/ToTape6Proc.cpp; sourceTree = SOURCE_ROOT; };
+		DE0184374EAA448189767747 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/CrunchyGrooveWear.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = CrunchyGrooveWear.h; path = src/CrunchyGrooveWear.h; sourceTree = SOURCE_ROOT; };
+		DF1DA2AEF51347E5AA77C03B /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/BussColors4.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = BussColors4.cpp; path = src/BussColors4.cpp; sourceTree = SOURCE_ROOT; };
+		E05C58361C184118BE985CA2 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/GlitchShifterProc.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = GlitchShifterProc.cpp; path = src/GlitchShifterProc.cpp; sourceTree = SOURCE_ROOT; };
+		E1F14DC717024A2491E1E8A7 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Slew2.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = Slew2.h; path = src/Slew2.h; sourceTree = SOURCE_ROOT; };
+		E2A558E5D0444EC09A36DBBB /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Surge.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = Surge.cpp; path = src/Surge.cpp; sourceTree = SOURCE_ROOT; };
+		E8F03AB41D74425CB2F91028 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Pop.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = Pop.cpp; path = src/Pop.cpp; sourceTree = SOURCE_ROOT; };
+		E9CE97D6FCD6491E81785761 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/StarChild.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = StarChild.cpp; path = src/StarChild.cpp; sourceTree = SOURCE_ROOT; };
+		EA0791866FAA494CBC9B7E06 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/YHighpassProc.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = YHighpassProc.cpp; path = src/YHighpassProc.cpp; sourceTree = SOURCE_ROOT; };
+		EB1F1EC5F6BC49DCB5FDBB39 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/HardVacuum.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = HardVacuum.cpp; path = src/HardVacuum.cpp; sourceTree = SOURCE_ROOT; };
+		EC8FC6AAB3DA4D86A6AFC204 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/DeRez2.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = DeRez2.h; path = src/DeRez2.h; sourceTree = SOURCE_ROOT; };
+		ED2E119E466049859FBF6221 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/SingleEndedTriode.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = SingleEndedTriode.cpp; path = src/SingleEndedTriode.cpp; sourceTree = SOURCE_ROOT; };
+		ED30228A586C436AB17BBC2D /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Galactic.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = Galactic.h; path = src/Galactic.h; sourceTree = SOURCE_ROOT; };
+		F0BB8F7B7AE5440FAF463916 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/TripleSpread.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = TripleSpread.h; path = src/TripleSpread.h; sourceTree = SOURCE_ROOT; };
+		F2832A282A334C2C984D501B /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/TripleSpread.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = TripleSpread.cpp; path = src/TripleSpread.cpp; sourceTree = SOURCE_ROOT; };
+		F2D33EE4B4D3440597196A38 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/ZNotch2Proc.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = ZNotch2Proc.cpp; path = src/ZNotch2Proc.cpp; sourceTree = SOURCE_ROOT; };
+		F2F57BEC2B524A6A86DFEC62 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/OneCornerClip.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = OneCornerClip.cpp; path = src/OneCornerClip.cpp; sourceTree = SOURCE_ROOT; };
+		F3ADBB953A96411FBB5B6F41 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/PointProc.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = PointProc.cpp; path = src/PointProc.cpp; sourceTree = SOURCE_ROOT; };
+		F3DECDFF0F834A54A9275FA0 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/PyeWacketProc.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = PyeWacketProc.cpp; path = src/PyeWacketProc.cpp; sourceTree = SOURCE_ROOT; };
+		F5356422EC4F4C76BEE21317 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Slew.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = Slew.cpp; path = src/Slew.cpp; sourceTree = SOURCE_ROOT; };
+		F537360407154B3AA5E1261E /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/DubCenter.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = DubCenter.cpp; path = src/DubCenter.cpp; sourceTree = SOURCE_ROOT; };
+		F5970FC4B0B04D4B8DC8E934 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/ZHighpass2.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = ZHighpass2.h; path = src/ZHighpass2.h; sourceTree = SOURCE_ROOT; };
+		F6C948023005488A9B521FFD /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Logical4Proc.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = Logical4Proc.cpp; path = src/Logical4Proc.cpp; sourceTree = SOURCE_ROOT; };
+		F72492796AC7440F80506FA7 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/YHighpass.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = YHighpass.h; path = src/YHighpass.h; sourceTree = SOURCE_ROOT; };
+		F72B7FEE6EB949E18C0BAFAC /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/ToVinyl4Proc.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = ToVinyl4Proc.cpp; path = src/ToVinyl4Proc.cpp; sourceTree = SOURCE_ROOT; };
+		F80E5CCA6F23425E9B498C17 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Slew2.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = Slew2.cpp; path = src/Slew2.cpp; sourceTree = SOURCE_ROOT; };
+		FBD5B53E532D40398166229F /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/VariMu.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = VariMu.h; path = src/VariMu.h; sourceTree = SOURCE_ROOT; };
+		FD27D56508854A0280AAD788 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/YBandpass.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = YBandpass.cpp; path = src/YBandpass.cpp; sourceTree = SOURCE_ROOT; };
+		FD6A7F45058D410B9AC617D6 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/DeckWrecka.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = DeckWrecka.cpp; path = src/DeckWrecka.cpp; sourceTree = SOURCE_ROOT; };
+		FDBEEDB511F24183A42594C1 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Spiral2.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = Spiral2.cpp; path = src/Spiral2.cpp; sourceTree = SOURCE_ROOT; };
+		FE90244097BB46049C12111F /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Surge.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = Surge.h; path = src/Surge.h; sourceTree = SOURCE_ROOT; };
+		FFA5A3659146423BB48B07E3 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/UnBox.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = UnBox.h; path = src/UnBox.h; sourceTree = SOURCE_ROOT; };
+		FFCA559AB81C4F19849F161D /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/BlockParty.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = BlockParty.h; path = src/BlockParty.h; sourceTree = SOURCE_ROOT; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		3339847A913E486ABB0BF79E /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		09A0030838BF4CB6B28114E4 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		10D75723ED374A1C930CBFB1 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Resources;
+			sourceTree = "<group>";
+		};
+		35933FB5E8DB4B80A76F2B09 /* CMake Rules */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = "CMake Rules";
+			sourceTree = "<group>";
+		};
+		6472B1BB1644481B8FC53EC6 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				033F016D4A474F1BA7E8B6F2 /* airwindows */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		6486C5D5E8A540CCAE179DFD /* Header Files */ = {
+			isa = PBXGroup;
+			children = (
+				8E84E04306424525976B4A9C /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/include/airwindows/AirWinBaseClass.h */,
+				1BCDA1CC078847028A5F629B /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/ADClip7.h */,
+				082F1470BF4247CEB3656526 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Air.h */,
+				8430B542685347B8B3300297 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Apicolypse.h */,
+				0DEBB295A30A4409826F7190 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/BassDrive.h */,
+				678436D643D54D1DA1AD02C5 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/BitGlitter.h */,
+				FFCA559AB81C4F19849F161D /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/BlockParty.h */,
+				D6AAAB0ADEAB4EC2BC327148 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/BrightAmbience2.h */,
+				72AB61C640C14A25917E7E90 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/BussColors4.h */,
+				3C2F7E92DF364B6E8A0E2E22 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/ButterComp2.h */,
+				96A8EDBEAC8B452C95AB4AAF /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Cabs.h */,
+				975CE1050A084FD89C127C74 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Capacitor.h */,
+				806B9CC98EB445A68B2BF629 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Cojones.h */,
+				C697F51C49FA4E6F9BFFB446 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Compresaturator.h */,
+				DE0184374EAA448189767747 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/CrunchyGrooveWear.h */,
+				11441BFAB88B4EC88378A7E1 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/DeBess.h */,
+				2F00ADFC83F74956A36263F2 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/DeEss.h */,
+				EC8FC6AAB3DA4D86A6AFC204 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/DeRez2.h */,
+				881DF5A2F17C4BECA203060B /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/DeckWrecka.h */,
+				C2F77A9295EA4356BD832759 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Density.h */,
+				303443FF194E49CFB94259E3 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Drive.h */,
+				D59577A376FF446C9174D845 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/DrumSlam.h */,
+				C35E13D5747A46B2930B5BC4 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/DustBunny.h */,
+				7DF179E9B92F4670B33E30FD /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Focus.h */,
+				060AA56890874263A1455DCE /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Fracture.h */,
+				ED30228A586C436AB17BBC2D /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Galactic.h */,
+				5177F4CBEF344A7F80159A53 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/GrooveWear.h */,
+				507A3741E35045FEB9D62F80 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/HardVacuum.h */,
+				7D08F19403CD40FA812C7DB4 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Hombre.h */,
+				6EA11C6A7CB340ED9049F52A /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Infinity.h */,
+				549177595F1745A2872EB98E /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/IronOxide5.h */,
+				B60D33BD904646D48579ADAB /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Logical4.h */,
+				0482218C5866443AA76CCB9D /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Loud.h */,
+				86ECD7733E3843B689252F49 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/MackEQ.h */,
+				85B7A4123A23480F9ED399D9 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Mackity.h */,
+				CB085295B89E41A1A6C7D045 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/MatrixVerb.h */,
+				0532D2A22BED4F4FABCBA816 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Melt.h */,
+				A6673AEC20654F379B6686CA /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Mojo.h */,
+				4B69D3CB02EB4511BC614F90 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/NCSeventeen.h */,
+				121DA91F51F640B68F0BB939 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Noise.h */,
+				A78D5D954F744507B1BF4CF0 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/OneCornerClip.h */,
+				7452616F22CC489DABD723A8 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/PocketVerbs.h */,
+				017EFD6E38DB45C7AC0F2476 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Point.h */,
+				C2FB4C20D4154B8BBA66BC97 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Pop.h */,
+				381BB8BFC87E48F98C00C414 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Pressure4.h */,
+				6FF6F9D3B81D4CC48406C5C5 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/PyeWacket.h */,
+				D5FB8C7FA93743C78DF316AF /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/SingleEndedTriode.h */,
+				7583FE67CCFC429FB158F230 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Slew.h */,
+				E1F14DC717024A2491E1E8A7 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Slew2.h */,
+				272DD870C3E647C3914658EA /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Spiral2.h */,
+				AD3CAE7E248B4ADB9B1D9BF8 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/StarChild.h */,
+				FE90244097BB46049C12111F /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Surge.h */,
+				4BDFA88583774EB58D5226E3 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/ToTape6.h */,
+				F0BB8F7B7AE5440FAF463916 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/TripleSpread.h */,
+				FFA5A3659146423BB48B07E3 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/UnBox.h */,
+				FBD5B53E532D40398166229F /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/VariMu.h */,
+				4E2F0E5E21FF4C05B94D3298 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Verbity.h */,
+				A74630808E4B462896A2EE92 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/VoiceOfTheStarship.h */,
+				7778666C5B0B4AD0873D1A77 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/YBandpass.h */,
+				F72492796AC7440F80506FA7 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/YHighpass.h */,
+				B9E2A14393C8462F997550DD /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/YLowpass.h */,
+				9CA0B277E39347ACAF625F74 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/YNotch.h */,
+				2C8553F575B74F3493703C64 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/ZBandpass2.h */,
+				F5970FC4B0B04D4B8DC8E934 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/ZHighpass2.h */,
+				4931DF60964B4083B035FFB7 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/ZLowpass2.h */,
+				A76B291FDE4345CEA9F690E6 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/ZNotch2.h */,
+			);
+			name = "Header Files";
+			sourceTree = "<group>";
+		};
+		7579F85B2FFB425C8D6362BB /* Source Files */ = {
+			isa = PBXGroup;
+			children = (
+				555BDFD6A81B4FC88DBD2A92 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/ADClip7.cpp */,
+				335BED85BD12450D91494481 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/ADClip7Proc.cpp */,
+				542C4636D0844F048B2BEFCB /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Air.cpp */,
+				C02B8D0334DE4BA3B954F66C /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/AirProc.cpp */,
+				0239854720854CD5BD5AE0FA /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/AirWinBaseClass_pluginRegistry.cpp */,
+				D8D18AF3767E40DB86A41093 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Apicolypse.cpp */,
+				DD4C0236509C47038B2D2A88 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/ApicolypseProc.cpp */,
+				2FB6176F48C4431594FE16BE /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/BassDrive.cpp */,
+				679642F5ABA342068E8ACCCD /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/BassDriveProc.cpp */,
+				19108A0D25DE430A9B7F0CBC /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/BitGlitter.cpp */,
+				7CB886E9154D4210BE8D0D9A /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/BitGlitterProc.cpp */,
+				49AA31E335034FD2B5289111 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/BlockParty.cpp */,
+				C6A48AA144DE4CFEBD4D09DE /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/BlockPartyProc.cpp */,
+				466C350A822947D1B7B9AD5C /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/BrightAmbience2.cpp */,
+				4DB3CE50C90B482699481271 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/BrightAmbience2Proc.cpp */,
+				DF1DA2AEF51347E5AA77C03B /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/BussColors4.cpp */,
+				3AC6D023818043ADAA8A5738 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/BussColors4Proc.cpp */,
+				B7794DFE9C704C5BAE1264AB /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/ButterComp2.cpp */,
+				58BFBF199BC54A3090998B3F /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/ButterComp2Proc.cpp */,
+				D067DA7E55C64557BB40C73D /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Cabs.cpp */,
+				89CDD8B3C5474179A4774720 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/CabsProc.cpp */,
+				41233C2B5E6D49229BB47878 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Capacitor.cpp */,
+				3EBF420407A242639893FA1C /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/CapacitorProc.cpp */,
+				7DB8F3929AA94D9F9C4A77E2 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Chamber.cpp */,
+				C0CC175EF4B6487480B355BB /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/ChamberProc.cpp */,
+				1EA3555AC8FB49AE80B703F4 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/ChromeOxide.cpp */,
+				78724B5AACAF40BC9FC7014D /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/ChromeOxideProc.cpp */,
+				B8B1D8A271E24B488F872D20 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Cojones.cpp */,
+				24DE5BCDB1254FA1B8C681AC /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/CojonesProc.cpp */,
+				1A6556DDB2454BB09A8D3859 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Compresaturator.cpp */,
+				6634CCD2CDDA4757B62BDB28 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/CompresaturatorProc.cpp */,
+				88510A2CA0074AA3803C6E59 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/CrunchyGrooveWear.cpp */,
+				8EF361BE6A4B48A4ABD18299 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/CrunchyGrooveWearProc.cpp */,
+				37CD69FD2A2449BEA7229CE1 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/DeBess.cpp */,
+				D063F8078B4340149A74E218 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/DeBessProc.cpp */,
+				AF35E99531094FF08280E4D8 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/DeEss.cpp */,
+				7FC760917C824F17835F8FE1 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/DeEssProc.cpp */,
+				972FB5F8CD9245639684AA9C /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/DeRez2.cpp */,
+				4BDDBA7F535847F281A1A799 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/DeRez2Proc.cpp */,
+				FD6A7F45058D410B9AC617D6 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/DeckWrecka.cpp */,
+				4099B1B140E0456EBC7B83CB /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/DeckWreckaProc.cpp */,
+				229FBEAB7AA84498952DD08A /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Density.cpp */,
+				90851C5ADA514A7DBB176EAC /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/DensityProc.cpp */,
+				C314C0E4155F43ECA359282E /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Drive.cpp */,
+				DC78437E508E42FE96DAE917 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/DriveProc.cpp */,
+				3ABCD8F905BE4B92ABFB3EEE /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/DrumSlam.cpp */,
+				076752388CBC421A88E3B2CF /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/DrumSlamProc.cpp */,
+				F537360407154B3AA5E1261E /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/DubCenter.cpp */,
+				1FF3D8476B03487CA5240469 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/DubCenterProc.cpp */,
+				05A77166E8DC45D0A16C3D23 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/DubSub.cpp */,
+				D9A4C7E5376C44509AC66AC3 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/DubSubProc.cpp */,
+				3C87514387EF4B37B2ED38B7 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/DustBunny.cpp */,
+				65984E61F23A402896A618D0 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/DustBunnyProc.cpp */,
+				54E62A30171241B9926C6581 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/FireAmp.cpp */,
+				96875AB0356B4DDD99048086 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/FireAmpProc.cpp */,
+				9933C3A2D4844795A5551DBB /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Focus.cpp */,
+				41CE1D7E8D9149FAB1B32AB5 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/FocusProc.cpp */,
+				CD257A04A9054AF1978DEA14 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Fracture.cpp */,
+				9CB926D993AD4DC18EAC4DA3 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/FractureProc.cpp */,
+				3F89153955C344069727B9B3 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Galactic.cpp */,
+				C974E8F5834B46D6A857E6B9 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/GalacticProc.cpp */,
+				2E130A49620A4D0392D6139A /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/GlitchShifter.cpp */,
+				E05C58361C184118BE985CA2 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/GlitchShifterProc.cpp */,
+				D049B6561ABE4712835A9FE5 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/GrooveWear.cpp */,
+				817AE4CDAB05485E8E829CA9 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/GrooveWearProc.cpp */,
+				EB1F1EC5F6BC49DCB5FDBB39 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/HardVacuum.cpp */,
+				D1ED22A281414D86B67C1D7F /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/HardVacuumProc.cpp */,
+				CB160D240EFD4672A38C06E8 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Hombre.cpp */,
+				66375DA283464DA78C223C95 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/HombreProc.cpp */,
+				D0335BA5F50B44369AECA1A5 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Infinity.cpp */,
+				4449BE3C5A674A35A7E60FEC /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/InfinityProc.cpp */,
+				A384086BF43C4504BC099128 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/IronOxide5.cpp */,
+				AB4CEB40613F44E99CB33178 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/IronOxide5Proc.cpp */,
+				1EAFB251AC9F4221A90E49E1 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Logical4.cpp */,
+				F6C948023005488A9B521FFD /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Logical4Proc.cpp */,
+				40C2E584C6DC4AF99FA9A231 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Loud.cpp */,
+				75D7F5B0902C4F938098EE68 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/LoudProc.cpp */,
+				C352C186BF154C6C95FEBB67 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/MackEQ.cpp */,
+				56D4E5AB8CD9437881B7CB4A /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/MackEQProc.cpp */,
+				13BEF36CB44D4AC3813B63D4 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Mackity.cpp */,
+				9F92817463664AC7A163E75B /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/MackityProc.cpp */,
+				960D2BB25FF84E0BAFA6707E /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/MatrixVerb.cpp */,
+				259A4DED3CDB4DCC9F81FEE6 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/MatrixVerbProc.cpp */,
+				DB1E68C6DA944785B1DD6E17 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Melt.cpp */,
+				A66F0F1FEF0F4446BBE062D9 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/MeltProc.cpp */,
+				733156B31AF14C4DA08ABB9A /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Mojo.cpp */,
+				224F94252A104F45A5CFE3F2 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/MojoProc.cpp */,
+				DB3683DFB2304EF0B3C84D32 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/NCSeventeen.cpp */,
+				C2E91841A1CE4B7BA3B0C641 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/NCSeventeenProc.cpp */,
+				279F19C450B04EA593702A8B /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Noise.cpp */,
+				5B7F675397FC4854A7C753D4 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/NoiseProc.cpp */,
+				3D8E6693EE72424C93D56287 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/NonlinearSpace.cpp */,
+				1939E32B34CF487DA351EC76 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/NonlinearSpaceProc.cpp */,
+				F2F57BEC2B524A6A86DFEC62 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/OneCornerClip.cpp */,
+				CD5D9E07CAA44FCF8EB283D2 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/OneCornerClipProc.cpp */,
+				07FE4803F34A4B0EAB712A7A /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Pafnuty.cpp */,
+				2316832951614F59A48D4B03 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/PafnutyProc.cpp */,
+				AB821CAD5FD4445B89D15783 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/PocketVerbs.cpp */,
+				07F3FEB613F046E38CDC5118 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/PocketVerbsProc.cpp */,
+				A9DDC531670149158467B204 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Point.cpp */,
+				F3ADBB953A96411FBB5B6F41 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/PointProc.cpp */,
+				E8F03AB41D74425CB2F91028 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Pop.cpp */,
+				2DB231D3116F46F393DF79B0 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/PopProc.cpp */,
+				8CE858CD3B3B4CAFA704EF86 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/PowerSag.cpp */,
+				3D411201290C431ABBEFBB0B /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/PowerSagProc.cpp */,
+				A913E8E52EDA45979B31DAB4 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Pressure4.cpp */,
+				135E9EBBEC1B426594B592BD /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Pressure4Proc.cpp */,
+				835F27290B524172BB9C3854 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/PyeWacket.cpp */,
+				F3DECDFF0F834A54A9275FA0 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/PyeWacketProc.cpp */,
+				ED2E119E466049859FBF6221 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/SingleEndedTriode.cpp */,
+				5B5EAB5A24E34664862826FA /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/SingleEndedTriodeProc.cpp */,
+				F5356422EC4F4C76BEE21317 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Slew.cpp */,
+				F80E5CCA6F23425E9B498C17 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Slew2.cpp */,
+				40DA9DB3259B41828BAD6012 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Slew2Proc.cpp */,
+				56502DD801704FBBAA7B48B2 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/SlewProc.cpp */,
+				FDBEEDB511F24183A42594C1 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Spiral2.cpp */,
+				145E74EAAFB346909FF1C350 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Spiral2Proc.cpp */,
+				E9CE97D6FCD6491E81785761 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/StarChild.cpp */,
+				0E072B183767429FB46B02FF /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/StarChildProc.cpp */,
+				E2A558E5D0444EC09A36DBBB /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Surge.cpp */,
+				445BA432D4BB4691AD9E770A /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/SurgeProc.cpp */,
+				D7B62031CA2A41A09E138C08 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/TapeDust.cpp */,
+				DA8DE38B7A6D4380B6010F27 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/TapeDustProc.cpp */,
+				8F8A6E0F8C8F4758A639027C /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/ToTape6.cpp */,
+				DD4C1A46E8C94DB2B856319A /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/ToTape6Proc.cpp */,
+				8706869D52F94E12BA83D9FF /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/ToVinyl4.cpp */,
+				F72B7FEE6EB949E18C0BAFAC /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/ToVinyl4Proc.cpp */,
+				F2832A282A334C2C984D501B /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/TripleSpread.cpp */,
+				C29BDAB4091A46F59A5B22AA /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/TripleSpreadProc.cpp */,
+				944233CA30344BABA6FB84E1 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/UnBox.cpp */,
+				67071B020F574859A9B32316 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/UnBoxProc.cpp */,
+				194A92C022CF4BFB9226661E /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/VariMu.cpp */,
+				B9376FBEBF704155B563E537 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/VariMuProc.cpp */,
+				45C478AF53884B8CBA63D8CE /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Verbity.cpp */,
+				6F73D963542D42B993EB4490 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/VerbityProc.cpp */,
+				094DD655BBF84674BCA4FE89 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/VoiceOfTheStarship.cpp */,
+				7129E1280CB148A2AB85ACBA /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/VoiceOfTheStarshipProc.cpp */,
+				FD27D56508854A0280AAD788 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/YBandpass.cpp */,
+				199E9A937C724962A9483FC2 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/YBandpassProc.cpp */,
+				549BBC3374AA44A184BBFBA1 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/YHighpass.cpp */,
+				EA0791866FAA494CBC9B7E06 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/YHighpassProc.cpp */,
+				D6FD2ED37E324DBB9141A663 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/YLowpass.cpp */,
+				28AAABCADCC2492F96E13F37 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/YLowpassProc.cpp */,
+				1FD583E89C684AD29DFE6522 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/YNotch.cpp */,
+				71C097584AE54ACFB7367334 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/YNotchProc.cpp */,
+				82F8CF6D7D104C1AAB536036 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/ZBandpass2.cpp */,
+				9E9F3496394944E1919B895D /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/ZBandpass2Proc.cpp */,
+				2E9C446FB0744C80B30B3604 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/ZHighpass2.cpp */,
+				B4A5C86847B54C59BF9AC1F4 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/ZHighpass2Proc.cpp */,
+				1FEB1D0819FD4D00B120D1A7 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/ZLowpass2.cpp */,
+				92344ED71C4D4F44A6EE83D0 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/ZLowpass2Proc.cpp */,
+				391A7D7384134D51BAC4914D /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/ZNotch2.cpp */,
+				F2D33EE4B4D3440597196A38 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/ZNotch2Proc.cpp */,
+			);
+			name = "Source Files";
+			sourceTree = "<group>";
+		};
+		A16C9E21ECFE4221A9931D30 = {
+			isa = PBXGroup;
+			children = (
+				CB9EA1B43A224E01B9949F34 /* ALL_BUILD */,
+				BC100D481E2547B9A58889B6 /* airwindows */,
+				6472B1BB1644481B8FC53EC6 /* Products */,
+				09A0030838BF4CB6B28114E4 /* Frameworks */,
+				10D75723ED374A1C930CBFB1 /* Resources */,
+			);
+			sourceTree = "<group>";
+		};
+		BC100D481E2547B9A58889B6 /* airwindows */ = {
+			isa = PBXGroup;
+			children = (
+				6486C5D5E8A540CCAE179DFD /* Header Files */,
+				BC65D8B7CE34490AB30B89F0 /* Resources */,
+				7579F85B2FFB425C8D6362BB /* Source Files */,
+				34600E50A74C4B00B8481962 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/CMakeLists.txt */,
+			);
+			name = airwindows;
+			sourceTree = "<group>";
+		};
+		BC65D8B7CE34490AB30B89F0 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				49D7D2EC6A98463E99B1CC80 /* /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/airwindows/CMakeFiles/airwindows.dir/Info.plist */,
+			);
+			name = Resources;
+			sourceTree = "<group>";
+		};
+		CB9EA1B43A224E01B9949F34 /* ALL_BUILD */ = {
+			isa = PBXGroup;
+			children = (
+				35933FB5E8DB4B80A76F2B09 /* CMake Rules */,
+				4E698E8836E44B7E858D4DD3 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/CMakeLists.txt */,
+			);
+			name = ALL_BUILD;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		77CABB7CFE05197ECC4D7AA6 /* airwindows */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 5B2A9AF547F04F6A82B4EA4C /* Build configuration list for PBXNativeTarget "airwindows" */;
+			buildPhases = (
+				CFC16F8B3061434CABDB94C8 /* Sources */,
+				3339847A913E486ABB0BF79E /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				1D54357E3B054044B93483E6 /* PBXTargetDependency */,
+			);
+			name = airwindows;
+			productName = airwindows;
+			productReference = 033F016D4A474F1BA7E8B6F2 /* airwindows */;
+			productType = "com.apple.product-type.library.static";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		B8E33EF644EB4250A76F8BE6 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 2660;
+			};
+			buildConfigurationList = 5864D866C8B84970A36AA9EA /* Build configuration list for PBXProject "airwindows" */;
+			buildSettings = {
+			};
+			buildStyles = (
+				8ADA4C1EBE6449A8B8A1281D /* Debug */,
+				42F8E18F84DF430CBA744FA9 /* Release */,
+				AB7694128A484D248AD4D5A8 /* MinSizeRel */,
+				3FDB5A7A09DD47028AA6E7F8 /* RelWithDebInfo */,
+			);
+			compatibilityVersion = "Xcode 3.2";
+			hasScannedForEncodings = 0;
+			mainGroup = A16C9E21ECFE4221A9931D30;
+			projectDirPath = /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows;
+			projectRoot = "";
+			targets = (
+				412D95C48532286282373140 /* ALL_BUILD */,
+				77CABB7CFE05197ECC4D7AA6 /* airwindows */,
+				77C1A3C52D322D9730269CA7 /* install */,
+				89D95F8BA93D09359DDCC172 /* ZERO_CHECK */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		15100753D62992536EEA127D /* Generate CMakeFiles/ALL_BUILD */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "Generate CMakeFiles/ALL_BUILD";
+			outputPaths = (
+/Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/airwindows/CMakeFiles/ALL_BUILD			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "set -e
+if test \"$CONFIGURATION\" = \"Debug\"; then :
+  cd /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/airwindows
+  echo Build\\ all\\ projects
+fi
+if test \"$CONFIGURATION\" = \"Release\"; then :
+  cd /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/airwindows
+  echo Build\\ all\\ projects
+fi
+if test \"$CONFIGURATION\" = \"MinSizeRel\"; then :
+  cd /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/airwindows
+  echo Build\\ all\\ projects
+fi
+if test \"$CONFIGURATION\" = \"RelWithDebInfo\"; then :
+  cd /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/airwindows
+  echo Build\\ all\\ projects
+fi
+";
+			showEnvVarsInLog = 0;
+		};
+		3C0110FC8322DE7E50886E21 = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "# shell script goes here
+exit 0";
+			showEnvVarsInLog = 0;
+		};
+		5A872F54FC05B8BB24073B22 /* Generate CMakeFiles/ZERO_CHECK */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "Generate CMakeFiles/ZERO_CHECK";
+			outputPaths = (
+/Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/airwindows/CMakeFiles/ZERO_CHECK			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "set -e
+if test \"$CONFIGURATION\" = \"Debug\"; then :
+  cd /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/airwindows
+  make -f /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/airwindows/CMakeScripts/ReRunCMake.make
+fi
+if test \"$CONFIGURATION\" = \"Release\"; then :
+  cd /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/airwindows
+  make -f /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/airwindows/CMakeScripts/ReRunCMake.make
+fi
+if test \"$CONFIGURATION\" = \"MinSizeRel\"; then :
+  cd /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/airwindows
+  make -f /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/airwindows/CMakeScripts/ReRunCMake.make
+fi
+if test \"$CONFIGURATION\" = \"RelWithDebInfo\"; then :
+  cd /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/airwindows
+  make -f /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/airwindows/CMakeScripts/ReRunCMake.make
+fi
+";
+			showEnvVarsInLog = 0;
+		};
+		87AF4882E018677E2624B544 = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "# shell script goes here
+exit 0";
+			showEnvVarsInLog = 0;
+		};
+		93426DA6A4AC2C2AC9CE883C /* CMake PostBuild Rules */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "CMake PostBuild Rules";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "set -e
+if test \"$CONFIGURATION\" = \"Debug\"; then :
+  cd /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/airwindows
+  /opt/homebrew/bin/cmake -DBUILD_TYPE=$CONFIGURATION -DEFFECTIVE_PLATFORM_NAME=$EFFECTIVE_PLATFORM_NAME -P cmake_install.cmake
+fi
+if test \"$CONFIGURATION\" = \"Release\"; then :
+  cd /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/airwindows
+  /opt/homebrew/bin/cmake -DBUILD_TYPE=$CONFIGURATION -DEFFECTIVE_PLATFORM_NAME=$EFFECTIVE_PLATFORM_NAME -P cmake_install.cmake
+fi
+if test \"$CONFIGURATION\" = \"MinSizeRel\"; then :
+  cd /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/airwindows
+  /opt/homebrew/bin/cmake -DBUILD_TYPE=$CONFIGURATION -DEFFECTIVE_PLATFORM_NAME=$EFFECTIVE_PLATFORM_NAME -P cmake_install.cmake
+fi
+if test \"$CONFIGURATION\" = \"RelWithDebInfo\"; then :
+  cd /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/airwindows
+  /opt/homebrew/bin/cmake -DBUILD_TYPE=$CONFIGURATION -DEFFECTIVE_PLATFORM_NAME=$EFFECTIVE_PLATFORM_NAME -P cmake_install.cmake
+fi
+";
+			showEnvVarsInLog = 0;
+		};
+		9B50530E35CC49C82C2FACCF = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "# shell script goes here
+exit 0";
+			showEnvVarsInLog = 0;
+		};
+/* End PBXShellScriptBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		CFC16F8B3061434CABDB94C8 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				05D180A8C2774540B52C75A6 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/ADClip7.cpp */,
+				3B1C0DDB28E844C4AA97C3E7 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/ADClip7Proc.cpp */,
+				1A248BE75D4044E080E3FC9E /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Air.cpp */,
+				B105B7EB1211412B992675F3 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/AirProc.cpp */,
+				122E12D6B13E434C83B5246E /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/AirWinBaseClass_pluginRegistry.cpp */,
+				BDC25FA065A242828EE72484 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Apicolypse.cpp */,
+				0D3C9A1AE05B46EF8F2C86B3 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/ApicolypseProc.cpp */,
+				57325CFAE5AA43FB82C04C09 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/BassDrive.cpp */,
+				9F25172925EB4AB8B342387F /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/BassDriveProc.cpp */,
+				A758EF77BE5043E896783E7D /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/BitGlitter.cpp */,
+				0AF0D9EF219A415CA190B25E /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/BitGlitterProc.cpp */,
+				007AF1551A5F467F91946594 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/BlockParty.cpp */,
+				506A8DE404264FB1B55FD1D8 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/BlockPartyProc.cpp */,
+				93627C8A0F434396901055BA /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/BrightAmbience2.cpp */,
+				89C2F44C4C2D4D54A57E25D9 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/BrightAmbience2Proc.cpp */,
+				F47CB15C3BAA4ADDAAA51659 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/BussColors4.cpp */,
+				D16DA9E6496B485AB04065D0 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/BussColors4Proc.cpp */,
+				3FC0D4B8D59949E3B37CE549 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/ButterComp2.cpp */,
+				3F00D01AB3A6498EB00A26BB /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/ButterComp2Proc.cpp */,
+				324091203AB04BC386B4852D /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Cabs.cpp */,
+				3F66B2F336FC40DCB0F5D4DC /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/CabsProc.cpp */,
+				C0838B83E499451685716122 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Capacitor.cpp */,
+				0E33B27413BD4E498F91CB9B /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/CapacitorProc.cpp */,
+				EFE12124B7BE4C0DB23E717F /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Chamber.cpp */,
+				D4D0DA003CAC41259385C1D7 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/ChamberProc.cpp */,
+				61E94B0FB6A54C78AF734E08 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/ChromeOxide.cpp */,
+				99CF6E9F0F5346949BE77A89 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/ChromeOxideProc.cpp */,
+				32E372F65D7D425A83795281 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Cojones.cpp */,
+				EA93727D296B48B9A8AB5F8E /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/CojonesProc.cpp */,
+				C8F2BE696AF2438089E32EAA /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Compresaturator.cpp */,
+				82EB887112264B588BAAA5E4 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/CompresaturatorProc.cpp */,
+				A9F9679A2DC8407CAFCD4DBD /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/CrunchyGrooveWear.cpp */,
+				394EFBCEFFFC418795AC0D54 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/CrunchyGrooveWearProc.cpp */,
+				CEC5E79078324D4E979B8EB5 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/DeBess.cpp */,
+				F93A9BA81337445C883F6445 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/DeBessProc.cpp */,
+				9FF2F275368449C39AE51186 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/DeEss.cpp */,
+				1D99802E77B546148E418382 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/DeEssProc.cpp */,
+				F5425192E6714923BEE3DF4A /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/DeRez2.cpp */,
+				2F31AE7CB7ED4A068A9306AB /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/DeRez2Proc.cpp */,
+				5497638EF37D4DAEAC825924 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/DeckWrecka.cpp */,
+				1442C14AFA384946BC541E95 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/DeckWreckaProc.cpp */,
+				6C1348A0986C49208D306084 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Density.cpp */,
+				E9659EE41DD0472FBF37B192 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/DensityProc.cpp */,
+				C15833F888F841A296CDF3E0 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Drive.cpp */,
+				C9E9991B2B2A49CD9BA66A55 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/DriveProc.cpp */,
+				65FF5207E5414CC698809810 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/DrumSlam.cpp */,
+				DD544FF4FDB54C4CAE346660 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/DrumSlamProc.cpp */,
+				3631DB6D2108463BA7D2E64D /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/DubCenter.cpp */,
+				805571E54F074D32AC7502E7 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/DubCenterProc.cpp */,
+				1F977CAF33B04261A260DC2C /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/DubSub.cpp */,
+				B558E3CE46EB4AB9B62A72AE /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/DubSubProc.cpp */,
+				91709FD59BFB4927833BC048 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/DustBunny.cpp */,
+				6996435EB1704E97AE753694 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/DustBunnyProc.cpp */,
+				52A79E0317DE4860ACF4C6DA /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/FireAmp.cpp */,
+				1A0E5673221142FD9E9E8EF4 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/FireAmpProc.cpp */,
+				0B7E50082A5944CC99DACC7A /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Focus.cpp */,
+				A98DA650EF0F451EB7940E1B /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/FocusProc.cpp */,
+				46DF0BC3B2AF4FE898BD43B9 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Fracture.cpp */,
+				681A4437C14942ECA4969684 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/FractureProc.cpp */,
+				B592CE92301D47DF92D34E9E /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Galactic.cpp */,
+				F821996003614D3BA56D8E9D /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/GalacticProc.cpp */,
+				AFD7E0BEB09E4BF3B682E2BF /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/GlitchShifter.cpp */,
+				D8D825D4EA3D4DACBA52BBC1 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/GlitchShifterProc.cpp */,
+				9A927217C3DF4AAF8E1B8283 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/GrooveWear.cpp */,
+				416F6B616E4F4DC9BC033ADA /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/GrooveWearProc.cpp */,
+				D7B78DC170BA47D2B2247784 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/HardVacuum.cpp */,
+				C9E6362E23C247ACB36CADA8 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/HardVacuumProc.cpp */,
+				7A5FAC02F49C459E831760BA /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Hombre.cpp */,
+				B02B11ED00E441B5822F5F51 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/HombreProc.cpp */,
+				B5E3A60CB2C14179AA43715C /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Infinity.cpp */,
+				4EC1792C882B451086250DB7 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/InfinityProc.cpp */,
+				17AF3B75FA4E4B2094FF7ABF /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/IronOxide5.cpp */,
+				B00C8DF8F8814159BF132F22 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/IronOxide5Proc.cpp */,
+				9DC3649F97034FC8BDBEC21E /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Logical4.cpp */,
+				B6A9C88C79B84EBF9A543DC1 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Logical4Proc.cpp */,
+				43BCE2D2376B4BC59D9B6181 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Loud.cpp */,
+				45E07529208941359B326E7D /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/LoudProc.cpp */,
+				6DEBA2AAC2794D87B06AE003 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/MackEQ.cpp */,
+				529E8DA82E304C2FB21C6266 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/MackEQProc.cpp */,
+				6E0D127E9F504DFC8FBF1F3F /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Mackity.cpp */,
+				06067C807EA7463DB8A5261D /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/MackityProc.cpp */,
+				890028958F8441D8BBA7BF09 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/MatrixVerb.cpp */,
+				68380C9040044B088103E70A /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/MatrixVerbProc.cpp */,
+				0994102BA35248FFA95FB79C /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Melt.cpp */,
+				9C701A2FE4194487AB4A6730 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/MeltProc.cpp */,
+				3B6E2815282048868A000B85 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Mojo.cpp */,
+				212C44CEBD674A66A2169E5A /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/MojoProc.cpp */,
+				A09C7D96DBF641E7B7C446CA /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/NCSeventeen.cpp */,
+				990E498F730146F785E49ECE /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/NCSeventeenProc.cpp */,
+				F5E3E22C3E8E43AAA14E0EBF /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Noise.cpp */,
+				B0829FACA6AE4EBABCC62C96 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/NoiseProc.cpp */,
+				2E752E9AC70F485083F9CC90 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/NonlinearSpace.cpp */,
+				D601E67EC46E481081B94A97 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/NonlinearSpaceProc.cpp */,
+				0CC59B39024A491FB9159532 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/OneCornerClip.cpp */,
+				9EA6260F2FC141D0BD2356DD /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/OneCornerClipProc.cpp */,
+				4A9D6DEA794D43A3BDE0AC40 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Pafnuty.cpp */,
+				B2F6983284DA42EC9EBACC51 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/PafnutyProc.cpp */,
+				8E6010DE7D10423CA5D900AC /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/PocketVerbs.cpp */,
+				CD83FC65B5F44F08917BF6DA /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/PocketVerbsProc.cpp */,
+				6E427A8AD2594604BF5CB809 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Point.cpp */,
+				0089C606B6694F42B1763210 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/PointProc.cpp */,
+				9DE28B0E04DE4C72BD0B1DE2 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Pop.cpp */,
+				4EED9BFCA290445D900A98D8 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/PopProc.cpp */,
+				162A5DEE4659434CA27C4BF0 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/PowerSag.cpp */,
+				D71E2BEE021647D69A7D36E7 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/PowerSagProc.cpp */,
+				64E3AE511EF144A5A70D36FD /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Pressure4.cpp */,
+				4B1EE2999E91489490E06652 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Pressure4Proc.cpp */,
+				2F480A744BEA43FFA495AD7A /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/PyeWacket.cpp */,
+				A5BE4B27256D4187AE5CB667 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/PyeWacketProc.cpp */,
+				4846454DA6294AFA9721D380 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/SingleEndedTriode.cpp */,
+				9DD75A3D037E4617B80B3277 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/SingleEndedTriodeProc.cpp */,
+				7462DB58ECEF461E819530EB /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Slew.cpp */,
+				4E7AB1A8C97B4DC988F7B014 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Slew2.cpp */,
+				FE26E75D65054034A87CE1A7 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Slew2Proc.cpp */,
+				5618803BB10E42F79C8AA908 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/SlewProc.cpp */,
+				5458E457809D44DEB9A7BFF6 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Spiral2.cpp */,
+				77135C39C3524F8B9FCC9470 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Spiral2Proc.cpp */,
+				7C5FFD8F55764F0D803CAC8B /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/StarChild.cpp */,
+				77E072EBEF4748759077BC97 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/StarChildProc.cpp */,
+				C4C3B519B13345F5B2702912 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Surge.cpp */,
+				C932E97FC2B24795A9D355E9 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/SurgeProc.cpp */,
+				9F73EFB34D06418BABDBA782 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/TapeDust.cpp */,
+				2405B58E3DBB4BDE896A48C4 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/TapeDustProc.cpp */,
+				C4C2323E49FA43F2815DE666 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/ToTape6.cpp */,
+				0B2E2A69EFA64869A01B980A /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/ToTape6Proc.cpp */,
+				8AB77326466A48EFAD7867EE /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/ToVinyl4.cpp */,
+				361D00B375C8478488156F37 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/ToVinyl4Proc.cpp */,
+				8665054BCFB7492F91D6F542 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/TripleSpread.cpp */,
+				F25F4330B60A47FDB563BF92 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/TripleSpreadProc.cpp */,
+				CABDC000EC9146659DBCBE11 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/UnBox.cpp */,
+				3A0653FABD444264BD8A9D9E /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/UnBoxProc.cpp */,
+				6BA03E98791C4ADE99AE2FA8 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/VariMu.cpp */,
+				2F4F554C5B854765BFFAC079 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/VariMuProc.cpp */,
+				866A01E07C6542F69C542F06 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/Verbity.cpp */,
+				539482E9CA214EC29BC2F117 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/VerbityProc.cpp */,
+				F9BC4E2133AA49AEB920CB9E /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/VoiceOfTheStarship.cpp */,
+				958D259929634793990B02E7 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/VoiceOfTheStarshipProc.cpp */,
+				B84284A886034010B9BEF24B /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/YBandpass.cpp */,
+				5F649D163486453D8D35E8F7 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/YBandpassProc.cpp */,
+				62BB39ECEBEB41B781D5D70F /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/YHighpass.cpp */,
+				72214A74A49E45548E2C24D1 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/YHighpassProc.cpp */,
+				B578E493B6FD4CA4A17F21F0 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/YLowpass.cpp */,
+				1E43C79DD4E34E6B8E1BEA86 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/YLowpassProc.cpp */,
+				51BA7C63C0184BC29C1072A3 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/YNotch.cpp */,
+				C688F61C31AE43A78514E8E4 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/YNotchProc.cpp */,
+				C44299941C124A09AB2A4BD6 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/ZBandpass2.cpp */,
+				C5A0A8D8B8F1407390783788 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/ZBandpass2Proc.cpp */,
+				D22EC8CBEB644368B2D3A120 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/ZHighpass2.cpp */,
+				4210B2C220264AFFB4138402 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/ZHighpass2Proc.cpp */,
+				B33829A5411A4A669A084917 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/ZLowpass2.cpp */,
+				00F9E2DE3A614E0AA304E177 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/ZLowpass2Proc.cpp */,
+				54E8B5967CDC4281A1C0981D /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/ZNotch2.cpp */,
+				E57D7C14ACBE40A6946BBE86 /* /Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/src/ZNotch2Proc.cpp */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		1D54357E3B054044B93483E6 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 89D95F8BA93D09359DDCC172 /* ZERO_CHECK */;
+			targetProxy = C7CDB0066D634F669792EFC4 /* PBXContainerItemProxy */;
+		};
+		4370221A78AA4932B5CEC5FC /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 89D95F8BA93D09359DDCC172 /* ZERO_CHECK */;
+			targetProxy = C91E5C9FEC2945CE8428EDA3 /* PBXContainerItemProxy */;
+		};
+		72C19163CC8C4B9EB2F34B3D /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 77CABB7CFE05197ECC4D7AA6 /* airwindows */;
+			targetProxy = C306A043F51647D7AE4304B3 /* PBXContainerItemProxy */;
+		};
+		CAE4FC19526742F5B1F04DC2 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 412D95C48532286282373140 /* ALL_BUILD */;
+			targetProxy = 6BFFDBF9603A4E9FAC55985B /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		06AACFCB663E4ADA8884CE84 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COMBINE_HIDPI_IMAGES = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'","$(inherited)");
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				INSTALL_PATH = "";
+				OTHER_LDFLAGS = ("","$(inherited)");
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = ALL_BUILD;
+				SECTORDER_FLAGS = "";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("$(inherited)");
+			};
+			name = Debug;
+		};
+		09AB34AB83284C5FAD2CA875 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = arm64;
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = B973YVS5A5;
+				IPHONEOS_DEPLOYMENT_TARGET = 10.15;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SYMROOT = /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/build;
+			};
+			name = Release;
+		};
+		09D153E4616F4719A1A1F17F /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COMBINE_HIDPI_IMAGES = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'","$(inherited)");
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				INSTALL_PATH = "";
+				OTHER_LDFLAGS = ("","$(inherited)");
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = install;
+				SECTORDER_FLAGS = "";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("$(inherited)");
+			};
+			name = Release;
+		};
+		0C8312B76FF448C4939E068B /* RelWithDebInfo */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COMBINE_HIDPI_IMAGES = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'","$(inherited)");
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				INSTALL_PATH = "";
+				OTHER_LDFLAGS = ("","$(inherited)");
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = install;
+				SECTORDER_FLAGS = "";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("$(inherited)");
+			};
+			name = RelWithDebInfo;
+		};
+		178D15E3921843B78597000F /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COMBINE_HIDPI_IMAGES = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'","$(inherited)");
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				INSTALL_PATH = "";
+				OTHER_LDFLAGS = ("","$(inherited)");
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = ALL_BUILD;
+				SECTORDER_FLAGS = "";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("$(inherited)");
+			};
+			name = Release;
+		};
+		1BD885D798004801BF3682F1 /* RelWithDebInfo */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COMBINE_HIDPI_IMAGES = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'","$(inherited)");
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				INSTALL_PATH = "";
+				OTHER_LDFLAGS = ("","$(inherited)");
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = ALL_BUILD;
+				SECTORDER_FLAGS = "";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("$(inherited)");
+			};
+			name = RelWithDebInfo;
+		};
+		2A69036C77774FF792C14B03 /* MinSizeRel */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COMBINE_HIDPI_IMAGES = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'","$(inherited)");
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				INSTALL_PATH = "";
+				OTHER_LDFLAGS = ("","$(inherited)");
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = ZERO_CHECK;
+				SECTORDER_FLAGS = "";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("$(inherited)");
+			};
+			name = MinSizeRel;
+		};
+		4696E227A85B4DB7998197CD /* RelWithDebInfo */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = arm64;
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = B973YVS5A5;
+				IPHONEOS_DEPLOYMENT_TARGET = 10.15;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SYMROOT = /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/build;
+			};
+			name = RelWithDebInfo;
+		};
+		48AAF1F0CCBA4A1EAC8CC5B1 /* MinSizeRel */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COMBINE_HIDPI_IMAGES = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'","$(inherited)");
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				INSTALL_PATH = "";
+				OTHER_LDFLAGS = ("","$(inherited)");
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = install;
+				SECTORDER_FLAGS = "";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("$(inherited)");
+			};
+			name = MinSizeRel;
+		};
+		4993DA461CD54D6392CE4AC1 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = arm64;
+				COMBINE_HIDPI_IMAGES = YES;
+				CONFIGURATION_BUILD_DIR = "/Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/airwindows/Debug${EFFECTIVE_PLATFORM_NAME}";
+				EXECUTABLE_PREFIX = lib;
+				EXECUTABLE_SUFFIX = .a;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'","'SURGE_INCLUDE_AIRWINDOWS=1'","'AudioEffectX=AirWinBaseClass'","'VstPlugCategory=long'","$(inherited)");
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = (/Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/include,"$(inherited)");
+				INSTALL_PATH = "";
+				LIBRARY_STYLE = STATIC;
+				LLVM_LTO = YES_THIN;
+				ONLY_ACTIVE_ARCH = NO;
+				OTHER_CPLUSPLUSFLAGS = "   '-std=c++20' '-flto=thin' -fPIC -fvisibility=hidden -fvisibility-inlines-hidden -Wno-multichar -fno-math-errno -fno-trapping-math -fno-char8_t -Wno-unused-command-line-argument -Wno-deprecated-declarations '-Werror=inconsistent-missing-override' '-Werror=logical-op-parentheses' '-Werror=dynamic-class-memaccess' '-Werror=undefined-bool-conversion' '-Werror=bitwise-op-parentheses' '-Werror=pointer-bool-conversion' -faligned-allocation -fasm-blocks ";
+				OTHER_LIBTOOLFLAGS = ("");
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = airwindows;
+				SECTORDER_FLAGS = "";
+				TARGET_TEMP_DIR = "/Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/build/airwindows.build/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("$(inherited)");
+			};
+			name = Debug;
+		};
+		536A45AF06D244A1A909C967 /* RelWithDebInfo */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COMBINE_HIDPI_IMAGES = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'","$(inherited)");
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				INSTALL_PATH = "";
+				OTHER_LDFLAGS = ("","$(inherited)");
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = ZERO_CHECK;
+				SECTORDER_FLAGS = "";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("$(inherited)");
+			};
+			name = RelWithDebInfo;
+		};
+		5CEA794277F146028549C780 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COMBINE_HIDPI_IMAGES = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'","$(inherited)");
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				INSTALL_PATH = "";
+				OTHER_LDFLAGS = ("","$(inherited)");
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = install;
+				SECTORDER_FLAGS = "";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("$(inherited)");
+			};
+			name = Debug;
+		};
+		647A786691514A1A9B1CD1B5 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COMBINE_HIDPI_IMAGES = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'","$(inherited)");
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				INSTALL_PATH = "";
+				OTHER_LDFLAGS = ("","$(inherited)");
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = ZERO_CHECK;
+				SECTORDER_FLAGS = "";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("$(inherited)");
+			};
+			name = Debug;
+		};
+		6E56C5B29A51402B9161D7BA /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = arm64;
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = B973YVS5A5;
+				IPHONEOS_DEPLOYMENT_TARGET = 10.15;
+				SDKROOT = iphoneos;
+				SYMROOT = /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/build;
+			};
+			name = Debug;
+		};
+		819E5EBCA9D54FD786BE8BEE /* MinSizeRel */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = arm64;
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = B973YVS5A5;
+				IPHONEOS_DEPLOYMENT_TARGET = 10.15;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SYMROOT = /Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/build;
+			};
+			name = MinSizeRel;
+		};
+		8A1F373C30D041359A7E0D42 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = arm64;
+				COMBINE_HIDPI_IMAGES = YES;
+				CONFIGURATION_BUILD_DIR = "/Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/airwindows/Release${EFFECTIVE_PLATFORM_NAME}";
+				EXECUTABLE_PREFIX = lib;
+				EXECUTABLE_SUFFIX = .a;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 3;
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'","'SURGE_INCLUDE_AIRWINDOWS=1'","'AudioEffectX=AirWinBaseClass'","'VstPlugCategory=long'","$(inherited)");
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = (/Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/include,"$(inherited)");
+				INSTALL_PATH = "";
+				LIBRARY_STYLE = STATIC;
+				LLVM_LTO = YES_THIN;
+				ONLY_ACTIVE_ARCH = NO;
+				OTHER_CPLUSPLUSFLAGS = "    -DNDEBUG '-std=c++20' '-flto=thin' -fPIC -fvisibility=hidden -fvisibility-inlines-hidden -Wno-multichar -fno-math-errno -fno-trapping-math -fno-char8_t -Wno-unused-command-line-argument -Wno-deprecated-declarations '-Werror=inconsistent-missing-override' '-Werror=logical-op-parentheses' '-Werror=dynamic-class-memaccess' '-Werror=undefined-bool-conversion' '-Werror=bitwise-op-parentheses' '-Werror=pointer-bool-conversion' -faligned-allocation -fasm-blocks ";
+				OTHER_LIBTOOLFLAGS = ("");
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = airwindows;
+				SECTORDER_FLAGS = "";
+				TARGET_TEMP_DIR = "/Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/build/airwindows.build/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("$(inherited)");
+			};
+			name = Release;
+		};
+		952104962256481DA64C4A74 /* MinSizeRel */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = arm64;
+				COMBINE_HIDPI_IMAGES = YES;
+				CONFIGURATION_BUILD_DIR = "/Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/airwindows/MinSizeRel${EFFECTIVE_PLATFORM_NAME}";
+				EXECUTABLE_PREFIX = lib;
+				EXECUTABLE_SUFFIX = .a;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = s;
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'","'SURGE_INCLUDE_AIRWINDOWS=1'","'AudioEffectX=AirWinBaseClass'","'VstPlugCategory=long'","$(inherited)");
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = (/Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/include,"$(inherited)");
+				INSTALL_PATH = "";
+				LIBRARY_STYLE = STATIC;
+				LLVM_LTO = YES_THIN;
+				ONLY_ACTIVE_ARCH = NO;
+				OTHER_CPLUSPLUSFLAGS = "    -DNDEBUG '-std=c++20' '-flto=thin' -fPIC -fvisibility=hidden -fvisibility-inlines-hidden -Wno-multichar -fno-math-errno -fno-trapping-math -fno-char8_t -Wno-unused-command-line-argument -Wno-deprecated-declarations '-Werror=inconsistent-missing-override' '-Werror=logical-op-parentheses' '-Werror=dynamic-class-memaccess' '-Werror=undefined-bool-conversion' '-Werror=bitwise-op-parentheses' '-Werror=pointer-bool-conversion' -faligned-allocation -fasm-blocks ";
+				OTHER_LIBTOOLFLAGS = ("");
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = airwindows;
+				SECTORDER_FLAGS = "";
+				TARGET_TEMP_DIR = "/Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/build/airwindows.build/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("$(inherited)");
+			};
+			name = MinSizeRel;
+		};
+		995FFA78D8C24819B43D59CC /* MinSizeRel */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COMBINE_HIDPI_IMAGES = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'","$(inherited)");
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				INSTALL_PATH = "";
+				OTHER_LDFLAGS = ("","$(inherited)");
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = ALL_BUILD;
+				SECTORDER_FLAGS = "";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("$(inherited)");
+			};
+			name = MinSizeRel;
+		};
+		B1D41A2519D5400DA03435DD /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COMBINE_HIDPI_IMAGES = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'","$(inherited)");
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				INSTALL_PATH = "";
+				OTHER_LDFLAGS = ("","$(inherited)");
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = ZERO_CHECK;
+				SECTORDER_FLAGS = "";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("$(inherited)");
+			};
+			name = Release;
+		};
+		B6DF1FB827864E25913A8E43 /* RelWithDebInfo */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = arm64;
+				COMBINE_HIDPI_IMAGES = YES;
+				CONFIGURATION_BUILD_DIR = "/Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/libs/airwindows/RelWithDebInfo${EFFECTIVE_PLATFORM_NAME}";
+				EXECUTABLE_PREFIX = lib;
+				EXECUTABLE_SUFFIX = .a;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 2;
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'","'SURGE_INCLUDE_AIRWINDOWS=1'","'AudioEffectX=AirWinBaseClass'","'VstPlugCategory=long'","$(inherited)");
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = (/Volumes/KJSL/workspace/github_kevleyski/surge/libs/airwindows/include,"$(inherited)");
+				INSTALL_PATH = "";
+				LIBRARY_STYLE = STATIC;
+				LLVM_LTO = YES_THIN;
+				ONLY_ACTIVE_ARCH = NO;
+				OTHER_CPLUSPLUSFLAGS = "       -DNDEBUG '-std=c++20' '-flto=thin' -fPIC -fvisibility=hidden -fvisibility-inlines-hidden -Wno-multichar -fno-math-errno -fno-trapping-math -fno-char8_t -Wno-unused-command-line-argument -Wno-deprecated-declarations '-Werror=inconsistent-missing-override' '-Werror=logical-op-parentheses' '-Werror=dynamic-class-memaccess' '-Werror=undefined-bool-conversion' '-Werror=bitwise-op-parentheses' '-Werror=pointer-bool-conversion' -faligned-allocation -fasm-blocks ";
+				OTHER_LIBTOOLFLAGS = ("");
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = airwindows;
+				SECTORDER_FLAGS = "";
+				TARGET_TEMP_DIR = "/Volumes/KJSL/workspace/github_kevleyski/surge/build_ios/build/airwindows.build/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("$(inherited)");
+			};
+			name = RelWithDebInfo;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		5864D866C8B84970A36AA9EA /* Build configuration list for PBXProject "airwindows" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				6E56C5B29A51402B9161D7BA /* Debug */,
+				09AB34AB83284C5FAD2CA875 /* Release */,
+				819E5EBCA9D54FD786BE8BEE /* MinSizeRel */,
+				4696E227A85B4DB7998197CD /* RelWithDebInfo */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		5B2A9AF547F04F6A82B4EA4C /* Build configuration list for PBXNativeTarget "airwindows" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				4993DA461CD54D6392CE4AC1 /* Debug */,
+				8A1F373C30D041359A7E0D42 /* Release */,
+				952104962256481DA64C4A74 /* MinSizeRel */,
+				B6DF1FB827864E25913A8E43 /* RelWithDebInfo */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		85D42EF8F7024D28ABCA3428 /* Build configuration list for PBXAggregateTarget "install" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				5CEA794277F146028549C780 /* Debug */,
+				09D153E4616F4719A1A1F17F /* Release */,
+				48AAF1F0CCBA4A1EAC8CC5B1 /* MinSizeRel */,
+				0C8312B76FF448C4939E068B /* RelWithDebInfo */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		A8154006A21C4F938C36937A /* Build configuration list for PBXAggregateTarget "ZERO_CHECK" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				647A786691514A1A9B1CD1B5 /* Debug */,
+				B1D41A2519D5400DA03435DD /* Release */,
+				2A69036C77774FF792C14B03 /* MinSizeRel */,
+				536A45AF06D244A1A909C967 /* RelWithDebInfo */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		CE370F15E36948BD97AF68D7 /* Build configuration list for PBXAggregateTarget "ALL_BUILD" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				06AACFCB663E4ADA8884CE84 /* Debug */,
+				178D15E3921843B78597000F /* Release */,
+				995FFA78D8C24819B43D59CC /* MinSizeRel */,
+				1BD885D798004801BF3682F1 /* RelWithDebInfo */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = B8E33EF644EB4250A76F8BE6 /* Project object */;
+}

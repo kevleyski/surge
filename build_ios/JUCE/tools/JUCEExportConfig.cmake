@@ -1,7 +1,7 @@
 # ==============================================================================
 #
 #  This file is part of the JUCE library.
-#  Copyright (c) 2020 - Raw Material Software Limited
+#  Copyright (c) - Raw Material Software Limited
 #
 #  JUCE is an open source library subject to commercial or open-source
 #  licensing.
@@ -44,6 +44,8 @@ endmacro()
 
 ####################################################################################
 
+include("${CMAKE_CURRENT_LIST_DIR}/LV2_HELPER.cmake")
+
 if(NOT TARGET juce::juceaide)
     add_executable(juce::juceaide IMPORTED)
     set_target_properties(juce::juceaide PROPERTIES
@@ -55,15 +57,18 @@ check_required_components("JUCE")
 set(JUCE_MODULES_DIR "/Volumes/KJSL/workspace/github_kevleyski/surge/libs/JUCE/modules" CACHE INTERNAL
     "The path to JUCE modules")
 
+include("/Volumes/KJSL/workspace/github_kevleyski/surge/libs/JUCE/extras/Build/CMake/JUCEModuleSupport.cmake")
 include("/Volumes/KJSL/workspace/github_kevleyski/surge/libs/JUCE/extras/Build/CMake/JUCEUtils.cmake")
 
 set(_juce_modules
     juce_analytics
+    juce_animation
     juce_audio_basics
     juce_audio_devices
     juce_audio_formats
     juce_audio_plugin_client
     juce_audio_processors
+    juce_audio_processors_headless
     juce_audio_utils
     juce_box2d
     juce_core
@@ -74,6 +79,8 @@ set(_juce_modules
     juce_graphics
     juce_gui_basics
     juce_gui_extra
+    juce_javascript
+    juce_midi_ci
     juce_opengl
     juce_osc
     juce_product_unlocking

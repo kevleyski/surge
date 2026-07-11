@@ -1,0 +1,98 @@
+# Install script for directory: /Volumes/KJSL/workspace/github_kevleyski/surge/libs/JUCE
+
+# Set the install prefix
+if(NOT DEFINED CMAKE_INSTALL_PREFIX)
+  set(CMAKE_INSTALL_PREFIX "/usr/local")
+endif()
+string(REGEX REPLACE "/$" "" CMAKE_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}")
+
+# Set the install configuration name.
+if(NOT DEFINED CMAKE_INSTALL_CONFIG_NAME)
+  if(BUILD_TYPE)
+    string(REGEX REPLACE "^[^A-Za-z0-9_]+" ""
+           CMAKE_INSTALL_CONFIG_NAME "${BUILD_TYPE}")
+  else()
+    set(CMAKE_INSTALL_CONFIG_NAME "Release")
+  endif()
+  message(STATUS "Install configuration: \"${CMAKE_INSTALL_CONFIG_NAME}\"")
+endif()
+
+# Set the component getting installed.
+if(NOT CMAKE_INSTALL_COMPONENT)
+  if(COMPONENT)
+    message(STATUS "Install component: \"${COMPONENT}\"")
+    set(CMAKE_INSTALL_COMPONENT "${COMPONENT}")
+  else()
+    set(CMAKE_INSTALL_COMPONENT)
+  endif()
+endif()
+
+# Is this installation the result of a crosscompile?
+if(NOT DEFINED CMAKE_CROSSCOMPILING)
+  set(CMAKE_CROSSCOMPILING "TRUE")
+endif()
+
+# Set path to fallback-tool for dependency-resolution.
+if(NOT DEFINED CMAKE_OBJDUMP)
+  set(CMAKE_OBJDUMP "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/objdump")
+endif()
+
+set(CMAKE_BINARY_DIR "/Users/klambert/workspace_KJSL/github_kevleyski/surge/build_ios")
+
+if(NOT PLATFORM_NAME)
+  if(NOT "$ENV{PLATFORM_NAME}" STREQUAL "")
+    set(PLATFORM_NAME "$ENV{PLATFORM_NAME}")
+  endif()
+  if(NOT PLATFORM_NAME)
+    set(PLATFORM_NAME iphoneos)
+  endif()
+endif()
+
+if(NOT EFFECTIVE_PLATFORM_NAME)
+  if(NOT "$ENV{EFFECTIVE_PLATFORM_NAME}" STREQUAL "")
+    set(EFFECTIVE_PLATFORM_NAME "$ENV{EFFECTIVE_PLATFORM_NAME}")
+  endif()
+  if(NOT EFFECTIVE_PLATFORM_NAME)
+    set(EFFECTIVE_PLATFORM_NAME -iphoneos)
+  endif()
+endif()
+
+if(NOT CMAKE_INSTALL_LOCAL_ONLY)
+  # Include the install script for the subdirectory.
+  include("/Users/klambert/workspace_KJSL/github_kevleyski/surge/build_ios/JUCE/modules/cmake_install.cmake")
+endif()
+
+if(NOT CMAKE_INSTALL_LOCAL_ONLY)
+  # Include the install script for the subdirectory.
+  include("/Users/klambert/workspace_KJSL/github_kevleyski/surge/build_ios/JUCE/extras/Build/cmake_install.cmake")
+endif()
+
+if(CMAKE_INSTALL_COMPONENT STREQUAL "Unspecified" OR NOT CMAKE_INSTALL_COMPONENT)
+  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/cmake/JUCE-8.0.12" TYPE FILE FILES
+    "/Users/klambert/workspace_KJSL/github_kevleyski/surge/build_ios/JUCE/JUCEConfigVersion.cmake"
+    "/Users/klambert/workspace_KJSL/github_kevleyski/surge/build_ios/JUCE/JUCEConfig.cmake"
+    "/Volumes/KJSL/workspace/github_kevleyski/surge/libs/JUCE/extras/Build/CMake/JUCECheckAtomic.cmake"
+    "/Volumes/KJSL/workspace/github_kevleyski/surge/libs/JUCE/extras/Build/CMake/JUCEHelperTargets.cmake"
+    "/Volumes/KJSL/workspace/github_kevleyski/surge/libs/JUCE/extras/Build/CMake/JUCEModuleSupport.cmake"
+    "/Volumes/KJSL/workspace/github_kevleyski/surge/libs/JUCE/extras/Build/CMake/JUCEUtils.cmake"
+    "/Volumes/KJSL/workspace/github_kevleyski/surge/libs/JUCE/extras/Build/CMake/JuceLV2Defines.h.in"
+    "/Volumes/KJSL/workspace/github_kevleyski/surge/libs/JUCE/extras/Build/CMake/LaunchScreen.storyboard"
+    "/Volumes/KJSL/workspace/github_kevleyski/surge/libs/JUCE/extras/Build/CMake/PIPAudioProcessor.cpp.in"
+    "/Volumes/KJSL/workspace/github_kevleyski/surge/libs/JUCE/extras/Build/CMake/PIPAudioProcessorWithARA.cpp.in"
+    "/Volumes/KJSL/workspace/github_kevleyski/surge/libs/JUCE/extras/Build/CMake/PIPComponent.cpp.in"
+    "/Volumes/KJSL/workspace/github_kevleyski/surge/libs/JUCE/extras/Build/CMake/PIPConsole.cpp.in"
+    "/Volumes/KJSL/workspace/github_kevleyski/surge/libs/JUCE/extras/Build/CMake/RecentFilesMenuTemplate.nib"
+    "/Volumes/KJSL/workspace/github_kevleyski/surge/libs/JUCE/extras/Build/CMake/UnityPluginGUIScript.cs.in"
+    "/Volumes/KJSL/workspace/github_kevleyski/surge/libs/JUCE/extras/Build/CMake/checkBundleSigning.cmake"
+    "/Volumes/KJSL/workspace/github_kevleyski/surge/libs/JUCE/extras/Build/CMake/copyDir.cmake"
+    "/Volumes/KJSL/workspace/github_kevleyski/surge/libs/JUCE/extras/Build/CMake/juce_runtime_arch_detection.cpp"
+    "/Volumes/KJSL/workspace/github_kevleyski/surge/libs/JUCE/extras/Build/CMake/juce_LinuxSubprocessHelper.cpp"
+    )
+endif()
+
+string(REPLACE ";" "\n" CMAKE_INSTALL_MANIFEST_CONTENT
+       "${CMAKE_INSTALL_MANIFEST_FILES}")
+if(CMAKE_INSTALL_LOCAL_ONLY)
+  file(WRITE "/Users/klambert/workspace_KJSL/github_kevleyski/surge/build_ios/JUCE/install_local_manifest.txt"
+     "${CMAKE_INSTALL_MANIFEST_CONTENT}")
+endif()
