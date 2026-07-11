@@ -4,7 +4,7 @@
  *
  * Learn more at https://surge-synthesizer.github.io/
  *
- * Copyright 2018-2023, various authors, as described in the GitHub
+ * Copyright 2018-2024, various authors, as described in the GitHub
  * transaction log.
  *
  * Surge XT is released under the GNU General Public Licence v3
@@ -66,6 +66,8 @@ class Wavetable
 
     int current_id, queue_id;
     bool refresh_display;
+    bool force_refresh_display;
+    bool refresh_script_editor;
     std::string queue_filename;
     std::string current_filename;
     int frame_size_if_absent{-1};
@@ -75,8 +77,9 @@ enum wtflags
 {
     wtf_is_sample = 1,
     wtf_loop_sample = 2,
-    wtf_int16 = 4,       // If this is set we have int16 in range 0-2^15
-    wtf_int16_is_16 = 8, // and in this case, range 0-2^16 if with above
+    wtf_int16 = 4,           // If this is set we have int16 in range 0-2^15
+    wtf_int16_is_16 = 8,     // and in this case, range 0-2^16 if with above
+    wtf_has_metadata = 0x10, // null term xml at end of file
 };
 
 #endif // SURGE_SRC_COMMON_DSP_WAVETABLE_H

@@ -4,7 +4,7 @@
  *
  * Learn more at https://surge-synthesizer.github.io/
  *
- * Copyright 2018-2023, various authors, as described in the GitHub
+ * Copyright 2018-2024, various authors, as described in the GitHub
  * transaction log.
  *
  * Surge XT is released under the GNU General Public Licence v3
@@ -87,6 +87,10 @@ SurgeSynthesizer::SurgeSynthesizer(PluginLayer *parent, const std::string &suppl
     // TODO: FIX SCENE ASSUMPTION
     memset(storage.getPatch().scenedata[0], 0, sizeof(pdata) * n_scene_params);
     memset(storage.getPatch().scenedata[1], 0, sizeof(pdata) * n_scene_params);
+
+    memset(storage.getPatch().scenedataOrig[0], 0, sizeof(pdata) * n_scene_params);
+    memset(storage.getPatch().scenedataOrig[1], 0, sizeof(pdata) * n_scene_params);
+
     memset(storage.getPatch().globaldata, 0, sizeof(pdata) * n_global_params);
     memset(mControlInterpolatorUsed, 0, sizeof(bool) * num_controlinterpolators);
 
@@ -121,6 +125,9 @@ SurgeSynthesizer::SurgeSynthesizer(PluginLayer *parent, const std::string &suppl
         &storage, Surge::Storage::SmoothingMode, (int)(Modulator::SmoothingMode::LEGACY));
     storage.pitchSmoothingMode = (Modulator::SmoothingMode)(int)Surge::Storage::getUserDefaultValue(
         &storage, Surge::Storage::PitchSmoothingMode, (int)(Modulator::SmoothingMode::DIRECT));
+
+    midiSoftTakeover =
+        (bool)Surge::Storage::getUserDefaultValue(&storage, Surge::Storage::MIDISoftTakeover, 0);
 
     patch.polylimit.val.i = DEFAULT_POLYLIMIT;
 
@@ -215,7 +222,7 @@ SurgeSynthesizer::SurgeSynthesizer(PluginLayer *parent, const std::string &suppl
         send[i][1].set_blocksize(BLOCK_SIZE);
     }
 
-    polydisplay = 0;
+    storage.activeVoiceCount = 0;
     refresh_editor = false;
     patch_loaded = false;
     storage.getPatch().category = "Init";
@@ -501,6 +508,7 @@ void SurgeSynthesizer::playNote(char channel, char key, char velocity, char detu
     ** and right now it doesn't
     */
     bool noHold = !channelState[channel].hold;
+
     if (mpeEnabled)
         noHold = noHold && !channelState[0].hold;
 
@@ -667,18 +675,35 @@ void SurgeSynthesizer::freeVoice(SurgeVoice *v)
         }
     }
 
+    int foundScene{-1}, foundIndex{-1};
     for (int i = 0; i < MAX_VOICES; i++)
     {
         if (voices_usedby[0][i] && (v == &voices_array[0][i]))
         {
+            assert(foundScene == -1);
+            assert(foundIndex == -1);
+            foundScene = 0;
+            foundIndex = i;
             voices_usedby[0][i] = 0;
         }
         if (voices_usedby[1][i] && (v == &voices_array[1][i]))
         {
+            assert(foundScene == -1);
+            assert(foundIndex == -1);
+            foundScene = 1;
+            foundIndex = i;
             voices_usedby[1][i] = 0;
         }
     }
     v->freeAllocatedElements();
+
+    /*
+     * Call the SurgeVoice destructor here. But since SurgeVoice lives in an
+     * array it will be destroyed on exit also so re-construct it with the
+     * default on the same meory just to be pedantic
+     */
+    v->~SurgeVoice();
+    v = new (&voices_array[foundScene][foundIndex]) SurgeVoice();
 }
 
 void SurgeSynthesizer::notifyEndedNote(int32_t nid, int16_t key, int16_t chan, bool thisBlock)
@@ -735,7 +760,8 @@ void SurgeSynthesizer::playVoice(int scene, char channel, char key, char velocit
                     storage.getPatch().scene[scene].modsources[ms_slfo1 + l]);
                 if (lms)
                 {
-                    Surge::Formula::setupEvaluatorStateFrom(lms->formulastate, storage.getPatch());
+                    Surge::Formula::setupEvaluatorStateFrom(lms->formulastate, storage.getPatch(),
+                                                            scene);
                 }
             }
             storage.getPatch().scene[scene].modsources[ms_slfo1 + l]->attack();
@@ -805,15 +831,19 @@ void SurgeSynthesizer::playVoice(int scene, char channel, char key, char velocit
 
             if (nvoice)
             {
+                // This is a constructed voice which we are going to re-construct
+                // so run the destructor. See also the handling in freeVoice below
+                nvoice->~SurgeVoice();
+
                 int mpeMainChannel = getMpeMainChannel(channel, key);
 
                 voices[scene].push_back(nvoice);
-                new (nvoice) SurgeVoice(&storage, &storage.getPatch().scene[scene],
-                                        storage.getPatch().scenedata[scene], key, velocity, channel,
-                                        scene, detune, &channelState[channel].keyState[key],
-                                        &channelState[mpeMainChannel], &channelState[channel],
-                                        mpeEnabled, voiceCounter++, host_noteid,
-                                        host_originating_key, host_originating_channel, 0.f, 0.f);
+                new (nvoice) SurgeVoice(
+                    &storage, &storage.getPatch().scene[scene], storage.getPatch().scenedata[scene],
+                    storage.getPatch().scenedataOrig[scene], key, velocity, channel, scene, detune,
+                    &channelState[channel].keyState[key], &channelState[mpeMainChannel],
+                    &channelState[channel], mpeEnabled, voiceCounter++, host_noteid,
+                    host_originating_key, host_originating_channel, 0.f, 0.f);
             }
         }
         break;
@@ -850,7 +880,7 @@ void SurgeSynthesizer::playVoice(int scene, char channel, char key, char velocit
             }
             else if (storage.mapChannelToOctave)
             {
-                auto keyadj = SurgeVoice::channelKeyEquvialent(key, channel, mpeEnabled, &storage);
+                auto keyadj = SurgeVoice::channelKeyEquivalent(key, channel, &storage);
 
                 for (int k = lowkey; k < hikey; ++k)
                 {
@@ -858,8 +888,7 @@ void SurgeSynthesizer::playVoice(int scene, char channel, char key, char velocit
                     {
                         if (channelState[ch].keyState[k].keystate)
                         {
-                            auto kadj =
-                                SurgeVoice::channelKeyEquvialent(k, ch, mpeEnabled, &storage);
+                            auto kadj = SurgeVoice::channelKeyEquivalent(k, ch, &storage);
 
                             if (primode == ALWAYS_HIGHEST && kadj > keyadj)
                                 createVoice = false;
@@ -954,8 +983,9 @@ void SurgeSynthesizer::playVoice(int scene, char channel, char key, char velocit
                         storage.last_key[scene] = key;
                     new (nvoice) SurgeVoice(
                         &storage, &storage.getPatch().scene[scene],
-                        storage.getPatch().scenedata[scene], key, velocity, channel, scene, detune,
-                        &channelState[channel].keyState[key], &channelState[mpeMainChannel],
+                        storage.getPatch().scenedata[scene],
+                        storage.getPatch().scenedataOrig[scene], key, velocity, channel, scene,
+                        detune, &channelState[channel].keyState[key], &channelState[mpeMainChannel],
                         &channelState[channel], mpeEnabled, voiceCounter++, host_noteid,
                         host_originating_key, host_originating_channel, aegReuse, fegReuse);
 
@@ -1011,7 +1041,7 @@ void SurgeSynthesizer::playVoice(int scene, char channel, char key, char velocit
             }
             else if (storage.mapChannelToOctave)
             {
-                auto keyadj = SurgeVoice::channelKeyEquvialent(key, channel, mpeEnabled, &storage);
+                auto keyadj = SurgeVoice::channelKeyEquivalent(key, channel, &storage);
 
                 for (int k = lowkey; k < hikey; ++k)
                 {
@@ -1019,8 +1049,7 @@ void SurgeSynthesizer::playVoice(int scene, char channel, char key, char velocit
                     {
                         if (channelState[ch].keyState[k].keystate)
                         {
-                            auto kadj =
-                                SurgeVoice::channelKeyEquvialent(k, ch, mpeEnabled, &storage);
+                            auto kadj = SurgeVoice::channelKeyEquivalent(k, ch, &storage);
 
                             if (primode == ALWAYS_HIGHEST && kadj > keyadj)
                                 createVoice = false;
@@ -1098,8 +1127,9 @@ void SurgeSynthesizer::playVoice(int scene, char channel, char key, char velocit
                     voices[scene].push_back(nvoice);
                     new (nvoice) SurgeVoice(
                         &storage, &storage.getPatch().scene[scene],
-                        storage.getPatch().scenedata[scene], key, velocity, channel, scene, detune,
-                        &channelState[channel].keyState[key], &channelState[mpeMainChannel],
+                        storage.getPatch().scenedata[scene],
+                        storage.getPatch().scenedataOrig[scene], key, velocity, channel, scene,
+                        detune, &channelState[channel].keyState[key], &channelState[mpeMainChannel],
                         &channelState[channel], mpeEnabled, voiceCounter++, host_noteid,
                         host_originating_key, host_originating_channel, aegStart, fegStart);
                 }
@@ -1402,8 +1432,7 @@ void SurgeSynthesizer::releaseNotePostHoldCheck(int scene, char channel, char ke
                     }
                     else if (!mpeEnabled && storage.mapChannelToOctave)
                     {
-                        auto keyadj =
-                            SurgeVoice::channelKeyEquvialent(key, channel, mpeEnabled, &storage);
+                        auto keyadj = SurgeVoice::channelKeyEquivalent(key, channel, &storage);
 
                         int highest = -1, lowest = 128, latest = -1;
                         int highestadj = -100, lowestadj = 1000;
@@ -1416,8 +1445,7 @@ void SurgeSynthesizer::releaseNotePostHoldCheck(int scene, char channel, char ke
                             {
                                 if (channelState[ch].keyState[k].keystate)
                                 {
-                                    auto kadj = SurgeVoice::channelKeyEquvialent(k, ch, mpeEnabled,
-                                                                                 &storage);
+                                    auto kadj = SurgeVoice::channelKeyEquivalent(k, ch, &storage);
                                     if (kadj >= highestadj)
                                     {
                                         /*
@@ -1475,7 +1503,7 @@ void SurgeSynthesizer::releaseNotePostHoldCheck(int scene, char channel, char ke
                     else
                     { // MPE branch
                         int highest = -1, lowest = 128, latest = -1;
-                        int hichan, lowchan, latechan;
+                        int hichan{-1}, lowchan{-1}, latechan{-1};
                         int64_t lt = 0;
 
                         for (k = hikey; k >= lowkey && !do_switch; k--)
@@ -1627,8 +1655,7 @@ void SurgeSynthesizer::releaseNotePostHoldCheck(int scene, char channel, char ke
                     }
                     else if (!mpeEnabled && storage.mapChannelToOctave)
                     {
-                        auto keyadj =
-                            SurgeVoice::channelKeyEquvialent(key, channel, mpeEnabled, &storage);
+                        auto keyadj = SurgeVoice::channelKeyEquivalent(key, channel, &storage);
 
                         int highest = -1, lowest = 128, latest = -1;
                         int highestadj = -1000, lowestadj = 1000;
@@ -1641,8 +1668,7 @@ void SurgeSynthesizer::releaseNotePostHoldCheck(int scene, char channel, char ke
                             {
                                 if (channelState[ch].keyState[k].keystate)
                                 {
-                                    auto kadj = SurgeVoice::channelKeyEquvialent(k, ch, mpeEnabled,
-                                                                                 &storage);
+                                    auto kadj = SurgeVoice::channelKeyEquivalent(k, ch, &storage);
 
                                     if (kadj >= highestadj)
                                     {
@@ -1696,7 +1722,7 @@ void SurgeSynthesizer::releaseNotePostHoldCheck(int scene, char channel, char ke
                     else
                     {
                         int highest = -1, lowest = 128, latest = -1;
-                        int hichan, lowchan, latechan;
+                        int hichan{-1}, lowchan{-1}, latechan{-1};
                         int64_t lt = 0;
 
                         for (k = hikey; k >= lowkey && !do_switch; k--)
@@ -2005,6 +2031,7 @@ void SurgeSynthesizer::polyAftertouch(char channel, int key, int value)
 void SurgeSynthesizer::programChange(char channel, int value)
 {
     PCH = value;
+    patchSelectedFromFavorites = false;
 
     auto pid = storage.patchIdToMidiBankAndProgram[CC0][PCH];
     if (pid >= 0)
@@ -2085,7 +2112,7 @@ float int7ToBipolarFloat(int x)
         return (x - 64) * (1.f / 64.f);
     }
 
-    return 0;
+    return 0.f;
 }
 
 void SurgeSynthesizer::channelController(char channel, int cc, int value)
@@ -2164,6 +2191,11 @@ void SurgeSynthesizer::channelController(char channel, int cc, int value)
                 ->set_target(fval);
         }
 
+        if (storage.useSustainAsModulatorOnly)
+        {
+            break;
+        }
+
         sustainpedalCC = value;
         hasUpdatedMidiCC = true;
 
@@ -2213,7 +2245,8 @@ void SurgeSynthesizer::channelController(char channel, int cc, int value)
     {
         if (mpeEnabled)
         {
-            channelState[channel].timbre = int7ToBipolarFloat(value);
+            channelState[channel].timbre =
+                mpeTimbreIsUnipolar ? (value / 127.f) : int7ToBipolarFloat(value);
             return;
         }
         break;
@@ -2281,6 +2314,7 @@ void SurgeSynthesizer::channelController(char channel, int cc, int value)
         {
             storage.getPatch().param_ptr[learn_param_from_cc]->midictrl = cc_encoded;
             storage.getPatch().param_ptr[learn_param_from_cc]->midichan = channel;
+            storage.getPatch().param_ptr[learn_param_from_cc]->miditakeover_status = sts_locked;
 
             learn_param_from_cc = -1;
         }
@@ -2309,27 +2343,79 @@ void SurgeSynthesizer::channelController(char channel, int cc, int value)
 
     for (int i = 0; i < (n_global_params + (n_scene_params * n_scenes)); i++)
     {
-        if (storage.getPatch().param_ptr[i]->midictrl == cc_encoded &&
-            (storage.getPatch().param_ptr[i]->midichan == channel ||
-             storage.getPatch().param_ptr[i]->midichan == -1))
-        {
-            this->setParameterSmoothed(i, fval);
-            int j = 0;
+        auto p = storage.getPatch().param_ptr[i];
 
-            while (j < 7)
+        if (p->midictrl == cc_encoded && (p->midichan == channel || p->midichan == -1))
+        {
+            bool applyControl{true};
+            if (midiSoftTakeover && p->miditakeover_status != sts_locked)
             {
-                if ((refresh_ctrl_queue[j] > -1) && (refresh_ctrl_queue[j] != i))
+                const auto pval = p->get_value_f01();
+                static constexpr float buffer = {1.5f / 127.f}; // 1.5 MIDI CCs away
+
+                switch (p->miditakeover_status)
                 {
-                    j++;
-                }
-                else
-                {
+                case sts_waiting_for_first_look:
+                    if (fval < pval - buffer)
+                    {
+                        p->miditakeover_status = sts_waiting_below;
+                    }
+                    else if (fval > pval + buffer)
+                    {
+                        p->miditakeover_status = sts_waiting_above;
+                    }
+                    else
+                    {
+                        p->miditakeover_status = sts_locked;
+                    }
                     break;
+                case sts_waiting_below:
+                    if (fval > pval - buffer)
+                    {
+                        p->miditakeover_status = sts_locked;
+                    }
+                    break;
+                case sts_waiting_above:
+                    if (fval < pval + buffer)
+                    {
+                        p->miditakeover_status = sts_locked;
+                    }
+                    break;
+                default:
+                    break;
+                }
+
+                if (p->miditakeover_status != sts_locked)
+                {
+                    applyControl = false;
                 }
             }
 
-            refresh_ctrl_queue[j] = i;
-            refresh_ctrl_queue_value[j] = fval;
+            if (applyControl)
+            {
+                this->setParameterSmoothed(i, fval);
+
+                // Notify audio thread param change listeners (OSC, e.g.)
+                // (which run on JUCE messenger thread)
+                for (const auto &it : audioThreadParamListeners)
+                    (it.second)(storage.getPatch().param_ptr[i]->oscName, fval, "");
+
+                int j = 0;
+                while (j < 7)
+                {
+                    if ((refresh_ctrl_queue[j] > -1) && (refresh_ctrl_queue[j] != i))
+                    {
+                        j++;
+                    }
+                    else
+                    {
+                        break;
+                    }
+                }
+
+                refresh_ctrl_queue[j] = i;
+                refresh_ctrl_queue_value[j] = fval;
+            }
         }
     }
 }
@@ -2409,7 +2495,7 @@ void SurgeSynthesizer::purgeHoldbuffer(int scene)
 {
     std::list<HoldBufferItem> retainBuffer;
 
-    for (auto hp : holdbuffer[scene])
+    for (const auto &hp : holdbuffer[scene])
     {
         auto channel = hp.channel;
         auto key = hp.key;
@@ -2691,7 +2777,17 @@ bool SurgeSynthesizer::setParameter01(long index, float value, bool external, bo
                 int s = storage.getPatch().param_ptr[index]->scene - 1;
                 release_if_latched[s & 1] = true;
                 release_anyway[s & 1] = true;
-                // release old notes if previous polymode was latch
+                if (!voices[s].empty())
+                {
+                    // The release if latched initiates a release scene
+                    // which kills all voices but doesn't clear up the
+                    // keyboard state. So
+                    for (auto &v : voices[s])
+                    {
+                        const auto &st = v->state;
+                        channelState[st.channel].keyState[st.key].keystate = 0;
+                    }
+                }
             }
             break;
         case ct_filtertype:
@@ -2749,6 +2845,10 @@ bool SurgeSynthesizer::setParameter01(long index, float value, bool external, bo
                 auto subp = storage.getPatch().param_ptr[index];
                 auto filterType = storage.getPatch().param_ptr[index - 1]->val.i;
                 auto maxIVal = sst::filters::fut_subcount[filterType];
+                if (filterType == sst::filters::FilterType::fut_cytomic_svf)
+                {
+                    maxIVal = sst::filters::FilterSubType::st_cytomic_allpass + 1;
+                }
                 if (maxIVal == 0)
                     subp->val.i = 0;
                 else
@@ -2853,20 +2953,25 @@ bool SurgeSynthesizer::setParameter01(long index, float value, bool external, bo
 
     if (external && !need_refresh)
     {
-        bool got = false;
-        for (int i = 0; i < 8; i++)
-        {
-            if (refresh_parameter_queue[i] < 0 || refresh_parameter_queue[i] == index)
-            {
-                refresh_parameter_queue[i] = index;
-                got = true;
-                break;
-            }
-        }
-        if (!got)
-            refresh_overflow = true;
+        queueForRefresh(index);
     }
     return need_refresh;
+}
+
+void SurgeSynthesizer::queueForRefresh(int param_index)
+{
+    bool got = false;
+    for (int i = 0; i < 8; i++)
+    {
+        if (refresh_parameter_queue[i] < 0 || refresh_parameter_queue[i] == param_index)
+        {
+            refresh_parameter_queue[i] = param_index;
+            got = true;
+            break;
+        }
+    }
+    if (!got)
+        refresh_overflow = true;
 }
 
 void SurgeSynthesizer::switch_toggled()
@@ -2918,6 +3023,13 @@ bool SurgeSynthesizer::loadFx(bool initp, bool force_reload_all)
                 std::copy(std::begin(fxsync[s].p), std::end(fxsync[s].p),
                           std::begin(storage.getPatch().fx[s].p));
             }
+
+            // TODO: Just change this entire thing to a single copy operation? How about an atomic
+            // pointer swap or copy-on-write?
+            storage.getPatch().fx[s].user_data = fxsync[s].user_data;
+            // If we don't clear this out of the sync, it will hang around and pollute all FX data
+            // even if the sync's type changes.
+            fxsync[s].user_data.clear();
 
             fx[s].reset(spawn_effect(storage.getPatch().fx[s].type.val.i, &storage,
                                      &storage.getPatch().fx[s], storage.getPatch().globaldata));
@@ -3089,50 +3201,64 @@ bool SurgeSynthesizer::loadOscalgos()
         for (int i = 0; i < n_oscs; i++)
         {
             localResendOscParams[s][i] = false;
-            if (storage.getPatch().scene[s].osc[i].queue_type > -1)
+            auto &osc_st = storage.getPatch().scene[s].osc[i];
+            if (osc_st.queue_type > -1)
             {
                 algosChanged = true;
-                // clear assigned modulation if we change osc type, see issue #2224
-                if (storage.getPatch().scene[s].osc[i].queue_type !=
-                    storage.getPatch().scene[s].osc[i].type.val.i)
+                // clear assigned modulation, and echo to OSC if we change osc type, see issue #2224
+                if (osc_st.queue_type != osc_st.type.val.i)
                 {
                     clear_osc_modulation(s, i);
                 }
 
-                storage.getPatch().scene[s].osc[i].type.val.i =
-                    storage.getPatch().scene[s].osc[i].queue_type;
-                storage.getPatch().update_controls(false, &storage.getPatch().scene[s].osc[i]);
-                storage.getPatch().scene[s].osc[i].queue_type = -1;
+                // Notify audio thread param change listeners (OSC, e.g.)
+                // (which run on juce messenger thread)
+                std::stringstream sb;
+                sb << "/param/" << (char)('a' + s) << "/osc/" << i + 1 << "/type";
+                auto new_type = osc_st.queue_type;
+                for (const auto &it : audioThreadParamListeners)
+                    (it.second)(sb.str(), new_type, osc_type_names[new_type]);
+
+                osc_st.type.val.i = osc_st.queue_type;
+                storage.getPatch().update_controls(false, &osc_st);
+                osc_st.queue_type = -1;
                 switch_toggled_queued = true;
                 refresh_editor = true;
                 localResendOscParams[s][i] = true;
             }
 
-            TiXmlElement *e = (TiXmlElement *)storage.getPatch().scene[s].osc[i].queue_xmldata;
+            TiXmlElement *e = (TiXmlElement *)osc_st.queue_xmldata;
             if (e)
             {
                 storage.getPatch().isDirty = true;
 
                 for (int k = 0; k < n_osc_params; k++)
                 {
+                    std::string oname = osc_st.p[k].oscName;
+                    std::string sx = osc_st.p[k].get_name();
+
                     double d;
                     int j;
                     std::string lbl;
 
                     lbl = fmt::format("p{:d}", k);
 
-                    if (storage.getPatch().scene[s].osc[i].p[k].valtype == vt_float)
+                    if (osc_st.p[k].valtype == vt_float)
                     {
                         if (e->QueryDoubleAttribute(lbl.c_str(), &d) == TIXML_SUCCESS)
                         {
-                            storage.getPatch().scene[s].osc[i].p[k].val.f = (float)d;
+                            osc_st.p[k].val.f = (float)d;
+                            for (const auto &it : audioThreadParamListeners)
+                                (it.second)(oname, d, sx);
                         }
                     }
                     else
                     {
                         if (e->QueryIntAttribute(lbl.c_str(), &j) == TIXML_SUCCESS)
                         {
-                            storage.getPatch().scene[s].osc[i].p[k].val.i = j;
+                            osc_st.p[k].val.i = j;
+                            for (const auto &it : audioThreadParamListeners)
+                                (it.second)(oname, j, sx);
                         }
                     }
 
@@ -3140,31 +3266,40 @@ bool SurgeSynthesizer::loadOscalgos()
 
                     if (e->QueryIntAttribute(lbl.c_str(), &j) == TIXML_SUCCESS)
                     {
-                        storage.getPatch().scene[s].osc[i].p[k].deform_type = j;
+                        osc_st.p[k].deform_type = j;
+                        for (const auto &it : audioThreadParamListeners)
+                            (it.second)(oname, j, sx);
                     }
 
                     lbl = fmt::format("p{:d}_extend_range", k);
 
                     if (e->QueryIntAttribute(lbl.c_str(), &j) == TIXML_SUCCESS)
                     {
-                        storage.getPatch().scene[s].osc[i].p[k].set_extend_range(j);
+                        osc_st.p[k].set_extend_range(j);
+                        for (const auto &it : audioThreadParamListeners)
+                            (it.second)(oname, j, sx);
                     }
                 }
 
                 int rt;
                 if (e->QueryIntAttribute("retrigger", &rt) == TIXML_SUCCESS)
                 {
-                    storage.getPatch().scene[s].osc[i].retrigger.val.b = rt;
+                    osc_st.retrigger.val.b = rt;
+                    std::stringstream sb;
+                    sb << "/param/" << (char)('a' + s) << "/osc/" << i + 1 << "/retrigger";
+                    std::string sx = rt > 0 ? "On" : "Off";
+                    for (const auto &it : audioThreadParamListeners)
+                        (it.second)(sb.str(), rt, sx);
                 }
 
                 /*
                  * Some oscillator types can change display when you change values
                  */
-                if (storage.getPatch().scene[s].osc[i].type.val.i == ot_modern)
+                if (osc_st.type.val.i == ot_modern)
                 {
                     refresh_editor = true;
                 }
-                storage.getPatch().scene[s].osc[i].queue_xmldata = 0;
+                osc_st.queue_xmldata = 0;
             }
         }
     }
@@ -3450,6 +3585,14 @@ void SurgeSynthesizer::prepareModsourceDoProcess(int scenemask)
 {
     for (int scene = 0; scene < n_scenes; scene++)
     {
+        bool anyFormula{false};
+        for (auto &lfs : storage.getPatch().scene[scene].lfo)
+        {
+            if (lfs.shape.val.i == lt_formula)
+            {
+                anyFormula = true;
+            }
+        }
         if ((1 << scene) & scenemask)
         {
             for (int i = 0; i < n_modsources; i++)
@@ -3465,6 +3608,13 @@ void SurgeSynthesizer::prepareModsourceDoProcess(int scenemask)
                     }
                 }
                 storage.getPatch().scene[scene].modsource_doprocess[i] = setTo;
+
+                if (i == ms_pitchbend || i == ms_aftertouch || i == ms_modwheel || i == ms_breath ||
+                    i == ms_expression || i == ms_sustain || i == ms_lowest_key ||
+                    i == ms_highest_key || i == ms_latest_key)
+                {
+                    storage.getPatch().scene[scene].modsource_doprocess[i] |= anyFormula;
+                }
             }
 
             for (int j = 0; j < 3; j++)
@@ -4083,13 +4233,15 @@ void loadPatchInBackgroundThread(SurgeSynthesizer *sy)
     if (patchid >= 0)
     {
         Patch p = synth->storage.patch_list[synth->patchid];
+        synth->storage.lastLoadedPatch = p.path;
         for (auto &it : synth->patchLoadedListeners)
-            (it.second)(p.path.replace_extension());
+            (it.second)(p.path);
     }
     if (had_patchid_file)
     {
+        synth->storage.lastLoadedPatch = ppath;
         for (auto &it : synth->patchLoadedListeners)
-            (it.second)(ppath.replace_extension());
+            (it.second)(ppath);
     }
 
     // Now we want to null out the patchLoadThread since everything is done
@@ -4111,6 +4263,8 @@ void SurgeSynthesizer::processAudioThreadOpsWhenAudioEngineUnavailable(bool dang
         if (patchid_queue >= 0)
         {
             loadPatch(patchid_queue);
+            Patch p = storage.patch_list[patchid_queue];
+            storage.lastLoadedPatch = p.path;
             patchid_queue = -1;
         }
 
@@ -4132,10 +4286,13 @@ void SurgeSynthesizer::processAudioThreadOpsWhenAudioEngineUnavailable(bool dang
             if (ptid >= 0)
             {
                 loadPatch(ptid);
+                Patch patch = storage.patch_list[ptid];
+                storage.lastLoadedPatch = patch.path;
             }
             else
             {
                 loadPatchByPath(patchid_file, -1, s.c_str());
+                storage.lastLoadedPatch = p;
             }
             patchid_file[0] = 0;
         }
@@ -4173,6 +4330,7 @@ void SurgeSynthesizer::enqueueFXOff(int whichFX)
     // this can come from the UI thread. I don't think we need the spawn mutex but we might
     std::lock_guard<std::mutex> lg(fxSpawnMutex);
     fxsync[whichFX].type.val.i = fxt_off;
+    fxsync[whichFX].user_data.clear();
     load_fx_needed = true;
 }
 
@@ -4243,9 +4401,11 @@ void SurgeSynthesizer::processControl()
 
     // TODO: FIX SCENE ASSUMPTION
     if (playA)
-        storage.getPatch().copy_scenedata(storage.getPatch().scenedata[0], 0); // -""-
+        storage.getPatch().copy_scenedata(storage.getPatch().scenedata[0],
+                                          storage.getPatch().scenedataOrig[0], 0); // -""-
     if (playB)
-        storage.getPatch().copy_scenedata(storage.getPatch().scenedata[1], 1);
+        storage.getPatch().copy_scenedata(storage.getPatch().scenedata[1],
+                                          storage.getPatch().scenedataOrig[1], 1);
 
     // TODO: FIX SCENE ASSUMPTION.
     // Prior to 1.1 we could play before or after copying modulation data but as we
@@ -4319,7 +4479,7 @@ void SurgeSynthesizer::processControl()
                     if (lms)
                     {
                         Surge::Formula::setupEvaluatorStateFrom(lms->formulastate,
-                                                                storage.getPatch());
+                                                                storage.getPatch(), s);
                     }
                 }
                 storage.getPatch().scene[s].modsources[ms_slfo1 + i]->process_block();
@@ -4333,11 +4493,14 @@ void SurgeSynthesizer::processControl()
     for (int i = 0; i < n; i++)
     {
         int src_id = storage.getPatch().modulation_global[i].source_id;
+        int src_index = storage.getPatch().modulation_global[i].source_index;
         int dst_id = storage.getPatch().modulation_global[i].destination_id;
         float depth = storage.getPatch().modulation_global[i].depth;
         int source_scene = storage.getPatch().modulation_global[i].source_scene;
+
         storage.getPatch().globaldata[dst_id].f +=
-            depth * storage.getPatch().scene[source_scene].modsources[src_id]->get_output(0) *
+            depth *
+            storage.getPatch().scene[source_scene].modsources[src_id]->get_output(src_index) *
             (1 - storage.getPatch().modulation_global[i].muted);
     }
 
@@ -4402,10 +4565,6 @@ void SurgeSynthesizer::process()
     storage.audioThreadID = std::this_thread::get_id();
 #endif
     processRunning = 0;
-
-#if DEBUG
-    memset(endedHostNoteIds, 0, 512 * sizeof(int32_t));
-#endif
 
     auto process_start = std::chrono::high_resolution_clock::now();
 
@@ -4659,7 +4818,7 @@ void SurgeSynthesizer::process()
     }
 
     storage.modRoutingMutex.unlock();
-    polydisplay = vcount;
+    storage.activeVoiceCount = vcount;
 
     // TODO: FIX SCENE ASSUMPTION
     if (play_scene[0])
@@ -4910,6 +5069,7 @@ void SurgeSynthesizer::populateDawExtraState()
     des.isPopulated = true;
 
     des.oscPortIn = storage.oscPortIn;
+    des.oscPortInLastBound = storage.oscPortInLastBound;
     des.oscPortOut = storage.oscPortOut;
     des.oscIPAddrOut = storage.oscOutIP;
     des.oscStartIn = storage.oscStartIn;
@@ -4917,6 +5077,7 @@ void SurgeSynthesizer::populateDawExtraState()
 
     des.mpeEnabled = mpeEnabled;
     des.mpePitchBendRange = storage.mpePitchBendRange;
+    des.mpeTimbreIsUnipolar = mpeTimbreIsUnipolar;
 
     des.isDirty = storage.getPatch().isDirty;
 
@@ -4937,6 +5098,7 @@ void SurgeSynthesizer::populateDawExtraState()
     }
 
     des.mapChannelToOctave = storage.mapChannelToOctave;
+    des.transposeByTuningPeriod = storage.transposeByTuningPeriod;
 
     int n = n_global_params + (n_scene_params * n_scenes);
 
@@ -4961,6 +5123,8 @@ void SurgeSynthesizer::populateDawExtraState()
 
     des.monoPedalMode = storage.monoPedalMode;
     des.oddsoundRetuneMode = storage.oddsoundRetuneMode;
+
+    des.lastLoadedPatch = storage.lastLoadedPatch;
 }
 
 void SurgeSynthesizer::loadFromDawExtraState()
@@ -4975,6 +5139,7 @@ void SurgeSynthesizer::loadFromDawExtraState()
     mpeEnabled = des.mpeEnabled;
 
     storage.oscPortIn = des.oscPortIn;
+    storage.oscPortInLastBound = des.oscPortInLastBound;
     storage.oscPortOut = des.oscPortOut;
     storage.oscOutIP = des.oscIPAddrOut;
     storage.oscStartIn = des.oscStartIn;
@@ -4984,6 +5149,8 @@ void SurgeSynthesizer::loadFromDawExtraState()
     {
         storage.mpePitchBendRange = des.mpePitchBendRange;
     }
+
+    mpeTimbreIsUnipolar = des.mpeTimbreIsUnipolar;
 
     storage.getPatch().isDirty = des.isDirty;
 
@@ -4999,7 +5166,7 @@ void SurgeSynthesizer::loadFromDawExtraState()
         }
         catch (Tunings::TuningError &e)
         {
-            storage.reportError(e.what(), "Unable to restore tuning!");
+            storage.reportError(e.what(), "Tuning Restore Error");
             storage.retuneTo12TETScale();
         }
     }
@@ -5026,7 +5193,7 @@ void SurgeSynthesizer::loadFromDawExtraState()
         }
         catch (Tunings::TuningError &e)
         {
-            storage.reportError(e.what(), "Unable to restore mapping!");
+            storage.reportError(e.what(), "Mapping Restore Error");
             storage.remapToConcertCKeyboard();
         }
     }
@@ -5036,6 +5203,7 @@ void SurgeSynthesizer::loadFromDawExtraState()
     }
 
     storage.mapChannelToOctave = des.mapChannelToOctave;
+    storage.transposeByTuningPeriod = des.transposeByTuningPeriod;
 
     int n = n_global_params + (n_scene_params * n_scenes);
     int nOld = n_global_params + n_scene_params;
@@ -5073,6 +5241,8 @@ void SurgeSynthesizer::loadFromDawExtraState()
             storage.controllers_chan[i] = des.customcontrol_chan_map[i];
         }
     }
+
+    storage.lastLoadedPatch = des.lastLoadedPatch;
 }
 
 void SurgeSynthesizer::swapMetaControllers(int c1, int c2)
@@ -5115,20 +5285,17 @@ void SurgeSynthesizer::swapMetaControllers(int c1, int c2)
 
             if (mv)
             {
-                int n = mv->size();
+                const int n = mv->size();
                 for (int i = 0; i < n; ++i)
                 {
-                    if (mv->at(i).source_id == ms_ctrl1 + c1)
+                    auto &mati = mv->at(i);
+                    if (mati.source_id == ms_ctrl1 + c1)
                     {
-                        auto q = mv->at(i);
-                        q.source_id = ms_ctrl1 + c2;
-                        mv->at(i) = q;
+                        mati.source_id = ms_ctrl1 + c2;
                     }
-                    else if (mv->at(i).source_id == ms_ctrl1 + c2)
+                    else if (mati.source_id == ms_ctrl1 + c2)
                     {
-                        auto q = mv->at(i);
-                        q.source_id = ms_ctrl1 + c1;
-                        mv->at(i) = q;
+                        mati.source_id = ms_ctrl1 + c1;
                     }
                 }
             }
@@ -5160,7 +5327,7 @@ void SurgeSynthesizer::changeModulatorSmoothing(Modulator::SmoothingMode m)
 void SurgeSynthesizer::reorderFx(int source, int target, FXReorderMode m)
 {
     if (source < 0 || source >= n_fx_slots || target < 0 || target >= n_fx_slots ||
-        source == target)
+        (source == target && m != FXReorderMode::NONE))
     {
         return;
     }
@@ -5174,6 +5341,7 @@ void SurgeSynthesizer::reorderFx(int source, int target, FXReorderMode m)
     fxmodsync[target].clear();
 
     fxsync[target].type.val.i = so.type.val.i;
+    fxsync[target].user_data = so.user_data;
 
     Effect *t_fx = spawn_effect(fxsync[target].type.val.i, &storage, &fxsync[target], 0);
 
@@ -5191,18 +5359,22 @@ void SurgeSynthesizer::reorderFx(int source, int target, FXReorderMode m)
         if (source == target)
         {
             fxsync[source].type.val.i = 0;
+            fxsync[source].user_data.clear();
             fxsync[target].type.val.i = 0;
+            fxsync[target].user_data.clear();
         }
     }
     break;
     case FXReorderMode::MOVE:
     {
         fxsync[source].type.val.i = 0;
+        fxsync[source].user_data.clear();
     }
     break;
     case FXReorderMode::SWAP:
     {
         fxsync[source].type.val.i = to.type.val.i;
+        fxsync[source].user_data = to.user_data;
 
         t_fx = spawn_effect(fxsync[source].type.val.i, &storage, &fxsync[source], 0);
 

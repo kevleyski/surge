@@ -4,7 +4,7 @@
  *
  * Learn more at https://surge-synthesizer.github.io/
  *
- * Copyright 2018-2023, various authors, as described in the GitHub
+ * Copyright 2018-2024, various authors, as described in the GitHub
  * transaction log.
  *
  * Surge XT is released under the GNU General Public Licence v3
@@ -196,7 +196,7 @@ void MSToolEffect::suspend() { init(); }
 void MSToolEffect::init_ctrltypes()
 {
     // using deactivation function from EQ3
-    static struct EQD : public ParameterDynamicDeactivationFunction
+    static struct MidSideDeactivator : public ParameterDynamicDeactivationFunction
     {
         bool getValue(const Parameter *p) const override
         {

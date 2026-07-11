@@ -4,7 +4,7 @@
  *
  * Learn more at https://surge-synthesizer.github.io/
  *
- * Copyright 2018-2023, various authors, as described in the GitHub
+ * Copyright 2018-2024, various authors, as described in the GitHub
  * transaction log.
  *
  * Surge XT is released under the GNU General Public Licence v3
@@ -87,9 +87,9 @@ void ResonatorEffect::setvars(bool init)
     }
 }
 
-inline void set1f(__m128 &m, int i, float f) { *((float *)&m + i) = f; }
+inline void set1f(SIMD_M128 &m, int i, float f) { *((float *)&m + i) = f; }
 
-inline float get1f(__m128 m, int i) { return *((float *)&m + i); }
+inline float get1f(SIMD_M128 m, int i) { return *((float *)&m + i); }
 
 void ResonatorEffect::sampleRateReset()
 {
@@ -132,6 +132,7 @@ void ResonatorEffect::process(float *dataL, float *dataR)
     case rm_bandpass_n:
     {
         type = fut_bp12;
+        subtype = sst::filters::FilterSubType::st_bp12_LegacyDriven;
         break;
     }
     case rm_highpass:
@@ -206,25 +207,25 @@ void ResonatorEffect::process(float *dataL, float *dataR)
         dataOS[1][s] =
             storage->lookup_waveshape(sst::waveshapers::WaveshaperType::wst_asym, dataOS[1][s]);
 
-        auto l128 = _mm_setzero_ps();
-        auto r128 = _mm_setzero_ps();
+        auto l128 = SIMD_MM(setzero_ps)();
+        auto r128 = SIMD_MM(setzero_ps)();
 
         if (filtptr)
         {
-            l128 = filtptr(&(qfus[0]), _mm_set1_ps(dataOS[0][s]));
-            r128 = filtptr(&(qfus[1]), _mm_set1_ps(dataOS[1][s]));
+            l128 = filtptr(&(qfus[0]), SIMD_MM(set1_ps)(dataOS[0][s]));
+            r128 = filtptr(&(qfus[1]), SIMD_MM(set1_ps)(dataOS[1][s]));
         }
         else
         {
-            l128 = _mm_set1_ps(dataOS[0][s]);
-            r128 = _mm_set1_ps(dataOS[1][s]);
+            l128 = SIMD_MM(set1_ps)(dataOS[0][s]);
+            r128 = SIMD_MM(set1_ps)(dataOS[1][s]);
         }
 
         float mixl = 0, mixr = 0;
         float tl[4], tr[4];
 
-        _mm_store_ps(tl, l128);
-        _mm_store_ps(tr, r128);
+        SIMD_MM(store_ps)(tl, l128);
+        SIMD_MM(store_ps)(tr, r128);
 
         for (int i = 0; i < 3; ++i)
         {

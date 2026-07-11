@@ -4,7 +4,7 @@
  *
  * Learn more at https://surge-synthesizer.github.io/
  *
- * Copyright 2018-2023, various authors, as described in the GitHub
+ * Copyright 2018-2024, various authors, as described in the GitHub
  * transaction log.
  *
  * Surge XT is released under the GNU General Public Licence v3
@@ -32,21 +32,27 @@ namespace Overlays
 {
 struct MultiLineSkinLabel;
 
+constexpr int windowWidth = 360;
+constexpr int windowMargin = 6;
+constexpr int btnWidth = 50;
+constexpr int btnHeight = 16;
+constexpr int maxTextLines = 5;
+
 struct Alert : public Surge::Overlays::OverlayComponent,
                public Surge::GUI::SkinConsumingComponent,
                public juce::Button::Listener
 {
-
-    Alert();
+    Alert(uint16_t extraH = 0);
     ~Alert();
 
+    uint16_t extraHeight{0};
     std::string title, label;
     std::unique_ptr<Surge::Widgets::SurgeTextButton> okButton;
     std::unique_ptr<Surge::Widgets::SurgeTextButton> cancelButton;
-    std::unique_ptr<juce::ToggleButton> toggleButton;
+    std::unique_ptr<juce::ToggleButton> dontAskAgainButton;
     bool singleButton = false;
     void setWindowTitle(const std::string &t);
-    void setLabel(const std::string &t);
+    void setLabel(const std::string &l);
     void setSingleButtonText(const std::string ok)
     {
         okButton->setButtonText(ok);
@@ -59,7 +65,7 @@ struct Alert : public Surge::Overlays::OverlayComponent,
         cancelButton->setButtonText(cancel);
         resetAccessibility();
     }
-    void addToggleButtonAndSetText(const std::string &t);
+    void addDontAskAgainButtonAndSetText(const std::string &t);
     void resetAccessibility();
 
     std::function<void()> onOk;
@@ -75,6 +81,8 @@ struct Alert : public Surge::Overlays::OverlayComponent,
     std::unique_ptr<MultiLineSkinLabel> labelComponent;
 
     void visibilityChanged() override;
+
+    bool keyPressed(const juce::KeyPress &press) override;
 
     /*
      * Alerts should use default focus order not the wonky tag first and

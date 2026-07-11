@@ -4,7 +4,7 @@
  *
  * Learn more at https://surge-synthesizer.github.io/
  *
- * Copyright 2018-2023, various authors, as described in the GitHub
+ * Copyright 2018-2024, various authors, as described in the GitHub
  * transaction log.
  *
  * Surge XT is released under the GNU General Public Licence v3
@@ -483,6 +483,34 @@ struct ModulationListContents : public juce::Component, public Surge::GUI::SkinC
             resetValuesFromDatum();
         }
 
+        void controlBeginEdit(GUI::IComponentTagValue *control) override
+        {
+            auto synth = contents->editor->ed->synth;
+            for (auto l : contents->editor->ed->synth->modListeners)
+            {
+                auto p = synth->storage.getPatch().param_ptr[datum.destination_id + datum.idBase];
+
+                auto nm01 = control->getValue() * 2.f - 1.f;
+
+                l->modBeginEdit(p->id, (modsources)datum.source_id, datum.source_scene,
+                                datum.source_index, nm01);
+            }
+        }
+
+        void controlEndEdit(GUI::IComponentTagValue *control) override
+        {
+            auto synth = contents->editor->ed->synth;
+            for (auto l : contents->editor->ed->synth->modListeners)
+            {
+                auto p = synth->storage.getPatch().param_ptr[datum.destination_id + datum.idBase];
+
+                auto nm01 = control->getValue() * 2.f - 1.f;
+
+                l->modEndEdit(p->id, (modsources)datum.source_id, datum.source_scene,
+                              datum.source_index, nm01);
+            }
+        }
+
         void resetValuesFromDatum()
         {
             std::string accPostfix = datum.sname + " to " + datum.pname;
@@ -538,7 +566,7 @@ struct ModulationListContents : public juce::Component, public Surge::GUI::SkinC
                 contents->editor->viewport->setViewPosition(0, 0);
             }
             if (surgeLikeSlider->isShowing())
-                surgeLikeSlider->grabKeyboardFocus();
+                Surge::GUI::grabKeyboardFocusIfAllowed(surgeLikeSlider.get());
         }
         bool firstInSort{false}, hasFollower{false};
         bool isTop{false}, isAfterTop{false}, isLast{false};
@@ -938,7 +966,7 @@ struct ModulationListContents : public juce::Component, public Surge::GUI::SkinC
             if (r.empty())
                 return;
 
-            for (auto q : r)
+            for (const auto &q : r)
             {
                 Datum d;
                 d.source_scene = q.source_scene;
@@ -1675,7 +1703,7 @@ void ModulationSideControls::doAdd()
     addSourceW->setLabels({"Select Source"});
     addTargetW->setLabels({"Select Target"});
     addTargetW->setEnabled(false);
-    addSourceW->grabKeyboardFocus();
+    Surge::GUI::grabKeyboardFocusIfAllowed(addSourceW.get());
     repaint();
 }
 
@@ -1692,7 +1720,7 @@ ModulationEditor::ModulationEditor(SurgeGUIEditor *ed, SurgeSynthesizer *s)
 
     struct IdleTimer : juce::Timer
     {
-        IdleTimer(ModulationEditor *ed) : moded(ed){};
+        IdleTimer(ModulationEditor *ed) : moded(ed) {};
         void timerCallback() override { moded->idle(); }
         ModulationEditor *moded;
     };

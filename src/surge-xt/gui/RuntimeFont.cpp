@@ -4,7 +4,7 @@
  *
  * Learn more at https://surge-synthesizer.github.io/
  *
- * Copyright 2018-2023, various authors, as described in the GitHub
+ * Copyright 2018-2024, various authors, as described in the GitHub
  * transaction log.
  *
  * Surge XT is released under the GNU General Public Licence v3
@@ -71,17 +71,21 @@ void FontManager::setupFontMembers()
     lfoTypeFont = getLatoAtSize(8);
     aboutFont = getLatoAtSize(10);
 }
-FontManager::~FontManager(){};
+FontManager::~FontManager() {};
 
 juce::Font FontManager::getLatoAtSize(float size, juce::Font::FontStyleFlags style) const
 {
     if (hasLatoOverride)
     {
-        return juce::Font(latoOverride).withPointHeight(size).withStyle(style);
+        return juce::Font(SST_JUCE_FONT_OPTIONS(latoOverride))
+            .withPointHeight(size)
+            .withStyle(style);
     }
     else if (useOSLato)
     {
-        return juce::Font("Lato", 10, 0).withPointHeight(size).withStyle(style);
+        return juce::Font(SST_JUCE_FONT_OPTIONS("Lato", 10, 0))
+            .withPointHeight(size)
+            .withStyle(style);
     }
     else
     {
@@ -98,13 +102,15 @@ juce::Font FontManager::getLatoAtSize(float size, juce::Font::FontStyleFlags sty
         {
             tf = latoItalicTypeface;
         }
-        return juce::Font(tf).withPointHeight(size).withStyle(style);
+        return juce::Font(SST_JUCE_FONT_OPTIONS(tf)).withPointHeight(size).withStyle(style);
     }
 }
 
 juce::Font FontManager::getFiraMonoAtSize(float size, juce::Font::FontStyleFlags style) const
 {
-    return juce::Font(firaMonoRegularTypeface).withPointHeight(size).withStyle(style);
+    return juce::Font(SST_JUCE_FONT_OPTIONS(firaMonoRegularTypeface))
+        .withPointHeight(size)
+        .withStyle(style);
 }
 
 void FontManager::overrideLatoWith(juce::ReferenceCountedObjectPtr<juce::Typeface> itf)

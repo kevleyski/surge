@@ -4,7 +4,7 @@
  *
  * Learn more at https://surge-synthesizer.github.io/
  *
- * Copyright 2018-2023, various authors, as described in the GitHub
+ * Copyright 2018-2024, various authors, as described in the GitHub
  * transaction log.
  *
  * Surge XT is released under the GNU General Public Licence v3
@@ -30,6 +30,8 @@
 #include "catch2/catch_amalgamated.hpp"
 
 #include "UnitTestUtilities.h"
+#include "WavetableScriptEvaluator.h"
+
 #include <chrono>
 #include <thread>
 
@@ -51,10 +53,12 @@ TEST_CASE("We Can Read Wavetables", "[io]")
     auto surge = Surge::Headless::createSurge(44100);
     REQUIRE(surge.get());
 
+    std::string metadata;
+
     SECTION("Wavetable.wav")
     {
         auto wt = &(surge->storage.getPatch().scene[0].osc[0].wt);
-        surge->storage.load_wt_wav_portable("resources/test-data/wav/Wavetable.wav", wt);
+        surge->storage.load_wt_wav_portable("resources/test-data/wav/Wavetable.wav", wt, metadata);
         REQUIRE(wt->size == 2048);
         REQUIRE(wt->n_tables == 256);
         REQUIRE((wt->flags & wtf_is_sample) == 0);
@@ -63,7 +67,7 @@ TEST_CASE("We Can Read Wavetables", "[io]")
     SECTION("05_BELL.WAV")
     {
         auto wt = &(surge->storage.getPatch().scene[0].osc[0].wt);
-        surge->storage.load_wt_wav_portable("resources/test-data/wav/05_BELL.WAV", wt);
+        surge->storage.load_wt_wav_portable("resources/test-data/wav/05_BELL.WAV", wt, metadata);
         REQUIRE(wt->size == 2048);
         REQUIRE(wt->n_tables == 33);
         REQUIRE((wt->flags & wtf_is_sample) == 0);
@@ -72,7 +76,7 @@ TEST_CASE("We Can Read Wavetables", "[io]")
     SECTION("pluckalgo.wav")
     {
         auto wt = &(surge->storage.getPatch().scene[0].osc[0].wt);
-        surge->storage.load_wt_wav_portable("resources/test-data/wav/pluckalgo.wav", wt);
+        surge->storage.load_wt_wav_portable("resources/test-data/wav/pluckalgo.wav", wt, metadata);
         REQUIRE(wt->size == 2048);
         REQUIRE(wt->n_tables == 9);
         REQUIRE((wt->flags & wtf_is_sample) == 0);
@@ -85,6 +89,11 @@ TEST_CASE("All Factory Wavetables Are Loadable", "[io]")
     REQUIRE(surge.get());
     for (auto p : surge->storage.wt_list)
     {
+        // Skip .wtscript files
+        if (p.path.extension() == ".wtscript")
+        {
+            continue;
+        }
         auto wt = &(surge->storage.getPatch().scene[0].osc[0].wt);
         wt->size = -1;
         wt->n_tables = -1;
@@ -94,6 +103,32 @@ TEST_CASE("All Factory Wavetables Are Loadable", "[io]")
         REQUIRE(wt->n_tables > 0);
     }
 }
+
+#if HAS_LUA
+TEST_CASE("All Factory .wtscript Files Validate", "[io]")
+{
+    auto surge = Surge::Headless::createSurge(44100, true);
+    REQUIRE(surge.get());
+
+    auto la = std::make_unique<Surge::WavetableScript::LuaWTEvaluator>();
+    auto oscdata = &(surge->storage.getPatch().scene[0].osc[0]);
+
+    for (auto p : surge->storage.wt_list)
+    {
+        // Skip non .wtscript files
+        if (p.path.extension() != ".wtscript")
+        {
+            continue;
+        }
+        INFO("Loading wtscript " << p.path);
+
+        oscdata->wavetable_display_name = "";
+        la->loadWtscriptForTesting(p.path, &surge->storage, oscdata);
+
+        REQUIRE(oscdata->wavetable_display_name != "");
+    }
+}
+#endif
 
 TEST_CASE("All Patches Are Loadable", "[io]")
 {
@@ -357,7 +392,12 @@ TEST_CASE("Stream Wavetable Names", "[io]")
 
         for (int i = 0; i < 40; ++i)
         {
-            int wti = rand() % surge->storage.wt_list.size();
+            int wti;
+            // Exclude .wtscript files
+            do
+            {
+                wti = rand() % surge->storage.wt_list.size();
+            } while (surge->storage.wt_list[wti].path.extension() == ".wtscript");
             INFO("Loading random wavetable " << wti << " at run " << i);
 
             surge->storage.load_wt(wti, &patch->scene[0].osc[0].wt, &patch->scene[0].osc[0]);
@@ -407,7 +447,14 @@ TEST_CASE("Stream Wavetable Names", "[io]")
                         patch->scene[s].osc[o].type.val.i = ot_wavetable;
                         for (int i = 0; i < 2; ++i)
                             surgeS->process();
-                        int wti = rand() % surgeS->storage.wt_list.size();
+
+                        int wti;
+                        // Exclude .wtscript files
+                        do
+                        {
+                            wti = rand() % surgeS->storage.wt_list.size();
+                        } while (surgeS->storage.wt_list[wti].path.extension() == ".wtscript");
+
                         surgeS->storage.load_wt(wti, &patch->scene[s].osc[o].wt,
                                                 &patch->scene[s].osc[o]);
                         REQUIRE(std::string(patch->scene[s].osc[o].wavetable_display_name) ==
@@ -447,7 +494,6 @@ TEST_CASE("Stream Wavetable Names", "[io]")
 
 TEST_CASE("Load Patches With Embedded KBM", "[io]")
 {
-    std::vector<std::string> patches = {};
     SECTION("Check Restore")
     {
         {
@@ -569,13 +615,37 @@ TEST_CASE("Patch Version Builder", "[io]")
             surge->process();
             auto ft = surge->storage.getPatch().scene[0].filterunit[0].type.val.i;
             auto st = surge->storage.getPatch().scene[0].filterunit[0].subtype.val.i;
+            auto lft = ft;
+            auto lst = st;
+            if (ff_revision >= 27)
+            {
+                // If the engiunue is later than revision 27 in the code this should lift
+                if (ft == sst::filters::FilterType::fut_obxd_4pole)
+                {
+                    if (st == sst::filters::FilterSubType::st_obxd4pole_24dB)
+                    {
+                        lst = sst::filters::FilterSubType::st_obxd4pole_broken24dB;
+                    }
+                }
+                if (ft == sst::filters::FilterType::fut_bp12)
+                {
+                    if (st == sst::filters::FilterSubType::st_Driven)
+                    {
+                        lst = sst::filters::FilterSubType::st_bp12_LegacyDriven;
+                    }
+                    if (st == sst::filters::FilterSubType::st_Clean)
+                    {
+                        lst = sst::filters::FilterSubType::st_bp12_LegacyClean;
+                    }
+                }
+            }
             for (int s = 0; s < n_scenes; ++s)
             {
                 for (int fu = 0; fu < n_filterunits_per_scene; ++fu)
                 {
-                    INFO(path_to_string(ent) << " " << ft << " " << st << " " << s << " " << fu);
-                    REQUIRE(surge->storage.getPatch().scene[s].filterunit[fu].type.val.i == ft);
-                    REQUIRE(surge->storage.getPatch().scene[s].filterunit[fu].subtype.val.i == st);
+                    INFO(path_to_string(ent) << " " << lft << " " << lst << " " << s << " " << fu);
+                    REQUIRE(surge->storage.getPatch().scene[s].filterunit[fu].type.val.i == lft);
+                    REQUIRE(surge->storage.getPatch().scene[s].filterunit[fu].subtype.val.i == lst);
                 }
             }
 
@@ -603,7 +673,6 @@ TEST_CASE("Patch Version Builder", "[io]")
                 case FilterType::fut_hp24:
                 case FilterType::fut_SNH:
                 case FilterType::fut_vintageladder:
-                case FilterType::fut_obxd_4pole:
                 case FilterType::fut_k35_lp:
                 case FilterType::fut_k35_hp:
                 case FilterType::fut_diode:
@@ -615,6 +684,15 @@ TEST_CASE("Patch Version Builder", "[io]")
                     // These types were unchanged
                     break;
                     // These are the types which changed 14 -> 15
+                case FilterType::fut_obxd_4pole:
+                    if (ff_revision >= 27)
+                    {
+                        if (lst == sst::filters::FilterSubType::st_obxd4pole_broken24dB)
+                        {
+                            fnst = sst::filters::FilterSubType::st_obxd4pole_24dB;
+                        }
+                    }
+                    break;
                 case FilterType::fut_comb_pos:
                     fnft = fut_14_comb;
                     fnst = st;
@@ -641,7 +719,6 @@ TEST_CASE("Patch Version Builder", "[io]")
                     break;
                 case FilterType::fut_notch12:
                     fnft = fut_14_notch12;
-                    fnst = st;
                     break;
                 case FilterType::fut_notch24:
                     fnft = fut_14_notch12;
@@ -649,7 +726,17 @@ TEST_CASE("Patch Version Builder", "[io]")
                     break;
                 case FilterType::fut_bp12:
                     fnft = fut_14_bp12;
-                    fnst = st;
+                    if (ff_revision < 27)
+                    {
+                        fnst = lst;
+                    }
+                    else
+                    {
+                        if (lst == sst::filters::FilterSubType::st_bp12_LegacyDriven)
+                            fnst = sst::filters::FilterSubType::st_Driven;
+                        if (lst == sst::filters::FilterSubType::st_bp12_LegacyClean)
+                            fnst = sst::filters::FilterSubType::st_Clean;
+                    }
                     break;
                 case FilterType::fut_bp24:
                     fnft = fut_14_bp12;
@@ -677,6 +764,31 @@ TEST_CASE("Patch Version Builder", "[io]")
             surge->process();
             auto ft = surge->storage.getPatch().scene[0].filterunit[0].type.val.i;
             auto st = surge->storage.getPatch().scene[0].filterunit[0].subtype.val.i;
+
+            auto lft = ft;
+            auto lst = st;
+            if (ff_revision >= 27)
+            {
+                // If the engiunue is later than revision 27 in the code this should lift
+                if (ft == sst::filters::FilterType::fut_obxd_4pole)
+                {
+                    if (st == sst::filters::FilterSubType::st_obxd4pole_broken24dB)
+                    {
+                        lst = sst::filters::FilterSubType::st_obxd4pole_24dB;
+                    }
+                }
+                if (ft == sst::filters::FilterType::fut_bp12)
+                {
+                    if (st == sst::filters::FilterSubType::st_bp12_LegacyDriven)
+                    {
+                        lst = sst::filters::FilterSubType::st_Driven;
+                    }
+                    if (st == sst::filters::FilterSubType::st_bp12_LegacyClean)
+                    {
+                        lst = sst::filters::FilterSubType::st_Clean;
+                    }
+                }
+            }
             for (int s = 0; s < n_scenes; ++s)
             {
                 for (int fu = 0; fu < n_filterunits_per_scene; ++fu)
@@ -688,7 +800,7 @@ TEST_CASE("Patch Version Builder", "[io]")
             }
 
             std::ostringstream cand_fn;
-            cand_fn << "filt_" << ft << "_" << st << ".fxp";
+            cand_fn << "filt_" << lft << "_" << lst << ".fxp";
             auto entfn = path_to_string(ent.path().filename());
             REQUIRE(entfn == cand_fn.str());
         }
@@ -728,5 +840,59 @@ TEST_CASE("Mono Voice Priority Streams", "[io]")
             REQUIRE(sdst->storage.getPatch().scene[1].monoVoicePriorityMode ==
                     (MonoVoicePriorityMode)r2);
         }
+    }
+}
+
+TEST_CASE("XML Direct", "[io]")
+{
+    // This is not a public API but we want to make sure it
+    // doesn't nuke surge with garbage
+    SECTION("Nothin")
+    {
+        auto surge = Surge::Headless::createSurge(44100);
+        std::string blank{};
+        surge->storage.getPatch().load_xml(blank.c_str(), blank.size(), false);
+    }
+
+    SECTION("Not XML")
+    {
+        auto surge = Surge::Headless::createSurge(44100);
+        std::string test{"This Is Not A Standard String, says Renee"};
+        surge->storage.getPatch().load_xml(test.c_str(), test.size(), false);
+    }
+
+    SECTION("Not XML")
+    {
+        auto surge = Surge::Headless::createSurge(44100);
+        std::string test{"This Is Not A Standard String, says Renee"};
+        surge->storage.getPatch().load_xml(test.c_str(), test.size(), false);
+    }
+
+    SECTION("Funny root node")
+    {
+        auto surge = Surge::Headless::createSurge(44100);
+        std::string test{"<funny/>"};
+        surge->storage.getPatch().load_xml(test.c_str(), test.size(), false);
+    }
+
+    SECTION("Invalid XML")
+    {
+        auto surge = Surge::Headless::createSurge(44100);
+        std::string test{"<funny></business>"};
+        surge->storage.getPatch().load_xml(test.c_str(), test.size(), false);
+    }
+
+    SECTION("Empty Patch")
+    {
+        auto surge = Surge::Headless::createSurge(44100);
+        std::string test{"<patch/>"};
+        surge->storage.getPatch().load_xml(test.c_str(), test.size(), false);
+    }
+
+    SECTION("Empty Parameters")
+    {
+        auto surge = Surge::Headless::createSurge(44100);
+        std::string test{"<patch><parameters/></patch>"};
+        surge->storage.getPatch().load_xml(test.c_str(), test.size(), false);
     }
 }

@@ -4,7 +4,7 @@
  *
  * Learn more at https://surge-synthesizer.github.io/
  *
- * Copyright 2018-2023, various authors, as described in the GitHub
+ * Copyright 2018-2024, various authors, as described in the GitHub
  * transaction log.
  *
  * Surge XT is released under the GNU General Public Licence v3
@@ -40,15 +40,18 @@ class alignas(16) Oscillator
 
     Oscillator(SurgeStorage *storage, OscillatorStorage *oscdata, pdata *localcopy);
     virtual ~Oscillator();
-    virtual void init(float pitch, bool is_display = false, bool nonzero_init_drift = true){};
+    virtual void init(float pitch, bool is_display = false, bool nonzero_init_drift = true) {};
     virtual void init_ctrltypes(int scene, int oscnum) { init_ctrltypes(); };
-    virtual void init_ctrltypes(){};
-    virtual void init_default_values(){};
+    virtual void init_ctrltypes() {};
+    virtual void init_default_values() {};
     virtual void init_extra_config() { oscdata->extraConfig.nData = 0; }
     virtual void process_block(float pitch, float drift = 0.f, bool stereo = false, bool FM = false,
                                float FMdepth = 0.f)
     {
     }
+
+    virtual void processSamplesForDisplay(float *samples, int size, bool real) {};
+
     virtual void assign_fm(float *master_osc) { this->master_osc = master_osc; }
     virtual bool allow_display() { return true; }
     inline double pitch_to_omega(float x)
@@ -94,7 +97,7 @@ class AbstractBlitOscillator : public Oscillator
     float oscbuffer alignas(16)[OB_LENGTH + FIRipol_N];
     float oscbufferR alignas(16)[OB_LENGTH + FIRipol_N];
     float dcbuffer alignas(16)[OB_LENGTH + FIRipol_N];
-    __m128 osc_out, osc_out2, osc_outR, osc_out2R;
+    SIMD_M128 osc_out, osc_out2, osc_outR, osc_out2R;
     void prepare_unison(int voices);
     float integrator_hpf;
     float pitchmult, pitchmult_inv;

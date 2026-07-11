@@ -4,7 +4,7 @@
  *
  * Learn more at https://surge-synthesizer.github.io/
  *
- * Copyright 2018-2023, various authors, as described in the GitHub
+ * Copyright 2018-2024, various authors, as described in the GitHub
  * transaction log.
  *
  * Surge XT is released under the GNU General Public Licence v3
@@ -32,6 +32,7 @@
 #include "DebugHelpers.h"
 
 #include "sst/basic-blocks/mechanics/endian-ops.h"
+#include "PatchFileHeaderStructs.h"
 
 namespace mech = sst::basic_blocks::mechanics;
 
@@ -79,7 +80,7 @@ struct LockedException : public Exception
     int rc;
 };
 
-void Exec(sqlite3 *h, const std::string &statement)
+static void Exec(sqlite3 *h, const std::string &statement)
 {
     char *emsg;
     auto rc = sqlite3_exec(h, statement.c_str(), nullptr, nullptr, &emsg);
@@ -383,9 +384,8 @@ CREATE TABLE IF NOT EXISTS Favorites (
         if (ec != SQLITE_OK)
         {
             std::ostringstream oss;
-            oss << "An error occurred opening sqlite file '" << dbname << "'. The error was '"
-                << sqlite3_errmsg(dbh) << "'.";
-            storage->reportError(oss.str(), "Surge Patch Database Error");
+            oss << "An error occurred when opening '" << dbname << "'.\n\n" << sqlite3_errmsg(dbh);
+            storage->reportError(oss.str(), "Database Error");
             if (dbh)
             {
                 // even if opening fails we still need to close the database
@@ -470,7 +470,6 @@ CREATE TABLE IF NOT EXISTS Favorites (
             // storage->reportError(e.what(), "SQLLite3 Startup Error");
         }
 
-        char *emsg;
         if (rebuild)
         {
 #if TRACE_DB
@@ -488,7 +487,7 @@ CREATE TABLE IF NOT EXISTS Favorites (
             }
             catch (const SQL::Exception &e)
             {
-                storage->reportError(e.what(), "PatchDB Setup Error");
+                storage->reportError(e.what(), "Database Setup Error");
             }
         }
 
@@ -542,11 +541,11 @@ CREATE TABLE IF NOT EXISTS Favorites (
         STRING
     };
     typedef std::tuple<std::string, FeatureType, int, std::string> feature;
-    std::vector<feature> extractFeaturesFromXML(const std::string &xml)
+    std::vector<feature> extractFeaturesFromXML(const char *xml)
     {
         std::vector<feature> res;
         TiXmlDocument doc;
-        doc.Parse(xml.c_str(), nullptr, TIXML_ENCODING_LEGACY);
+        doc.Parse(xml, nullptr, TIXML_ENCODING_LEGACY);
         if (doc.Error())
         {
 #if TRACE_DB
@@ -668,8 +667,9 @@ CREATE TABLE IF NOT EXISTS Favorites (
                 if (keepRunning)
                 {
                     auto b = pathQ.begin();
-                    auto e = (pathQ.size() < transChunkSize) ? pathQ.end()
-                                                             : pathQ.begin() + transChunkSize;
+                    const auto &e = (pathQ.size() < transChunkSize)
+                                        ? pathQ.end()
+                                        : pathQ.begin() + transChunkSize;
                     std::copy(b, e, std::back_inserter(doThis));
                     pathQ.erase(b, e);
                 }
@@ -704,7 +704,7 @@ CREATE TABLE IF NOT EXISTS Favorites (
                                "writing up to 10 more times. "
                                "Please dismiss this error in the meantime!\n\n Attempt: "
                             << lock_retries;
-                        storage->reportError(oss.str(), "Patch Database Locked");
+                        storage->reportError(oss.str(), "Database Locked");
                         // OK so in this case, we reload doThis onto the front of the queue and
                         // sleep
                         lock_retries++;
@@ -724,12 +724,12 @@ CREATE TABLE IF NOT EXISTS Favorites (
                         {
                             storage->reportError(
                                 "Database is locked and unwritable after multiple attempts!",
-                                "Patch Database Locked");
+                                "Database Locked");
                         }
                     }
                     catch (SQL::Exception &e)
                     {
-                        storage->reportError(e.what(), "Patch DB");
+                        storage->reportError(e.what(), "Database Error");
                     }
                 }
             }
@@ -802,7 +802,10 @@ CREATE TABLE IF NOT EXISTS Favorites (
         }
         catch (const SQL::Exception &e)
         {
-            storage->reportError(e.what(), "PatchDB - Load Check");
+            if (storage)
+            {
+                storage->reportError(e.what(), "Database Load Check");
+            }
             return;
         }
 
@@ -831,46 +834,53 @@ CREATE TABLE IF NOT EXISTS Favorites (
         }
         catch (const SQL::Exception &e)
         {
-            storage->reportError(e.what(), "PatchDB - Insert Patch");
+            if (storage)
+            {
+                storage->reportError(e.what(), "Database Insert Patch");
+            }
             return;
         }
 
         std::ostringstream searchName;
         searchName << p.name << " ";
 
+        if (storage)
+        {
+            auto pTmp = p.path.parent_path();
+            std::vector<fs::path> parentFiles;
+            int maxItForSafety{0};
+            while ((pTmp != storage->userPatchesPath) &&
+                   (pTmp != storage->datapath / "patches_factory") &&
+                   (pTmp != storage->datapath / "patches_3rdparty") && !pTmp.empty() &&
+                   (pTmp != pTmp.root_directory()) && maxItForSafety < 10)
+            {
+                parentFiles.push_back(pTmp.filename());
+                pTmp = pTmp.parent_path();
+                maxItForSafety++;
+            }
+
+            if (pTmp == storage->datapath / "patches_3rdparty")
+            {
+                parentFiles.erase(parentFiles.end() - 1);
+            }
+
+            for (const auto &pf : parentFiles)
+            {
+                searchName << pf.u8string() << " ";
+            }
+        }
+
         std::ifstream stream(p.path, std::ios::in | std::ios::binary);
-        std::vector<uint8_t> contents((std::istreambuf_iterator<char>(stream)),
-                                      std::istreambuf_iterator<char>());
 
-#pragma pack(push, 1)
-        struct patch_header
+        std::vector<char> fxChunk;
+        fxChunk.resize(sizeof(sst::io::fxChunkSetCustom));
+        stream.read(fxChunk.data(), fxChunk.size());
+        if (!stream)
         {
-            char tag[4];
-            unsigned int xmlsize,
-                wtsize[2][3]; // TODO: FIX SCENE AND OSC COUNT ASSUMPTION (but also since
-            // it's used in streaming, do it with care!)
-        };
+            return;
+        }
 
-        struct fxChunkSetCustom
-        {
-            int chunkMagic; // 'CcnK'
-            int byteSize;   // of this chunk, excl. magic + byteSize
-
-            int fxMagic; // 'FPCh'
-            int version;
-            int fxID; // fx unique id
-            int fxVersion;
-
-            int numPrograms;
-            char prgName[28];
-
-            int chunkSize;
-            // char chunk[8]; // variable
-        };
-#pragma pack(pop)
-
-        uint8_t *d = contents.data();
-        auto *fxp = (fxChunkSetCustom *)d;
+        auto *fxp = (sst::io::fxChunkSetCustom *)(fxChunk.data());
         if ((mech::endian_read_int32BE(fxp->chunkMagic) != 'CcnK') ||
             (mech::endian_read_int32BE(fxp->fxMagic) != 'FPCh') ||
             (mech::endian_read_int32BE(fxp->fxID) != 'cjs3'))
@@ -878,8 +888,14 @@ CREATE TABLE IF NOT EXISTS Favorites (
             return;
         }
 
-        auto phd = d + sizeof(fxChunkSetCustom);
-        auto *ph = (patch_header *)phd;
+        std::vector<char> patchHeaderChunk;
+        patchHeaderChunk.resize(sizeof(sst::io::patch_header));
+        stream.read(patchHeaderChunk.data(), patchHeaderChunk.size());
+        if (!stream)
+        {
+            return;
+        }
+        auto *ph = (sst::io::patch_header *)(patchHeaderChunk.data());
         auto xmlSz = mech::endian_read_int32LE(ph->xmlsize);
 
         if (!memcpy(ph->tag, "sub3", 4) || xmlSz < 0 || xmlSz > 1024 * 1024 * 1024)
@@ -888,19 +904,21 @@ CREATE TABLE IF NOT EXISTS Favorites (
             return;
         }
 
-        auto xd = phd + sizeof(patch_header);
-        std::string xml(xd, xd + xmlSz);
-
+        std::string xmlData;
+        xmlData.resize(xmlSz);
+        stream.read(xmlData.data(), xmlData.size());
+        if (!stream)
+            return;
         try
         {
             auto ins =
                 SQL::Statement(dbh, "INSERT INTO PATCHFEATURE ( \"patch_id\", \"feature\", "
                                     "\"feature_type\", \"feature_ivalue\", \"feature_svalue\" ) "
                                     "VALUES ( ?1, ?2, ?3, ?4, ?5 )");
-            auto feat = extractFeaturesFromXML(xml);
-            for (auto f : feat)
+            auto feat = extractFeaturesFromXML(xmlData.data());
+            for (const auto &f : feat)
             {
-                auto ftype = std::get<0>(f);
+                const auto &ftype = std::get<0>(f);
                 ins.bindi64(1, patchid);
                 ins.bind(2, std::get<0>(f));
                 ins.bind(3, (int)std::get<1>(f));
@@ -921,7 +939,10 @@ CREATE TABLE IF NOT EXISTS Favorites (
         }
         catch (const SQL::Exception &e)
         {
-            storage->reportError(e.what(), "PatchDB - FXP Features");
+            if (storage)
+            {
+                storage->reportError(e.what(), "Database FXP Features");
+            }
             return;
         }
 
@@ -937,7 +958,10 @@ CREATE TABLE IF NOT EXISTS Favorites (
         }
         catch (const SQL::Exception &e)
         {
-            storage->reportError(e.what(), "PatchDB - FXP Features");
+            if (storage)
+            {
+                storage->reportError(e.what(), "Database FXP Features");
+            }
             return;
         }
     }
@@ -963,7 +987,7 @@ CREATE TABLE IF NOT EXISTS Favorites (
         }
         catch (const SQL::Exception &e)
         {
-            storage->reportError(e.what(), "PatchDB - Junk gave Junk");
+            storage->reportError(e.what(), "Database Junk Gave Junk");
         }
     }
 
@@ -983,7 +1007,7 @@ CREATE TABLE IF NOT EXISTS Favorites (
         }
         catch (const SQL::Exception &e)
         {
-            storage->reportError(e.what(), "PatchDB - Junk gave Junk");
+            storage->reportError(e.what(), "Database Junk Gave Junk");
         }
     }
 
@@ -998,7 +1022,7 @@ CREATE TABLE IF NOT EXISTS Favorites (
         }
         catch (const SQL::Exception &e)
         {
-            storage->reportError(e.what(), "PatchDB - Junk gave Junk");
+            storage->reportError(e.what(), "Database Junk Gave Junk");
         }
     }
     void addRootCategory(const std::string &name, CatType type)
@@ -1019,7 +1043,7 @@ CREATE TABLE IF NOT EXISTS Favorites (
         }
         catch (const SQL::Exception &e)
         {
-            storage->reportError(e.what(), "PatchDB - Category Query");
+            storage->reportError(e.what(), "Database Category Query");
         }
 
         try
@@ -1035,7 +1059,7 @@ CREATE TABLE IF NOT EXISTS Favorites (
         }
         catch (const SQL::Exception &e)
         {
-            storage->reportError(e.what(), "PatchDB - Category Root Insert");
+            storage->reportError(e.what(), "Database Category Root Insert");
         }
     }
 
@@ -1059,7 +1083,7 @@ CREATE TABLE IF NOT EXISTS Favorites (
         }
         catch (const SQL::Exception &e)
         {
-            storage->reportError(e.what(), "PatchDB - Category Query");
+            storage->reportError(e.what(), "Database Category Query");
         }
 
         try
@@ -1086,7 +1110,7 @@ CREATE TABLE IF NOT EXISTS Favorites (
         }
         catch (const SQL::Exception &e)
         {
-            storage->reportError(e.what(), "PatchDB - Category Root Insert");
+            storage->reportError(e.what(), "Database Category Root Insert");
         }
     }
 
@@ -1196,7 +1220,7 @@ std::vector<std::pair<std::string, int>> PatchDB::readAllFeatures()
     }
     catch (SQL::Exception &e)
     {
-        storage->reportError(e.what(), "PatchDB - readFeatures");
+        storage->reportError(e.what(), "Database Read Features");
     }
     return res;
 }
@@ -1221,7 +1245,7 @@ std::vector<std::string> PatchDB::readAllFeatureValueString(const std::string &f
     }
     catch (SQL::Exception &e)
     {
-        storage->reportError(e.what(), "PatchDB - readFeatures");
+        storage->reportError(e.what(), "Database Read Features");
     }
     return res;
 }
@@ -1246,7 +1270,7 @@ std::vector<int> PatchDB::readAllFeatureValueInt(const std::string &feature)
     }
     catch (SQL::Exception &e)
     {
-        storage->reportError(e.what(), "PatchDB - readFeatures");
+        storage->reportError(e.what(), "Database Read Features");
     }
     return res;
 }
@@ -1291,7 +1315,7 @@ std::vector<PatchDB::patchRecord> PatchDB::rawQueryForNameLike(const std::string
         }
         else
         {
-            storage->reportError(e.what(), "PatchDB - rawQueryForNameLike");
+            storage->reportError(e.what(), "Database Raw Query For Name Like");
         }
     }
 
@@ -1354,7 +1378,7 @@ std::vector<PatchDB::catRecord> PatchDB::internalCategories(int t, const std::st
     }
     catch (SQL::Exception &e)
     {
-        storage->reportError(e.what(), "PatchDB - Loading Categories");
+        storage->reportError(e.what(), "Database Loading Categories");
     }
 
     return res;
@@ -1403,7 +1427,7 @@ std::vector<std::string> PatchDB::readUserFavorites()
     catch (SQL::Exception &e)
     {
         // This error really doesn't matter most of the time
-        storage->reportError(e.what(), "PatchDB - Loading Favorites");
+        storage->reportError(e.what(), "Database Loading Favorites");
     }
     return std::vector<std::string>();
 }
@@ -1432,7 +1456,7 @@ PatchDB::readAllPatchPathsWithIdAndModTime()
     catch (SQL::Exception &e)
     {
         // This error really doesn't matter most of the time
-        storage->reportError(e.what(), "PatchDB - Loading Favorites");
+        storage->reportError(e.what(), "Database Loading Favorites");
     }
     return res;
 }
@@ -1460,7 +1484,7 @@ std::string PatchDB::sqlWhereClauseFor(const std::unique_ptr<PatchDBQueryParser:
 {
     auto protect = [](const std::string &s) -> std::string {
         std::vector<std::pair<std::string, std::string>> replacements{{"'", "''"}, {"%", "%%"}};
-        auto res = s;
+        std::string res = s;
         for (const auto &[search, replace] : replacements)
         {
             size_t pos = res.find(search);
@@ -1490,6 +1514,11 @@ std::string PatchDB::sqlWhereClauseFor(const std::unique_ptr<PatchDBQueryParser:
                  !t->children[0]->content.empty())
         {
             oss << "(category LIKE '%" << protect(t->children[0]->content) << "%' )";
+        }
+        else if (t->content == "FAVORITES" || t->content == "FAV")
+        {
+            // Value after = is ignored; any value filters to favorites
+            oss << "(p.path IN (SELECT path FROM Favorites))";
         }
         else
         {
@@ -1559,7 +1588,7 @@ PatchDB::queryFromQueryString(const std::unique_ptr<PatchDBQueryParser::Token> &
         }
         else
         {
-            storage->reportError(e.what(), "PatchDB - rawQueryForNameLike");
+            storage->reportError(e.what(), "Database Raw Query For Name Like");
         }
     }
 

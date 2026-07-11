@@ -4,7 +4,7 @@
  *
  * Learn more at https://surge-synthesizer.github.io/
  *
- * Copyright 2018-2023, various authors, as described in the GitHub
+ * Copyright 2018-2024, various authors, as described in the GitHub
  * transaction log.
  *
  * Surge XT is released under the GNU General Public Licence v3
@@ -23,6 +23,7 @@
 #ifndef SURGE_SRC_COMMON_DSP_EFFECT_H
 #define SURGE_SRC_COMMON_DSP_EFFECT_H
 
+#include "globals.h"
 #include "DSPUtils.h"
 #include "SurgeStorage.h"
 #include "lipol.h"
@@ -52,21 +53,20 @@ class alignas(16) Effect
 
     virtual const char *get_effectname() { return 0; }
 
-    virtual void init(){};
+    virtual void init() {}
     virtual void init_ctrltypes();
-    virtual void init_default_values(){};
+    virtual void init_default_values() {}
 
-    // No matter what path is used to reload (whether created anew or what not) this is called after
-    // the loading state of an item has changed
-    virtual void updateAfterReload(){};
-    virtual Surge::ParamConfig::VUType vu_type(int id) { return Surge::ParamConfig::vut_off; };
-    virtual int vu_ypos(int id) { return id; }; // in 'half-hslider' heights
-    virtual const char *group_label(int id) { return 0; };
-    virtual int group_label_ypos(int id) { return 0; };
-    virtual int get_ringout_decay()
-    {
-        return -1;
-    } // number of blocks it takes for the effect to 'ring out'
+    // No matter which path is used to reload (whether created anew or whatnot)
+    // this is called after the loading state of an item that has changed
+    virtual void updateAfterReload() {}
+
+    virtual const char *group_label(int id) { return 0; }
+    virtual int group_label_ypos(int id) { return 0; }
+
+    // number of blocks it takes for the effect to 'ring out'
+    virtual int get_ringout_decay() { return -1; }
+
     int groupIndexForParamIndex(int paramIndex)
     {
         int fpos = fxdata->p[paramIndex].posy / 10 + fxdata->p[paramIndex].posy_offset;
@@ -94,7 +94,6 @@ class alignas(16) Effect
     // virtual void processSSE3(float *dataL, float *dataR){ return; }
     // virtual void processT<int architecture>(float *dataL, float *dataR){ return; }
     virtual void suspend() { return; }
-    float vu[KNumVuSlots]; // stereo pairs, just use every other when mono
 
     // Most of the fx read the sample rate at sample time but airwindows
     // keeps a cache so give loaded fx a notice when the sample rate changes
@@ -112,7 +111,7 @@ class alignas(16) Effect
         return x;
     }
 
-    inline void applyWidth(float *__restrict L, float *__restrict R, lipol_ps_blocksz &width)
+    inline void applyStereoWidth(float *__restrict L, float *__restrict R, lipol_ps_blocksz &width)
     {
         namespace sdsp = sst::basic_blocks::dsp;
         float M alignas(16)[BLOCK_SIZE], S alignas(16)[BLOCK_SIZE];

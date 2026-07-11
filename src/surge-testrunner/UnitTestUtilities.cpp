@@ -4,7 +4,7 @@
  *
  * Learn more at https://surge-synthesizer.github.io/
  *
- * Copyright 2018-2023, various authors, as described in the GitHub
+ * Copyright 2018-2024, various authors, as described in the GitHub
  * transaction log.
  *
  * Surge XT is released under the GNU General Public Licence v3
@@ -251,11 +251,25 @@ std::shared_ptr<SurgeSynthesizer> surgeOnTemplate(const std::string &otp, float 
 
 std::shared_ptr<SurgeSynthesizer> surgeOnSine(float sr = 44100)
 {
-    return surgeOnTemplate("Init Sine", sr);
+    auto surge = Surge::Headless::createSurge(sr);
+
+    auto pt = fs::path{"resources/test-data/patches"};
+    REQUIRE(fs::is_directory(pt));
+    auto isin = pt / "TestInitSine.fxp";
+    REQUIRE(fs::exists(isin));
+    surge->loadPatchByPath(path_to_string(isin).c_str(), -1, "Test");
+    return surge;
 }
 std::shared_ptr<SurgeSynthesizer> surgeOnSaw(float sr = 44100)
 {
-    return surgeOnTemplate("Init Saw", sr);
+    auto surge = Surge::Headless::createSurge(sr);
+
+    auto pt = fs::path{"resources/test-data/patches"};
+    REQUIRE(fs::is_directory(pt));
+    auto isin = pt / "TestInitSaw.fxp";
+    REQUIRE(fs::exists(isin));
+    surge->loadPatchByPath(path_to_string(isin).c_str(), -1, "Test");
+    return surge;
 }
 
 void makePlotPNGFromData(std::string pngFileName, std::string plotTitle, float *buffer, int nS,

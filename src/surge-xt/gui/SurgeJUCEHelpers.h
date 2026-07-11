@@ -4,7 +4,7 @@
  *
  * Learn more at https://surge-synthesizer.github.io/
  *
- * Copyright 2018-2023, various authors, as described in the GitHub
+ * Copyright 2018-2024, various authors, as described in the GitHub
  * transaction log.
  *
  * Surge XT is released under the GNU General Public Licence v3
@@ -110,9 +110,9 @@ struct WheelAccumulationHelper
     }
 };
 
-inline void addMenuWithShortcut(juce::PopupMenu &m, const std::string &lab,
-                                const std::string &shortcut, bool enabled, bool ticked,
-                                std::function<void()> action)
+inline void addMenuItemWithShortcut(juce::PopupMenu &m, const std::string &lab,
+                                    const std::string &shortcut, bool enabled, bool ticked,
+                                    std::function<void()> action)
 {
     auto i = juce::PopupMenu::Item(lab)
                  .setAction(std::move(action))
@@ -123,10 +123,10 @@ inline void addMenuWithShortcut(juce::PopupMenu &m, const std::string &lab,
     m.addItem(i);
 }
 
-inline void addMenuWithShortcut(juce::PopupMenu &m, const std::string &lab,
-                                const std::string &shortcut, std::function<void()> action)
+inline void addMenuItemWithShortcut(juce::PopupMenu &m, const std::string &lab,
+                                    const std::string &shortcut, std::function<void()> action)
 {
-    addMenuWithShortcut(m, lab, shortcut, true, false, action);
+    addMenuItemWithShortcut(m, lab, shortcut, true, false, action);
 }
 
 inline void addRevealFile(juce::PopupMenu &m, const fs::path &p)

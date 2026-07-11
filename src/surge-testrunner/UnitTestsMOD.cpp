@@ -4,7 +4,7 @@
  *
  * Learn more at https://surge-synthesizer.github.io/
  *
- * Copyright 2018-2023, various authors, as described in the GitHub
+ * Copyright 2018-2024, various authors, as described in the GitHub
  * transaction log.
  *
  * Surge XT is released under the GNU General Public Licence v3
@@ -19,7 +19,6 @@
  * All source for Surge XT is available at
  * https://github.com/surge-synthesizer/surge
  */
-#include <iostream>
 #include <iostream>
 #include <iomanip>
 #include <sstream>
@@ -172,9 +171,9 @@ TEST_CASE("ADSR Envelope Behaviour", "[mod]")
         {
             if (sturns.size() != 3)
             {
-                for (auto s : simple)
+                for (const auto &s : simple)
                     std::cout << s.first << " " << s.second << std::endl;
-                for (auto s : sturns)
+                for (const auto &s : sturns)
                     std::cout << s.first << " " << s.second << std::endl;
             }
             REQUIRE(sturns.size() == 3);
@@ -189,10 +188,10 @@ TEST_CASE("ADSR Envelope Behaviour", "[mod]")
         {
             if (sturns.size() != 5)
             {
-                for (auto s : simple)
+                for (const auto &s : simple)
                     std::cout << s.first << " " << s.second << std::endl;
                 std::cout << "TURNS" << std::endl;
-                for (auto s : sturns)
+                for (const auto &s : sturns)
                     std::cout << s.first << " " << s.second << std::endl;
             }
             REQUIRE(sturns.size() == 5);
@@ -247,7 +246,7 @@ TEST_CASE("ADSR Envelope Behaviour", "[mod]")
     SECTION("Digital Envelope With Quadratic Slope Hits Zero")
     {
         auto res = runAdsr(0.1, 0.1, 0.0, 0.1, 0, 1, 0, false, 0.4, 0.5);
-        for (auto p : res)
+        for (const auto &p : res)
         {
             if (p.first > 0.22)
             {
@@ -271,7 +270,7 @@ TEST_CASE("ADSR Envelope Behaviour", "[mod]")
             float zerot = 0;
             float valAtRelEnd = -1;
             std::vector<float> heldPeriod;
-            for (auto obs : ae)
+            for (const auto &obs : ae)
             {
                 // std::cout << obs.first << " " << obs.second << std::endl;
 
@@ -335,7 +334,7 @@ TEST_CASE("ADSR Envelope Behaviour", "[mod]")
         auto testSusPush = [&](float s1, float s2) {
             auto digPush = runAdsr(0.05, 0.05, s1, 0.1, 0, 0, 0, false, 0.5, s2, 0.25, s2);
             int obs = 0;
-            for (auto s : digPush)
+            for (const auto &s : digPush)
             {
                 if (s.first > 0.2 && obs == 0)
                 {
@@ -395,8 +394,8 @@ TEST_CASE("ADSR Envelope Behaviour", "[mod]")
             auto gate = !released;
             float v_gate = gate ? v_cc : 0.f;
 
-            // discharge = _mm_and_ps(_mm_or_ps(_mm_cmpgt_ss(v_c1_delayed, one), discharge),
-            // v_gate);
+            // discharge = SIMD_MM(and_ps)(SIMD_MM(or_ps)(SIMD_MM(cmpgt_ss)(v_c1_delayed, one),
+            // discharge), v_gate);
             discharge = ((v_c1_delayed > 1) || discharge) && gate;
             v_c1_delayed = v_c1;
 
@@ -404,15 +403,15 @@ TEST_CASE("ADSR Envelope Behaviour", "[mod]")
 
             float v_attack = discharge ? 0 : v_gate;
             // OK so this line:
-            // __m128 v_decay = _mm_or_ps(_mm_andnot_ps(discharge, v_cc_vec), _mm_and_ps(discharge,
-            // S)); The semantic intent is discharge ? S : v_cc but in the ADSR discharge has a
-            // value of v_gate which is 1.5 (v_cc) not 1.0. That bitwise and with 1.5 acts as a
-            // binary filter (the mantissa) and a rounding operation (from the .5) so I need to
-            // duplicate it exactly here.
+            // auto v_decay = SIMD_MM(or_ps)(SIMD_MM(andnot_ps)(discharge, v_cc_vec),
+            // SIMD_MM(and_ps)(discharge, S)); The semantic intent is discharge ? S : v_cc but in
+            // the ADSR discharge has a value of v_gate which is 1.5 (v_cc) not 1.0. That bitwise
+            // and with 1.5 acts as a binary filter (the mantissa) and a rounding operation (from
+            // the .5) so I need to duplicate it exactly here.
             /*
-            __m128 sM = _mm_load_ss(&S);
-            __m128 dM = _mm_load_ss(&v_cc);
-            __m128 vdv = _mm_and_ps(dM, sM);
+            auto sM = SIMD_MM(load_ss)(&S);
+            auto dM = SIMD_MM(load_ss)(&v_cc);
+            auto vdv = SIMD_MM(and_ps)(dM, sM);
             float v_decay = discharge ? vdv[0] : v_cc;
             */
             // Alternately I can correct the SSE code for discharge
@@ -486,7 +485,7 @@ TEST_CASE("ADSR Envelope Behaviour", "[mod]")
 
             int obs = 0;
             INFO("Non-SIMD Analog Envelope Passes Sustain Push");
-            for (auto s : aDupPush)
+            for (const auto &s : aDupPush)
             {
                 if (s.first > 0.2 && obs == 0)
                 {
@@ -502,7 +501,7 @@ TEST_CASE("ADSR Envelope Behaviour", "[mod]")
 
             obs = 0;
             INFO("SSE Analog Envelope Passes Sustain Push");
-            for (auto s : aSurgePush)
+            for (const auto &s : aSurgePush)
             {
                 if (s.first > 0.2 && obs == 0)
                 {
@@ -659,15 +658,18 @@ TEST_CASE("Extended Pitch Bend", "[mod]")
 
 TEST_CASE("Pitch Bend And Tuning", "[mod][tun]")
 {
-    std::vector<std::string> testScales = {"resources/test-data/scl/12-intune.scl",
-                                           "resources/test-data/scl/zeus22.scl",
-                                           "resources/test-data/scl/6-exact.scl"};
-
     SECTION("Multi Scale Bend Distances")
     {
         auto surge = surgeOnSine();
         surge->storage.tuningApplicationMode = SurgeStorage::RETUNE_ALL;
         surge->mpeEnabled = false;
+
+        // clang-format off
+        static constexpr std::initializer_list<const char *> testScales
+                    {"resources/test-data/scl/12-intune.scl",
+                     "resources/test-data/scl/zeus22.scl",
+                     "resources/test-data/scl/6-exact.scl"};
+        // clang-format on
 
         for (auto sclf : testScales)
         {
@@ -817,7 +819,8 @@ TEST_CASE("LFO Tempo Sync Drift in Latch Mode", "[mod]")
         surge->setParameter01(rid, 0.455068, false, false);
         lfostorage->shape.val.i = lt_square;
 
-        surge->storage.getPatch().copy_scenedata(surge->storage.getPatch().scenedata[0], 0);
+        surge->storage.getPatch().copy_scenedata(surge->storage.getPatch().scenedata[0],
+                                                 surge->storage.getPatch().scenedataOrig[1], 0);
 
         lfo->assign(&(surge->storage), lfostorage, surge->storage.getPatch().scenedata[0], nullptr,
                     ss.get(), nullptr, nullptr);
@@ -1424,7 +1427,7 @@ TEST_CASE("Mod LFO Is Well Behaved", "[mod]")
                 Surge::ModControl mc(48000, 1.0 / 48000);
                 for (int s = 0; s < 200; ++s)
                 {
-                    mc.pre_process(m, rate, depth, phase_offset);
+                    mc.processStartOfBlock(m, rate, depth, phase_offset);
                     REQUIRE(mc.value() <= 1.0);
                     REQUIRE(mc.value() >= -1.0);
                 }

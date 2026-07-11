@@ -31,25 +31,26 @@ juce_add_plugin(${PROJECT_NAME}
   NEEDS_MIDI_OUTPUT FALSE
   IS_MIDI_EFFECT FALSE
   MICROPHONE_PERMISSION_ENABLED TRUE
-  MICROPHONE_PERMISSION_TEXT "Surge XT Effects would like to use your microphone for Audio Input"
+  MICROPHONE_PERMISSION_TEXT "Surge XT Effects would like to use your microphone for audio input"
 
   BLUETOOTH_PERMISSION_ENABLED TRUE
-  BLUETOOTH_PERMISSION_TEXT "Surge XT Effects would like to use BlueTooth"
+  BLUETOOTH_PERMISSION_TEXT "Surge XT Effects would like to use Bluetooth"
 
-
-        COPY_PLUGIN_AFTER_BUILD ${SURGE_COPY_AFTER_BUILD}
+  COPY_PLUGIN_AFTER_BUILD ${SURGE_COPY_AFTER_BUILD}
 
   VST3_CATEGORIES Fx
+  VST3_AUTO_MANIFEST FALSE
+
   VST2_CATEGORY kPlugCategEffect
+
   AU_MAIN_TYPE kAudioUnitType_Effect
   AU_SANDBOX_SAFE TRUE
-
 
   LV2_URI https://surge-synthesizer.github.io/lv2/surge-xt-fx
   LV2_SHARED_LIBRARY_NAME SurgeXT_FX
 
   FORMATS ${SURGE_JUCE_FORMATS}
-  )
+)
 
 target_sources(${PROJECT_NAME} PRIVATE
   SurgeFXEditor.cpp
@@ -57,20 +58,40 @@ target_sources(${PROJECT_NAME} PRIVATE
   SurgeFXProcessor.cpp
   SurgeFXProcessor.h
   SurgeLookAndFeel.h
+  FXOpenSoundControl.cpp
+  FXOpenSoundControl.h
   )
 
 target_link_libraries(${PROJECT_NAME} PRIVATE
   surge::surge-common
   surge-fx-binary
   surge-juce
+  surge-platform
+  #sst-jucegui
   juce::juce_audio_utils
   juce::juce_audio_processors
+  juce::juce_osc
   )
 
 if(SURGE_BUILD_CLAP)
   clap_juce_extensions_plugin(TARGET surge-fx
     CLAP_ID "org.surge-synth-team.surge-xt-fx"
-    CLAP_FEATURES "effect" "multi-effect" "delay" "rotary speaker" "eq" "reverb" "chorus" "flanger" "distortion" "free and open source")
+    CLAP_FEATURES
+      "audio-effect"
+      "filter"
+      "phaser"
+      "rotary speaker"
+      "equalizer"
+      "granular"
+      "frequency-shifter"
+      "distortion"
+      "flanger"
+      "chorus"
+      "delay"
+      "reverb"
+      "multi-effects"
+      "stereo"
+      "free and open source")
 endif()
 
 surge_juce_package(${PROJECT_NAME} "Surge XT Effects")

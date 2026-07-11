@@ -4,7 +4,7 @@
  *
  * Learn more at https://surge-synthesizer.github.io/
  *
- * Copyright 2018-2023, various authors, as described in the GitHub
+ * Copyright 2018-2024, various authors, as described in the GitHub
  * transaction log.
  *
  * Surge XT is released under the GNU General Public Licence v3
@@ -43,21 +43,42 @@ struct EvaluatorState
     float lastOutput = 0;
     // 6 is NOT the number of LFOs, but number of MSEG state elements!
     // TODO: replace 6 with a constexpr!
-    float msegState[6] = {0};
+    float msegState[6] = {0, 0, 0, 0, 0, 0};
     bool released = false, retrigger_FEG = false, retrigger_AEG = false, has_triggered = false;
     enum LoopState
     {
         PLAYING,
         RELEASING
     } loopState = PLAYING;
-    double releaseStartPhase;
-    double timeAlongSegment;
-    float releaseStartValue;
+    double releaseStartPhase{0};
+    double timeAlongSegment{0};
+    float releaseStartValue{0};
     std::minstd_rand gen;
     std::uniform_real_distribution<float> urd;
 
     void seed(long l) { gen = std::minstd_rand(l); }
 };
+
+struct FitResult
+{
+    MSEGStorage::segment::Type type;
+    float cpv{0.f};
+    float cpduration{0.5f};
+    float maxResidual{1e10f};
+};
+
+// Fit a single segment spanning samples[start..end] (inclusive endpoints pinned
+// to v0/v1 at absolute times tStart/tEnd).  Returns the best-fitting type and
+// its control-point values. LFO Deform is assumed as 0 throughout.
+FitResult fitSegment(std::span<const std::pair<float, float>> samples, float v0, float v1,
+                     float tStart, float tEnd);
+
+// Index-based Ramer-Douglas-Peucker algorithm using curve-fit residual
+// Appends fitted MSEGStorage::segment values to `result`.
+// epsilon is the max-residual tolerance in normalized value units.
+void freehandRDP(std::span<const std::pair<float, float>> samples, float epsilon,
+                 float totalGestureDuration, std::vector<MSEGStorage::segment> &result);
+
 float valueAt(int phaseIntPart, float phaseFracPart, float deform, MSEGStorage *ms,
               EvaluatorState *state, bool forceOneShot = false);
 

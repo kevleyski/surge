@@ -4,7 +4,7 @@
  *
  * Learn more at https://surge-synthesizer.github.io/
  *
- * Copyright 2018-2023, various authors, as described in the GitHub
+ * Copyright 2018-2024, various authors, as described in the GitHub
  * transaction log.
  *
  * Surge XT is released under the GNU General Public Licence v3
@@ -24,6 +24,7 @@
 #define SURGE_SRC_SURGE_XT_GUI_WIDGETS_VERTICALLABEL_H
 
 #include "juce_gui_basics/juce_gui_basics.h"
+#include "juce/JuceAPICope.h"
 
 #include <string>
 
@@ -48,7 +49,7 @@ struct VerticalLabel : public juce::Component
         repaint();
     }
 
-    juce::Font font;
+    juce::Font font{SST_JUCE_EMPTY_FONT};
     void setFont(const juce::Font &f)
     {
         font = f;

@@ -4,7 +4,7 @@
  *
  * Learn more at https://surge-synthesizer.github.io/
  *
- * Copyright 2018-2023, various authors, as described in the GitHub
+ * Copyright 2018-2024, various authors, as described in the GitHub
  * transaction log.
  *
  * Surge XT is released under the GNU General Public Licence v3
@@ -26,6 +26,7 @@
 #include "SurgeJUCEHelpers.h"
 #include "WidgetBaseMixin.h"
 #include "AccessibleHelpers.h"
+#include "ModulatableControlInterface.h"
 
 #include "juce_gui_basics/juce_gui_basics.h"
 
@@ -43,13 +44,17 @@ namespace Widgets
 struct MultiSwitch : public juce::Component,
                      public WidgetBaseMixin<MultiSwitch>,
                      public LongHoldMixin<MultiSwitch>,
-                     public Surge::Widgets::HasAccessibleSubComponentForFocus
+                     public Surge::Widgets::HasAccessibleSubComponentForFocus,
+                     public ModulatableControlInterface
 {
     MultiSwitch();
     ~MultiSwitch();
 
     SurgeStorage *storage{nullptr};
     void setStorage(SurgeStorage *s) { storage = s; }
+
+    Surge::GUI::IComponentTagValue *asControlValueInterface() override { return this; }
+    juce::Component *asJuceComponent() override { return this; }
 
     int rows{0}, columns{0}, heightOfOneImage{0}, frameOffset{0};
     int getRows() const { return rows; }
@@ -76,6 +81,8 @@ struct MultiSwitch : public juce::Component,
 
     bool draggable{false};
     void setDraggable(bool d) { draggable = d; }
+    bool mousewheelable{false};
+    void setMousewheelable(bool w) { mousewheelable = w; }
 
     bool middleClickable{false};
     void setMiddleClickable(bool m) { middleClickable = m; }
@@ -127,7 +134,7 @@ struct MultiSwitch : public juce::Component,
     std::unique_ptr<juce::AccessibilityHandler> createAccessibilityHandler() override;
 
     bool isDeactivated{false};
-    void setDeactivated(bool b) { isDeactivated = b; }
+    void setDeactivated(bool b) override { isDeactivated = b; }
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MultiSwitch);
 };
@@ -135,7 +142,7 @@ struct MultiSwitch : public juce::Component,
 struct MultiSwitchSelfDraw : public MultiSwitch
 {
     MultiSwitchSelfDraw() : MultiSwitch() {}
-    juce::Font font{36};
+    juce::Font font{SST_JUCE_FONT_OPTIONS(36)};
     void paint(juce::Graphics &g) override;
 
     std::vector<std::string> labels;

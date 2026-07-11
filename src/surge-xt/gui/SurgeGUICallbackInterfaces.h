@@ -4,7 +4,7 @@
  *
  * Learn more at https://surge-synthesizer.github.io/
  *
- * Copyright 2018-2023, various authors, as described in the GitHub
+ * Copyright 2018-2024, various authors, as described in the GitHub
  * transaction log.
  *
  * Surge XT is released under the GNU General Public Licence v3
@@ -65,8 +65,8 @@ struct IComponentTagValue : public Hoverable
             return false;
         }
 
-        virtual void controlBeginEdit(IComponentTagValue *control){};
-        virtual void controlEndEdit(IComponentTagValue *control){};
+        virtual void controlBeginEdit(IComponentTagValue *control) {};
+        virtual void controlEndEdit(IComponentTagValue *control) {};
     };
 };
 } // namespace GUI

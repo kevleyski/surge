@@ -4,7 +4,7 @@
  *
  * Learn more at https://surge-synthesizer.github.io/
  *
- * Copyright 2018-2023, various authors, as described in the GitHub
+ * Copyright 2018-2024, various authors, as described in the GitHub
  * transaction log.
  *
  * Surge XT is released under the GNU General Public Licence v3
@@ -55,13 +55,19 @@ enum KeyboardActions
     TOGGLE_SCENE,
     TOGGLE_MODULATOR_ARM,
 
+#if INCLUDE_PATCH_BROWSER
+    TOGGLE_PATCH_BRWOSER,
+#endif
 #if WINDOWS
     TOGGLE_DEBUG_CONSOLE,
 #endif
-    SHOW_KEYBINDINGS_EDITOR,
-    SHOW_LFO_EDITOR,
-    SHOW_MODLIST,
-    SHOW_TUNING_EDITOR,
+    TOGGLE_KEYBIND_EDITOR,
+    TOGGLE_LFO_EDITOR,
+#if HAS_LUA
+    TOGGLE_WTS_EDITOR,
+#endif
+    TOGGLE_MODLIST,
+    TOGGLE_TUNING_EDITOR,
     TOGGLE_OSCILLOSCOPE,
     TOGGLE_VIRTUAL_KEYBOARD,
 
@@ -134,17 +140,27 @@ inline std::string keyboardActionName(KeyboardActions a)
     case TOGGLE_MODULATOR_ARM:
         return "TOGGLE_MODULATOR_ARM";
 
+#if INCLUDE_PATCH_BROWSER
+    case TOGGLE_PATCH_BROWSER:
+        return "TOGGLE_PATCH_BROWSER";
+#endif
+
 #if WINDOWS
     case TOGGLE_DEBUG_CONSOLE:
         return "TOGGLE_DEBUG_CONSOLE";
 #endif
-    case SHOW_KEYBINDINGS_EDITOR:
+
+    case TOGGLE_KEYBIND_EDITOR:
         return "SHOW_KEYBINDINGS_EDITOR";
-    case SHOW_LFO_EDITOR:
+    case TOGGLE_LFO_EDITOR:
         return "SHOW_LFO_EDITOR";
-    case SHOW_MODLIST:
+#if HAS_LUA
+    case TOGGLE_WTS_EDITOR:
+        return "SHOW_WTS_EDITOR";
+#endif
+    case TOGGLE_MODLIST:
         return "SHOW_MODLIST";
-    case SHOW_TUNING_EDITOR:
+    case TOGGLE_TUNING_EDITOR:
         return "SHOW_TUNING_EDITOR";
     case TOGGLE_VIRTUAL_KEYBOARD:
         return "TOGGLE_VIRTUAL_KEYBOARD";
@@ -268,16 +284,21 @@ inline std::string keyboardActionDescription(KeyboardActions a)
         desc = "Debug Console";
         break;
 #endif
-    case SHOW_KEYBINDINGS_EDITOR:
+    case TOGGLE_KEYBIND_EDITOR:
         desc = "Keyboard Shortcut Editor";
         break;
-    case SHOW_LFO_EDITOR:
+    case TOGGLE_LFO_EDITOR:
         desc = "LFO Editor (MSEG or Formula)";
         break;
-    case SHOW_MODLIST:
+#if HAS_LUA
+    case TOGGLE_WTS_EDITOR:
+        desc = "Wavetable Script Editor";
+        break;
+#endif
+    case TOGGLE_MODLIST:
         desc = "Modulation List";
         break;
-    case SHOW_TUNING_EDITOR:
+    case TOGGLE_TUNING_EDITOR:
         desc = "Tuning Editor";
         break;
     case TOGGLE_VIRTUAL_KEYBOARD:

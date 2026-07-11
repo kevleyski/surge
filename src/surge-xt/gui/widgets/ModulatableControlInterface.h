@@ -4,7 +4,7 @@
  *
  * Learn more at https://surge-synthesizer.github.io/
  *
- * Copyright 2018-2023, various authors, as described in the GitHub
+ * Copyright 2018-2024, various authors, as described in the GitHub
  * transaction log.
  *
  * Surge XT is released under the GNU General Public Licence v3
@@ -170,7 +170,7 @@ struct ModulatableControlInterface
     virtual void setIntStepRange(int i) { intRange = i; }
 
     // Font handling. FIXME - implement this
-    juce::Font font;
+    juce::Font font{SST_JUCE_EMPTY_FONT};
     virtual void setFont(juce::Font f) { font = f; }
     virtual void setFontStyle(int x) {}
     virtual void setTextAlign(juce::Justification x) {}

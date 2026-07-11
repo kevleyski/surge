@@ -4,7 +4,7 @@
  *
  * Learn more at https://surge-synthesizer.github.io/
  *
- * Copyright 2018-2023, various authors, as described in the GitHub
+ * Copyright 2018-2024, various authors, as described in the GitHub
  * transaction log.
  *
  * Surge XT is released under the GNU General Public Licence v3
@@ -117,11 +117,6 @@ void ExciterEffect::init_ctrltypes()
     fxdata->p[exciter_drive].set_type(ct_percent);
     fxdata->p[exciter_drive].val_default.f = 0.5f;
     fxdata->p[exciter_drive].posy_offset = 1;
-
-    fxdata->p[exciter_tone].set_name("Tone");
-    fxdata->p[exciter_tone].set_type(ct_percent);
-    fxdata->p[exciter_tone].val_default.f = 0.5f;
-    fxdata->p[exciter_tone].posy_offset = 1;
 
     fxdata->p[exciter_tone].set_name("Tone");
     fxdata->p[exciter_tone].set_type(ct_percent);

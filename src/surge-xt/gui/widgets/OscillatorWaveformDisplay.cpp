@@ -4,7 +4,7 @@
  *
  * Learn more at https://surge-synthesizer.github.io/
  *
- * Copyright 2018-2023, various authors, as described in the GitHub
+ * Copyright 2018-2024, various authors, as described in the GitHub
  * transaction log.
  *
  * Surge XT is released under the GNU General Public Licence v3
@@ -22,11 +22,16 @@
 
 #include "OscillatorWaveformDisplay.h"
 #include "SurgeStorage.h"
+#include "SurgeSynthProcessor.h"
+#include "SurgeSynthEditor.h"
 #include "Oscillator.h"
 #include "OscillatorBase.h"
+#include "WavetableOscillator.h"
 #include "RuntimeFont.h"
 #include "SurgeGUIUtils.h"
 #include "SurgeGUIEditor.h"
+#include "SurgeJUCEHelpers.h"
+#include "SurgeXTBinary.h"
 #include "StringOscillator.h"
 #include "AliasOscillator.h"
 #include "widgets/MenuCustomComponents.h"
@@ -67,7 +72,7 @@ OscillatorWaveformDisplay::OscillatorWaveformDisplay()
             announce += storage->wt_list[id].name;
             sge->enqueueAccessibleAnnouncement(announce);
 
-            oscdata->wt.queue_id = id;
+            handleWavetableLoad(id);
         }
     };
     ol->onReturnKey = [ov = ol.get()](OscillatorWaveformDisplay *d) {
@@ -93,9 +98,15 @@ OscillatorWaveformDisplay::OscillatorWaveformDisplay()
             announce += storage->wt_list[id].name;
             sge->enqueueAccessibleAnnouncement(announce);
 
-            oscdata->wt.queue_id = id;
+            handleWavetableLoad(id);
+            auto new_name = storage->getCurrentWavetableName(oscdata);
+
+            SurgeSynthProcessor *ssp = &sge->juceEditor->processor;
+            ssp->paramChangeToListeners(nullptr, true, ssp->SCT_WAVETABLE, (float)scene,
+                                        (float)oscInScene, (float)id, new_name);
         }
     };
+
     ol->onReturnKey = [ov = ol.get()](OscillatorWaveformDisplay *d) {
         ov->onPress(d);
         return true;
@@ -106,6 +117,7 @@ OscillatorWaveformDisplay::OscillatorWaveformDisplay()
     ol = std::make_unique<OverlayAsAccessibleButton<OscillatorWaveformDisplay>>(
         this, customEditor ? "Close Custom Editor" : "Open Custom Editor",
         juce::AccessibilityRole::button);
+
     ol->setWantsKeyboardFocus(true);
     addChildComponent(*ol);
 
@@ -123,6 +135,7 @@ OscillatorWaveformDisplay::OscillatorWaveformDisplay()
             d->customEditorAccOverlay->setTitle("Open Custom Editor");
         }
     };
+
     ol->onReturnKey = [this](OscillatorWaveformDisplay *d) {
         if (customEditor)
         {
@@ -140,6 +153,12 @@ OscillatorWaveformDisplay::OscillatorWaveformDisplay()
     };
 
     customEditorAccOverlay = std::move(ol);
+
+    auto xml1 = juce::parseXML(SurgeXTBinary::wtfile_icon_svg);
+    auto xml2 = juce::parseXML(SurgeXTBinary::wtscript_icon_svg);
+
+    wtFileIcon = juce::Drawable::createFromSVG(*xml1);
+    wtScriptIcon = juce::Drawable::createFromSVG(*xml2);
 }
 
 OscillatorWaveformDisplay::~OscillatorWaveformDisplay() = default;
@@ -308,11 +327,14 @@ void OscillatorWaveformDisplay::paint(juce::Graphics &g)
 
     if (usesWT)
     {
-        // It's a bit unsatisfactory to put this here but we don't really get notified
-        // once the wavetable change is done other than through repaint
-        if (oscdata->wt.current_id != lastWavetableId)
+        if (oscdata->wt.current_id != lastWavetableId || forceWTRepaint)
         {
-            auto nd = std::string("Wavetable: ") + getCurrentWavetableName();
+            if (forceWTRepaint)
+            {
+                forceWTRepaint = false;
+            }
+
+            auto nd = std::string("Wavetable: ") + storage->getCurrentWavetableName(oscdata);
 
             menuOverlays[0]->setTitle(nd);
             menuOverlays[0]->setDescription(nd);
@@ -381,11 +403,11 @@ void OscillatorWaveformDisplay::paint(juce::Graphics &g)
         g.setColour(isWtNameHovered ? fgframeHov : fgframe);
         g.drawRect(waveTableName);
 
-        auto wtn = getCurrentWavetableName();
+        auto wtn = storage->getCurrentWavetableName(oscdata);
 
         g.setColour(isWtNameHovered ? fgtextHov : fgtext);
         g.setFont(skin->fontManager->getLatoAtSize(9));
-        g.drawText(wtn.c_str(), waveTableName, juce::Justification::centred);
+        g.drawText(juce::String(wtn), waveTableName, juce::Justification::centred);
     }
 
     if (supportsCustomEditor())
@@ -399,8 +421,10 @@ void OscillatorWaveformDisplay::paint(juce::Graphics &g)
         auto osctype = oscdata->type.val.i;
 
         if (osctype == ot_audioinput ||
-            (osctype == ot_string && oscdata->p[StringOscillator::str_exciter_mode].val.i ==
-                                         StringOscillator::constant_audioin) ||
+            (osctype == ot_string && (oscdata->p[StringOscillator::str_exciter_mode].val.i ==
+                                          StringOscillator::constant_audioin ||
+                                      oscdata->p[StringOscillator::str_exciter_mode].val.i ==
+                                          StringOscillator::constant_scene_a_in)) ||
             (osctype == ot_alias &&
              oscdata->p[AliasOscillator::ao_wave].val.i == AliasOscillator::aow_audiobuffer))
         {
@@ -414,33 +438,12 @@ void OscillatorWaveformDisplay::paint(juce::Graphics &g)
     }
 }
 
-std::string OscillatorWaveformDisplay::getCurrentWavetableName()
+void OscillatorWaveformDisplay::setZoomFactor(int zoom)
 {
-    storage->waveTableDataMutex.lock();
-
-    std::string wttxt;
-    int wtid = oscdata->wt.current_id;
-
-    if (!oscdata->wavetable_display_name.empty())
+    if (customEditor && uses_wavetabledata(oscdata->type.val.i))
     {
-        wttxt = oscdata->wavetable_display_name;
+        customEditor->resized();
     }
-    else if ((wtid >= 0) && (wtid < storage->wt_list.size()))
-    {
-        wttxt = storage->wt_list.at(wtid).name;
-    }
-    else if (oscdata->wt.flags & wtf_is_sample)
-    {
-        wttxt = "(Patch Sample)";
-    }
-    else
-    {
-        wttxt = "(Patch Wavetable)";
-    }
-
-    storage->waveTableDataMutex.unlock();
-
-    return wttxt;
 }
 
 void OscillatorWaveformDisplay::resized()
@@ -534,6 +537,7 @@ void OscillatorWaveformDisplay::repaintBasedOnOscMuteState()
 
     if (oscInvalid)
     {
+        forceWTRepaint = true;
         repaint();
     }
 }
@@ -547,7 +551,7 @@ void OscillatorWaveformDisplay::repaintBasedOnOscMuteState()
         tp[oscdata->p[i].param_id_in_scene].i = oscdata->p[i].val.i;
     }
 
-    return spawn_osc(oscdata->type.val.i, storage, oscdata, tp, oscbuffer);
+    return spawn_osc(oscdata->type.val.i, storage, oscdata, tp, tp, oscbuffer);
 }
 
 void OscillatorWaveformDisplay::populateMenu(juce::PopupMenu &contextMenu, int selectedItem,
@@ -556,8 +560,12 @@ void OscillatorWaveformDisplay::populateMenu(juce::PopupMenu &contextMenu, int s
     bool addUserLabel = false;
     int idx = 0;
 
+    wtFileIcon->replaceColour(juce::Colours::white, skin->getColor(Colors::PopupMenu::Text));
+    wtScriptIcon->replaceColour(juce::Colours::white, skin->getColor(Colors::PopupMenu::Text));
+
     if (selectedItem >= 0 && selectedItem < storage->wt_list.size() && singleCategory)
     {
+        Surge::Widgets::MenuCenteredBoldLabel::addToMenuAsSectionHeader(contextMenu, "WAVETABLES");
         populateMenuForCategory(contextMenu, storage->wt_list[selectedItem].category, selectedItem,
                                 true);
     }
@@ -567,6 +575,7 @@ void OscillatorWaveformDisplay::populateMenu(juce::PopupMenu &contextMenu, int s
         {
             if (idx == storage->firstThirdPartyWTCategory)
             {
+                contextMenu.addColumnBreak();
                 Surge::Widgets::MenuCenteredBoldLabel::addToMenuAsSectionHeader(
                     contextMenu, "3RD PARTY WAVETABLES");
             }
@@ -574,6 +583,7 @@ void OscillatorWaveformDisplay::populateMenu(juce::PopupMenu &contextMenu, int s
             if (idx == storage->firstUserWTCategory &&
                 storage->firstUserWTCategory != storage->wt_category.size())
             {
+                contextMenu.addColumnBreak();
                 addUserLabel = true;
             }
 
@@ -607,68 +617,31 @@ void OscillatorWaveformDisplay::populateMenu(juce::PopupMenu &contextMenu, int s
         }
     }
 
-    contextMenu.addSeparator();
+    contextMenu.addColumnBreak();
+    Surge::Widgets::MenuCenteredBoldLabel::addToMenuAsSectionHeader(contextMenu, "FUNCTIONS");
 
-    /*
-    We've decided to postpone this feature until after XT 1.0
+    createWTLoadMenu(contextMenu);
+    createWTExportMenu(contextMenu);
 
-    contextMenu.addSeparator();
-
-    auto owts = [this]() {
-        if (sge)
-            sge->showOverlay(SurgeGUIEditor::WT_SCRIPTING_EDITOR);
-    };
-
-    contextMenu.addItem(Surge::GUI::toOSCase("Wavetable Script Editor..."), owts);
-    */
-
-    // add this option only if we have any wavetables in the list
-    if (idx > 0)
+#if HAS_LUA
+    if (!oscdata->wavetable_script.empty())
     {
-        auto refresh = [this]() { this->storage->refresh_wtlist(); };
-
-        contextMenu.addItem(Surge::GUI::toOSCase("Refresh Wavetable List"), refresh);
+        contextMenu.addItem(Surge::GUI::toOSCase("Save as .wtscript..."),
+                            [this]() { this->sge->saveWavetableScript(); });
+        contextMenu.addSeparator();
     }
+#endif
 
-    auto rnaction = [this]() {
-        auto c = this->oscdata->wavetable_display_name;
-
-        if (sge)
-        {
-            sge->promptForMiniEdit(
-                c, "Enter a new name:", "Wavetable Display Name", juce::Point<int>{},
-                [this](const std::string &s) {
-                    this->oscdata->wavetable_display_name = s;
-                    this->repaint();
-                },
-                this);
-        }
-    };
-
-    contextMenu.addItem(Surge::GUI::toOSCase("Change Wavetable Display Name..."), rnaction);
-
+    createWTRenameMenu(contextMenu);
     contextMenu.addSeparator();
 
-    auto action = [this]() { this->loadWavetableFromFile(); };
-    contextMenu.addItem(Surge::GUI::toOSCase("Load Wavetable from File..."), action);
-
-    auto exportAction = [this]() {
-        int oscNum = this->oscInScene;
-        int scene = this->scene;
-        std::string baseName = storage->getPatch().name + "_osc" + std::to_string(oscNum + 1) +
-                               "_scene" + (scene == 0 ? "A" : "B");
-        auto fn = storage->export_wt_wav_portable(baseName, &(oscdata->wt));
-
-        if (!fn.empty())
-        {
-            sge->messageBox("Wavetable Export",
-                            "Wavetable was successfully exported to\n" + fn + "!");
-        }
-    };
-
-    contextMenu.addItem(Surge::GUI::toOSCase("Export Wavetable to File..."), exportAction);
-
+    refreshWavetablesMenu(contextMenu);
     contextMenu.addSeparator();
+
+#if HAS_LUA
+    createOpenScriptEditorMenu(contextMenu);
+    contextMenu.addSeparator();
+#endif
 
     createWTMenuItems(contextMenu);
 }
@@ -722,10 +695,19 @@ void OscillatorWaveformDisplay::createWTMenuItems(juce::PopupMenu &contextMenu, 
             };
 
             auto text = fmt::format("Switch to {} Display", (customEditor) ? "2D" : "3D");
-
             contextMenu.addItem(Surge::GUI::toOSCase(text), action);
-
             contextMenu.addSeparator();
+
+            createWTLoadMenu(contextMenu);
+            createWTExportMenu(contextMenu);
+            contextMenu.addSeparator();
+
+            createWTRenameMenu(contextMenu);
+            contextMenu.addSeparator();
+
+#if HAS_LUA
+            createOpenScriptEditorMenu(contextMenu);
+#endif
 
             Surge::Widgets::MenuCenteredBoldLabel::addToMenuAsSectionHeader(contextMenu, "INFO");
 
@@ -738,6 +720,79 @@ void OscillatorWaveformDisplay::createWTMenuItems(juce::PopupMenu &contextMenu, 
                 true, false, nullptr);
         }
     }
+}
+
+void OscillatorWaveformDisplay::createWTLoadMenu(juce::PopupMenu &contextMenu)
+{
+    auto action = [this]() { this->loadWavetableFromFile(); };
+    contextMenu.addItem(Surge::GUI::toOSCase("Load Wavetable from File..."), action);
+}
+
+void OscillatorWaveformDisplay::createWTExportMenu(juce::PopupMenu &contextMenu)
+{
+    juce::PopupMenu exportMenu;
+
+    exportMenu.addItem(Surge::GUI::toOSCase("Export as .wav..."), [this]() {
+        this->sge->exportWavetableAs(SurgeGUIEditor::WTExportFormat::WAV);
+    });
+    exportMenu.addItem(Surge::GUI::toOSCase("Export as .wt..."), [this]() {
+        this->sge->exportWavetableAs(SurgeGUIEditor::WTExportFormat::WT);
+    });
+
+    if (!oscdata->wavetable_script.empty())
+    {
+        exportMenu.addSeparator();
+
+        exportMenu.addItem("Export for Serum...", [this]() {
+            this->sge->exportWavetableAs(SurgeGUIEditor::WTExportFormat::SERUM);
+        });
+        exportMenu.addItem("Export for VCV Rack...", [this]() {
+            this->sge->exportWavetableAs(SurgeGUIEditor::WTExportFormat::VCVRACK);
+        });
+    }
+
+    contextMenu.addSubMenu(Surge::GUI::toOSCase("Export Wavetable"), exportMenu);
+}
+
+void OscillatorWaveformDisplay::createWTRenameMenu(juce::PopupMenu &contextMenu)
+{
+
+    auto rnaction = [this]() {
+        auto c = this->oscdata->wavetable_display_name;
+        if (sge)
+        {
+            sge->promptForMiniEdit(
+                c, "Enter a new name:", "Wavetable Display Name", juce::Point<int>{},
+                [this](const std::string &s) {
+                    this->oscdata->wavetable_display_name = s;
+                    this->repaint();
+                },
+                this);
+        }
+    };
+    contextMenu.addItem(Surge::GUI::toOSCase("Rename Wavetable..."), rnaction);
+}
+
+void OscillatorWaveformDisplay::createOpenScriptEditorMenu(juce::PopupMenu &contextMenu)
+{
+#if HAS_LUA
+    auto owts = [this]() {
+        if (sge)
+            sge->showOverlay(SurgeGUIEditor::WTS_EDITOR);
+    };
+
+    Surge::GUI::addMenuItemWithShortcut(
+        contextMenu, Surge::GUI::toOSCase("Wavetable Script Editor..."),
+        sge->getShortcutDescription(Surge::GUI::KeyboardActions::TOGGLE_WTS_EDITOR), owts);
+
+    contextMenu.addSeparator();
+#endif
+}
+
+void OscillatorWaveformDisplay::refreshWavetablesMenu(juce::PopupMenu &contextMenu)
+{
+    auto refresh = [this]() { this->storage->refresh_wtlist(); };
+    contextMenu.addItem(Surge::GUI::toOSCase("Refresh Wavetable List"), refresh);
 }
 
 void OscillatorWaveformDisplay::createAliasOptionsMenu(const bool useComponentBounds,
@@ -762,154 +817,366 @@ void OscillatorWaveformDisplay::createAliasOptionsMenu(const bool useComponentBo
 
     if (!onlyHelpEntry)
     {
-        {
-            auto action = [this]() {
-                sge->undoManager()->pushOscillatorExtraConfig(scene, oscInScene);
+        constexpr int num_partials = AliasOscillator::n_additive_partials;
 
-                for (int qq = 0; qq < AliasOscillator::n_additive_partials; ++qq)
+        contextMenu.addItem("Sine", [this]() {
+            sge->undoManager()->pushOscillatorExtraConfig(scene, oscInScene);
+
+            for (int qq = 0; qq < num_partials; ++qq)
+            {
+                oscdata->extraConfig.data[qq] = (qq == 0) ? 1 : 0;
+            }
+
+            storage->getPatch().isDirty = true;
+
+            repaint();
+        });
+
+        contextMenu.addItem("Triangle", [this]() {
+            sge->undoManager()->pushOscillatorExtraConfig(scene, oscInScene);
+
+            for (int qq = 0; qq < num_partials; ++qq)
+            {
+                oscdata->extraConfig.data[qq] = (qq % 2 == 0) * 1.f / ((qq + 1) * (qq + 1));
+
+                if (qq % 4 == 2)
                 {
-                    oscdata->extraConfig.data[qq] = (qq == 0) ? 1 : 0;
+                    oscdata->extraConfig.data[qq] *= -1.f;
                 }
-                storage->getPatch().isDirty = true;
+            }
 
-                repaint();
-            };
+            storage->getPatch().isDirty = true;
 
-            contextMenu.addItem("Sine", action);
-        }
+            repaint();
+        });
 
-        {
-            auto action = [this]() {
-                sge->undoManager()->pushOscillatorExtraConfig(scene, oscInScene);
+        contextMenu.addItem("Sawtooth", [this]() {
+            sge->undoManager()->pushOscillatorExtraConfig(scene, oscInScene);
 
-                for (int qq = 0; qq < AliasOscillator::n_additive_partials; ++qq)
-                {
-                    oscdata->extraConfig.data[qq] = (qq % 2 == 0) * 1.f / ((qq + 1) * (qq + 1));
+            for (int qq = 0; qq < num_partials; ++qq)
+            {
+                oscdata->extraConfig.data[qq] = 1.f / (qq + 1);
+            }
 
-                    if (qq % 4 == 2)
-                    {
-                        oscdata->extraConfig.data[qq] *= -1.f;
-                    }
-                }
-                storage->getPatch().isDirty = true;
+            storage->getPatch().isDirty = true;
 
-                repaint();
-            };
+            repaint();
+        });
 
-            contextMenu.addItem("Triangle", action);
-        }
+        contextMenu.addItem("Square", [this]() {
+            sge->undoManager()->pushOscillatorExtraConfig(scene, oscInScene);
 
-        {
-            auto action = [this]() {
-                sge->undoManager()->pushOscillatorExtraConfig(scene, oscInScene);
+            for (int qq = 0; qq < num_partials; ++qq)
+            {
+                oscdata->extraConfig.data[qq] = (qq % 2 == 0) * 1.f / (qq + 1);
+            }
 
-                for (int qq = 0; qq < AliasOscillator::n_additive_partials; ++qq)
-                {
-                    oscdata->extraConfig.data[qq] = 1.f / (qq + 1);
-                }
-                storage->getPatch().isDirty = true;
+            storage->getPatch().isDirty = true;
 
-                repaint();
-            };
+            repaint();
+        });
 
-            contextMenu.addItem("Sawtooth", action);
-        }
+        contextMenu.addItem("Random", [this]() {
+            sge->undoManager()->pushOscillatorExtraConfig(scene, oscInScene);
 
-        {
-            auto action = [this]() {
-                sge->undoManager()->pushOscillatorExtraConfig(scene, oscInScene);
+            for (int qq = 0; qq < num_partials; ++qq)
+            {
+                oscdata->extraConfig.data[qq] = storage->rand_pm1();
+            }
 
-                for (int qq = 0; qq < AliasOscillator::n_additive_partials; ++qq)
-                {
-                    oscdata->extraConfig.data[qq] = (qq % 2 == 0) * 1.f / (qq + 1);
-                }
-                storage->getPatch().isDirty = true;
+            storage->getPatch().isDirty = true;
 
-                repaint();
-            };
-
-            contextMenu.addItem("Square", action);
-        }
-
-        {
-            auto action = [this]() {
-                sge->undoManager()->pushOscillatorExtraConfig(scene, oscInScene);
-
-                for (int qq = 0; qq < AliasOscillator::n_additive_partials; ++qq)
-                {
-                    oscdata->extraConfig.data[qq] = storage->rand_pm1();
-                }
-                storage->getPatch().isDirty = true;
-
-                repaint();
-            };
-
-            contextMenu.addItem("Random", action);
-        }
+            repaint();
+        });
 
         contextMenu.addSeparator();
 
-        {
-            auto action = [this]() {
-                sge->undoManager()->pushOscillatorExtraConfig(scene, oscInScene);
+        contextMenu.addItem("Shift Left", [this]() {
+            sge->undoManager()->pushOscillatorExtraConfig(scene, oscInScene);
 
-                for (int qq = 0; qq < AliasOscillator::n_additive_partials; ++qq)
+            for (int qq = 0; qq < num_partials - 1; ++qq)
+            {
+                std::swap(oscdata->extraConfig.data[qq + 1], oscdata->extraConfig.data[qq]);
+            }
+
+            storage->getPatch().isDirty = true;
+
+            repaint();
+        });
+
+        contextMenu.addItem("Shift Right", [this]() {
+            sge->undoManager()->pushOscillatorExtraConfig(scene, oscInScene);
+
+            for (int qq = 0; qq < num_partials - 1; ++qq)
+            {
+                std::swap(oscdata->extraConfig.data[num_partials - 2 - qq],
+                          oscdata->extraConfig.data[num_partials - 1 - qq]);
+            }
+
+            storage->getPatch().isDirty = true;
+
+            repaint();
+        });
+
+        contextMenu.addSeparator();
+
+        contextMenu.addItem("Keep Positive", [this]() {
+            sge->undoManager()->pushOscillatorExtraConfig(scene, oscInScene);
+
+            for (int qq = 0; qq < num_partials; ++qq)
+            {
+                if (oscdata->extraConfig.data[qq] < 0)
                 {
-                    if (oscdata->extraConfig.data[qq] < 0)
-                    {
-                        oscdata->extraConfig.data[qq] *= -1;
-                    }
+                    oscdata->extraConfig.data[qq] = 0;
                 }
-                storage->getPatch().isDirty = true;
+            }
 
-                repaint();
-            };
+            storage->getPatch().isDirty = true;
 
-            contextMenu.addItem("Absolute", action);
-        }
+            repaint();
+        });
 
-        {
-            auto action = [this]() {
-                sge->undoManager()->pushOscillatorExtraConfig(scene, oscInScene);
+        contextMenu.addItem("Keep Negative", [this]() {
+            sge->undoManager()->pushOscillatorExtraConfig(scene, oscInScene);
 
-                for (int qq = 0; qq < AliasOscillator::n_additive_partials; ++qq)
+            for (int qq = 0; qq < num_partials; ++qq)
+            {
+                if (oscdata->extraConfig.data[qq] > 0)
                 {
-                    oscdata->extraConfig.data[qq] = -oscdata->extraConfig.data[qq];
+                    oscdata->extraConfig.data[qq] = 0;
                 }
-                storage->getPatch().isDirty = true;
+            }
 
-                repaint();
-            };
+            storage->getPatch().isDirty = true;
 
-            contextMenu.addItem("Invert", action);
-        }
+            repaint();
+        });
 
-        {
-            auto action = [this]() {
-                sge->undoManager()->pushOscillatorExtraConfig(scene, oscInScene);
-                storage->getPatch().isDirty = true;
+        contextMenu.addItem("Keep Even Harmonics", [this]() {
+            sge->undoManager()->pushOscillatorExtraConfig(scene, oscInScene);
 
-                float pdata[AliasOscillator::n_additive_partials];
-
-                for (int qq = 0; qq < AliasOscillator::n_additive_partials; ++qq)
+            for (int qq = 0; qq < num_partials; ++qq)
+            {
+                if (qq > 0 && qq % 2 == 0)
                 {
-                    pdata[qq] = oscdata->extraConfig.data[qq];
+                    oscdata->extraConfig.data[qq] = 0;
                 }
+            }
 
-                for (int qq = 0; qq < AliasOscillator::n_additive_partials; ++qq)
+            storage->getPatch().isDirty = true;
+
+            repaint();
+        });
+
+        contextMenu.addItem("Keep Odd Harmonics", [this]() {
+            sge->undoManager()->pushOscillatorExtraConfig(scene, oscInScene);
+
+            for (int qq = 0; qq < num_partials; ++qq)
+            {
+                if (qq > 0 && qq % 2 == 1)
                 {
-                    oscdata->extraConfig.data[15 - qq] = pdata[qq];
+                    oscdata->extraConfig.data[qq] = 0;
                 }
+            }
 
-                repaint();
-            };
+            storage->getPatch().isDirty = true;
 
-            contextMenu.addItem("Reverse", action);
-        }
+            repaint();
+        });
+
+        contextMenu.addSeparator();
+
+        contextMenu.addItem("Absolute", [this]() {
+            sge->undoManager()->pushOscillatorExtraConfig(scene, oscInScene);
+
+            for (int qq = 0; qq < num_partials; ++qq)
+            {
+                if (oscdata->extraConfig.data[qq] < 0)
+                {
+                    oscdata->extraConfig.data[qq] *= -1;
+                }
+            }
+
+            storage->getPatch().isDirty = true;
+
+            repaint();
+        });
+
+        contextMenu.addItem("Invert", [this]() {
+            sge->undoManager()->pushOscillatorExtraConfig(scene, oscInScene);
+
+            for (int qq = 0; qq < num_partials; ++qq)
+            {
+                oscdata->extraConfig.data[qq] = -oscdata->extraConfig.data[qq];
+            }
+
+            storage->getPatch().isDirty = true;
+
+            repaint();
+        });
+
+        contextMenu.addItem("Invert Even Harmonics", [this]() {
+            sge->undoManager()->pushOscillatorExtraConfig(scene, oscInScene);
+
+            for (int qq = 0; qq < num_partials; ++qq)
+            {
+                oscdata->extraConfig.data[qq] = (qq > 0 && qq % 2 == 0)
+                                                    ? -oscdata->extraConfig.data[qq]
+                                                    : oscdata->extraConfig.data[qq];
+            }
+
+            storage->getPatch().isDirty = true;
+
+            repaint();
+        });
+
+        contextMenu.addItem("Invert Odd Harmonics", [this]() {
+            sge->undoManager()->pushOscillatorExtraConfig(scene, oscInScene);
+
+            for (int qq = 0; qq < num_partials; ++qq)
+            {
+                oscdata->extraConfig.data[qq] = (qq > 0 && qq % 2 == 1)
+                                                    ? -oscdata->extraConfig.data[qq]
+                                                    : oscdata->extraConfig.data[qq];
+            }
+
+            storage->getPatch().isDirty = true;
+
+            repaint();
+        });
+
+        contextMenu.addItem("Reverse", [this]() {
+            sge->undoManager()->pushOscillatorExtraConfig(scene, oscInScene);
+
+            float pdata[num_partials];
+
+            for (int qq = 0; qq < num_partials; ++qq)
+            {
+                pdata[qq] = oscdata->extraConfig.data[qq];
+            }
+
+            for (int qq = 0; qq < num_partials; ++qq)
+            {
+                oscdata->extraConfig.data[15 - qq] = pdata[qq];
+            }
+
+            storage->getPatch().isDirty = true;
+
+            repaint();
+        });
+
+        contextMenu.addSeparator();
+
+        contextMenu.addItem("Soften", [this]() {
+            sge->undoManager()->pushOscillatorExtraConfig(scene, oscInScene);
+
+            float average = 0;
+
+            for (int qq = 0; qq < num_partials; ++qq)
+            {
+                average = average + ((oscdata->extraConfig.data[qq] - average) / 2);
+                oscdata->extraConfig.data[qq] = average;
+            }
+
+            storage->getPatch().isDirty = true;
+
+            repaint();
+        });
+
+        contextMenu.addItem("Window (Linear)", [this]() {
+            sge->undoManager()->pushOscillatorExtraConfig(scene, oscInScene);
+
+            for (int qq = 0; qq < num_partials; ++qq)
+            {
+                oscdata->extraConfig.data[qq] *=
+                    static_cast<float>(num_partials - qq) / static_cast<float>(num_partials);
+            }
+
+            storage->getPatch().isDirty = true;
+
+            repaint();
+        });
+
+        contextMenu.addItem("Window (Cosine)", [this]() {
+            sge->undoManager()->pushOscillatorExtraConfig(scene, oscInScene);
+
+            for (int qq = 0; qq < num_partials; ++qq)
+            {
+                oscdata->extraConfig.data[qq] *=
+                    std::cos(static_cast<float>(qq) / static_cast<float>(num_partials));
+            }
+
+            storage->getPatch().isDirty = true;
+
+            repaint();
+        });
     }
 
     contextMenu.showMenuAsync(sge->popupMenuOptions(useComponentBounds ? this : nullptr));
 }
+
+struct ItemWithSharedIcon : juce::PopupMenu::Item
+{
+    ItemWithSharedIcon(const juce::String &s) : juce::PopupMenu::Item(s) {}
+
+    void setSharedDrawable(std::shared_ptr<juce::Drawable> d) { sharedDrawable = d; }
+    std::shared_ptr<juce::Drawable> sharedDrawable;
+};
+
+struct ItemWithSharedIconComponent : juce::PopupMenu::CustomComponent
+{
+    ItemWithSharedIcon item;
+    juce::PopupMenu::Options options;
+    ItemWithSharedIconComponent(ItemWithSharedIcon &i) : item(i) {}
+
+    bool hl{false};
+    void mouseEnter(const juce::MouseEvent &event) override
+    {
+        hl = true;
+        repaint();
+    }
+    void mouseExit(const juce::MouseEvent &event) override
+    {
+        hl = false;
+        repaint();
+    }
+    void mouseDown(const juce::MouseEvent &event) override
+    {
+        if (item.action)
+        {
+            item.action();
+        }
+        triggerMenuItem();
+    }
+    bool keyPressed(const juce::KeyPress &key) override
+    {
+        if (key.isKeyCode(juce::KeyPress::returnKey) || key.isKeyCode(juce::KeyPress::spaceKey))
+        {
+            if (item.action)
+            {
+                item.action();
+            }
+            triggerMenuItem();
+            return true;
+        }
+        return false;
+    }
+    void paint(juce::Graphics &g) override
+    {
+        const auto colour = item.colour != juce::Colour() ? &item.colour : nullptr;
+        const auto hasSubMenu =
+            item.subMenu != nullptr && (item.itemID == 0 || item.subMenu->getNumItems() > 0);
+        getLookAndFeel().drawPopupMenuItem(
+            g, getLocalBounds(), item.isSeparator, item.isEnabled, hl, item.isTicked, hasSubMenu,
+            item.text, item.shortcutKeyDescription, item.sharedDrawable.get(), colour);
+    }
+    void getIdealSize(int &idealWidth, int &idealHeight) override
+    {
+        getLookAndFeel().getIdealPopupMenuItemSizeWithOptions(item.text, item.isSeparator,
+                                                              options.getStandardItemHeight(),
+                                                              idealWidth, idealHeight, options);
+    }
+};
 
 bool OscillatorWaveformDisplay::populateMenuForCategory(juce::PopupMenu &contextMenu,
                                                         int categoryId, int selectedItem,
@@ -939,21 +1206,43 @@ bool OscillatorWaveformDisplay::populateMenuForCategory(juce::PopupMenu &context
                 selected = true;
             }
 
-            subMenu->addItem(storage->wt_list[p].name, true, checked, action);
+            bool isWTS = storage->wt_list[p].path.extension() == ".wtscript";
+            auto item = ItemWithSharedIcon(storage->wt_list[p].name);
+
+            item.setEnabled(true);
+            item.setTicked(checked);
+            item.setAction(action);
+            item.setSharedDrawable(isWTS ? wtScriptIcon : wtFileIcon);
+
+            // subMenu->addItem(item);
+            subMenu->addCustomItem(p, std::make_unique<ItemWithSharedIconComponent>(item), nullptr,
+                                   storage->wt_list[p].name);
 
             sub++;
 
-            if (sub != 0 && sub % 16 == 0)
+            if (sub != 0 && sub % 24 == 0)
             {
                 subMenu->addColumnBreak();
+
+                if (intoTop)
+                {
+                    Surge::Widgets::MenuCenteredBoldLabel::addToMenuAsSectionHeader(*subMenu, "");
+                }
             }
         }
     }
 
+    bool addedSeparator = false;
     for (auto child : cat.children)
     {
         if (child.numberOfPatchesInCategoryAndChildren > 0)
         {
+            if (!addedSeparator && sub > 0)
+            {
+                subMenu->addSeparator();
+                addedSeparator = true;
+            }
+
             // this isn't the best approach but it works
             int cidx = 0;
 
@@ -1003,8 +1292,21 @@ bool OscillatorWaveformDisplay::populateMenuForCategory(juce::PopupMenu &context
     return selected;
 }
 
+void OscillatorWaveformDisplay::handleWavetableLoad(int id)
+{
+    if (storage->wt_list[id].path.extension() == ".wtscript")
+    {
+        this->sge->loadWavetableScript(id, storage->wt_list[id].path, storage, oscdata);
+    }
+    else
+    {
+        oscdata->wt.queue_id = id;
+    }
+}
+
 void OscillatorWaveformDisplay::loadWavetable(int id)
 {
+    // std::cout << "loadWavetable called with id: " << id << std::endl;
     if (id >= 0 && (id < storage->wt_list.size()))
     {
         if (sge)
@@ -1014,7 +1316,14 @@ void OscillatorWaveformDisplay::loadWavetable(int id)
             announce += storage->wt_list[id].name;
             sge->enqueueAccessibleAnnouncement(announce);
         }
-        oscdata->wt.queue_id = id;
+
+        handleWavetableLoad(id);
+
+        auto new_name = storage->getCurrentWavetableName(oscdata);
+
+        SurgeSynthProcessor *ssp = &sge->juceEditor->processor;
+        ssp->paramChangeToListeners(nullptr, true, ssp->SCT_WAVETABLE, (float)scene,
+                                    (float)oscInScene, (float)id, new_name);
     }
 }
 
@@ -1029,8 +1338,12 @@ void OscillatorWaveformDisplay::loadWavetableFromFile()
         return;
     }
 
+    juce::String fileTypes = "*.wav;*.wt";
+#if HAS_LUA
+    fileTypes << ";*.wtscript";
+#endif
     sge->fileChooser = std::make_unique<juce::FileChooser>(
-        "Select Wavetable to Load", juce::File(path_to_string(wtPath)), "*.wav, *.wt");
+        "Select Wavetable to Load", juce::File(path_to_string(wtPath)), fileTypes);
     sge->fileChooser->launchAsync(
         juce::FileBrowserComponent::openMode | juce::FileBrowserComponent::canSelectFiles,
         [this, wtPath](const juce::FileChooser &c) {
@@ -1044,7 +1357,14 @@ void OscillatorWaveformDisplay::loadWavetableFromFile()
             auto res = c.getResult();
             auto rString = res.getFullPathName().toStdString();
 
-            this->oscdata->wt.queue_filename = rString;
+            if (res.hasFileExtension(".wtscript"))
+            {
+                this->sge->loadWavetableScript(-1, string_to_path(rString), storage, oscdata);
+            }
+            else
+            {
+                this->oscdata->wt.queue_filename = rString;
+            }
 
             auto dir = string_to_path(res.getParentDirectory().getFullPathName().toStdString());
 
@@ -1108,7 +1428,11 @@ void OscillatorWaveformDisplay::mouseDown(const juce::MouseEvent &event)
                         sge->enqueueAccessibleAnnouncement(announce);
                     }
 
-                    oscdata->wt.queue_id = id;
+                    handleWavetableLoad(id);
+                    auto new_name = storage->getCurrentWavetableName(oscdata);
+                    SurgeSynthProcessor *ssp = &sge->juceEditor->processor;
+                    ssp->paramChangeToListeners(nullptr, true, ssp->SCT_WAVETABLE, (float)scene,
+                                                (float)oscInScene, (float)id, new_name);
                 }
             }
             else
@@ -1134,7 +1458,11 @@ void OscillatorWaveformDisplay::mouseDown(const juce::MouseEvent &event)
                         sge->enqueueAccessibleAnnouncement(announce);
                     }
 
-                    oscdata->wt.queue_id = id;
+                    handleWavetableLoad(id);
+                    auto new_name = storage->getCurrentWavetableName(oscdata);
+                    SurgeSynthProcessor *ssp = &sge->juceEditor->processor;
+                    ssp->paramChangeToListeners(nullptr, true, ssp->SCT_WAVETABLE, (float)scene,
+                                                (float)oscInScene, (float)id, new_name);
                 }
             }
             else
@@ -1231,7 +1559,7 @@ std::string OscillatorWaveformDisplay::customEditorActionLabel(bool isActionToOp
     if (oscdata->type.val.i == ot_alias &&
         oscdata->p[AliasOscillator::ao_wave].val.i == AliasOscillator::aow_additive)
     {
-        return isActionToOpen ? "EDIT" : "CLOSE";
+        return isActionToOpen ? "ADDITIVE EDITOR" : "CLOSE";
     }
 
     return "";
@@ -1275,260 +1603,283 @@ struct WaveTable3DEditor : public juce::Component,
 
     std::unique_ptr<juce::Image> backingImage;
 
+    /*
+        For Profiling!
+
+        TRUE
+        All graphics will be produced by the oscillator.process_block.
+
+        FALSE
+        Wt data will be used and processed by the oscillator
+    */
+
+    const bool PROCESS_WITH_OSC = false;
+
+    float samplesCached[128][128];
+    float morphValue = 0.0;
+
+    int currentBreakingPoint = -1;
+
+    union ParamCached
+    {
+        int i;
+        float f;
+    };
+
+    ParamCached paramCached[7];
+    float zoomFactor = -1.0;
+    bool hasResized = false;
+
+    /* Values exported from
+     * https://www.blancoberg.com/surgewt3d?json=%7B%22rendered_frames%22%3A40%2C%22rendered_samples%22%3A53%2C%22paddingX%22%3A0.017679932260795936%2C%22paddingY%22%3A0.2127688399661304%2C%22skew%22%3A0.3%2C%22perspective%22%3A0%2C%22amplitude%22%3A0.14970364098221847%2C%22adjustX%22%3A0%2C%22adjustY%22%3A0%2C%22thickness%22%3A0.3989839119390347%2C%22morph%22%3A0%7D
+     */
+
+    int w, h;
+    float wf, hf;
+    int wt_size = 0;
+    int wt_nframes = 64;
+    int rendered_frames = 40;
+    int rendered_samples = WavetableOscillator::SAMPLES_FOR_DISPLAY;
+    float paddingX = 0.017679932260795936;
+    float paddingY = 0.2127688399661304;
+    float skew = 0.3;
+    float perspective = 0;
+    float amplitude = 0.14970364098221847;
+    float morph = 0;
+    float thickness = 0.3191871295512278;
+    float adjustX = 0;
+    float adjustY = 0;
+
+    //////////////////////////////////////////////////
+
     WaveTable3DEditor(OscillatorWaveformDisplay *pD, SurgeStorage *s, OscillatorStorage *osc,
                       SurgeGUIEditor *ed)
         : parent(pD), storage(s), oscdata(osc), sge(ed)
     {
+        clearSampleCache();
     }
 
-    void resized() override { backingImage = nullptr; }
+    void cacheParams()
+    {
+        for (int i = 0; i < 7; i++)
+        {
+            this->paramCached[i].i = oscdata->p[i].val.i;
+            this->paramCached[i].f = oscdata->p[i].val.f;
+        }
+    }
+
+    void clearSampleCache()
+    {
+        for (int i = 0; i < 128; i++)
+        {
+            samplesCached[i][0] = 0.f;
+        }
+    }
+
+    bool paramsHaveChanged()
+    {
+
+        for (int i = 0; i < 7; i++)
+        {
+            if (oscdata->p[i].val.i != this->paramCached[i].i ||
+                oscdata->p[i].val.f != this->paramCached[i].f)
+            {
+                cacheParams();
+                return true;
+            }
+        }
+        return false;
+    }
+
+    float getCurrentZoomFactor()
+    {
+        float zoom = (float)sge->getZoomFactor() * 0.01;
+        return zoom;
+    }
+
+    void resized() override
+    {
+        float currentZoom = getCurrentZoomFactor();
+
+        if (currentZoom != zoomFactor)
+        {
+            zoomFactor = currentZoom;
+            hasResized = true;
+            w = getWidth();
+            h = getHeight();
+
+            wf = (float)w * zoomFactor * 2;
+            hf = (float)h * zoomFactor * 2;
+
+            backingImage = nullptr;
+            backingImage = std::make_unique<juce::Image>(juce::Image::PixelFormat::ARGB, (int)wf,
+                                                         (int)(hf), true);
+        }
+    }
+
+    /*
+        create a interpolated frame based on a float frame value
+    */
+
+    void getInterpFrame(float *samples, float frame, float frames, bool processForReal,
+                        bool useCache)
+    {
+        auto &wt = oscdata->wt;
+        float actualFrame = (frame / (frames - 1.f)) * (float)(wt_nframes - 1);
+        int frameFrom = (int)(actualFrame);
+        float proc = actualFrame - (float)frameFrom;
+
+        if (processForReal == false)
+        {
+            if (samplesCached[(int)frame][0] == 0.f || useCache == false)
+            {
+                int frameTo = frameFrom + 1 > wt_nframes - 1 ? frameFrom : frameFrom + 1;
+
+                for (int i = 0; i < rendered_samples; i++)
+                {
+
+                    int pos = floor((((float)i) / (float)std::max(rendered_samples - 1, 1)) *
+                                    ((float)wt_size - 1.f));
+
+                    samples[i] = wt.TableF32WeakPointers[0][frameFrom][pos] * (1.f - proc) +
+                                 wt.TableF32WeakPointers[0][frameTo][pos] * proc;
+                    if (useCache)
+                        samplesCached[(int)frame][i + 1] = samples[i];
+                }
+
+                samplesCached[(int)frame][0] = 1.f;
+            }
+            else
+            {
+                for (int i = 0; i < rendered_samples; i++)
+                {
+                    samples[i] = samplesCached[(int)frame][i + 1];
+                }
+            }
+        }
+    }
+
+    void drawWavetable(juce::Graphics &g)
+    {
+        auto osc = parent->setupOscillator();
+        osc->init(0, true, false);
+
+        float opacity = 0.666;
+        float opacityMultiplier = parent->isMuted ? 0.5f : 1.f;
+
+        // draw the base layer
+        if (paramsHaveChanged() || hasResized)
+        {
+            hasResized = false;
+            juce::Colour color =
+                juce::Colour((unsigned char)0, (unsigned char)0, (unsigned char)0, 0.f);
+
+            backingImage->clear(
+                juce::Rectangle(0, 0, int(zoomFactor * w * 2), int(zoomFactor * h * 2)), color);
+            auto g = juce::Graphics(*backingImage);
+
+            for (int i = 0; i < rendered_frames; i++)
+            {
+                float proc = (float)i / (float)rendered_frames;
+
+                drawWaveform(
+                    g, i, rendered_frames, skin->getColor(Colors::Osc::Display::WaveCurrent3D),
+                    (0.9 - 0.7 * proc) * opacity * opacityMultiplier * 0.5, 1, osc, 1.f, true);
+            }
+
+            // on lower frames, draw the actual frames on top of the base shape
+            if (wt_nframes <= 10 && wt_nframes > 1)
+            {
+                opacity = 0.5;
+
+                for (int i = 0; i < wt_nframes; i++)
+                {
+                    float proc = (float)i / (float)rendered_frames;
+                    int fr = (float)i / ((float)wt_nframes - 1) * ((float)rendered_frames - 1.f);
+
+                    drawWaveform(g, fr, rendered_frames,
+                                 skin->getColor(Colors::Osc::Display::WaveCurrent3D),
+                                 (0.9 - 0.7 * proc) * opacity * opacityMultiplier * 0.5, 1.0, osc,
+                                 1.f, true);
+                }
+            }
+
+            // draw the wavetable position (morph)
+            // do not use cache for a smoother motion
+            float pos = limit_range(morphValue, 0.f, 1.f);
+            int position = pos * (128 - 1);
+
+            drawWaveform(g, position, 128, skin->getColor(Colors::Osc::Display::WaveCurrent3D),
+                         0.9 * opacityMultiplier, 1.5, osc, 1.f, false);
+        }
+
+        // draw backing image to graphics context
+        g.drawImage(*backingImage, getLocalBounds().toFloat(),
+                    juce::RectanglePlacement::fillDestination);
+    }
+
+    void drawWaveform(juce::Graphics &g, int i, int renderedFrames, juce::Colour color,
+                      float opacity, float thick, ::Oscillator *osc, float scale, bool useCache)
+    {
+
+        bool processForReal = PROCESS_WITH_OSC;
+
+        juce::Path p;
+        float procFrames = ((float)i) / (float)(renderedFrames - 1);
+
+        float samples[64];
+
+        getInterpFrame(samples, (float)i, (float)renderedFrames, processForReal, useCache);
+
+        osc->processSamplesForDisplay(samples, rendered_samples, processForReal);
+
+        float xScaled = wf * scale;
+        float YScaled = hf * scale;
+
+        float skewCalc = skew;
+
+        for (int k = 0; k < rendered_samples; k++)
+        {
+
+            float proc = (float)k / ((float)rendered_samples - 1.f);
+
+            float x = xScaled *
+                      (adjustX + 0.5 * perspective * procFrames + paddingX + skewCalc * procFrames +
+                       proc * (1 - paddingX * 2.0 - skewCalc - perspective * procFrames));
+            x += perspective * skewCalc * wf * 0.5;
+
+            float y = adjustY * YScaled + YScaled - paddingY * YScaled -
+                      (YScaled - paddingY * 2 * YScaled) * procFrames +
+                      samples[k] * YScaled * -(amplitude * (1 - 0.2 * perspective * procFrames)) *
+                          (1 - perspective * procFrames);
+
+            if (k == 0)
+            {
+                p.startNewSubPath(x, y);
+            }
+            else
+            {
+                p.lineTo(x, y);
+            }
+        }
+
+        g.setColour(color.withMultipliedAlpha(opacity));
+        g.strokePath(p, juce::PathStrokeType(thickness * xScaled * 0.01 * 2 * thick));
+    }
 
     void paint(juce::Graphics &g) override
     {
-        auto wtlockguard = std::lock_guard<std::mutex>(parent->storage->waveTableDataMutex);
+        // The audio thread can rebuild and reallocate the wavetable underneath us
+        // (BuildWT), so hold the wt lock while we read it, like the 2D display does.
+        std::lock_guard<std::mutex> wtLock(storage->waveTableDataMutex);
+
         auto &wt = oscdata->wt;
-        auto pos = -1.f;
-        bool off = false;
+        wt_size = wt.size;
+        wt_nframes = wt.n_tables;
 
-        if (uses_wavetabledata(oscdata->type.val.i))
-        {
-            pos = oscdata->p[0].val.f;
-            off = oscdata->p[0].extend_range;
-        }
-        else
-        {
-            pos = 0.f;
-        };
+        morphValue = oscdata->p[0].val.f;
 
-        auto tpos = pos * (wt.n_tables - off);
-
-        // OK so now go backwards through the tables but also tilt and raise for the 3D effect
-        auto smp = wt.size;
-        auto smpinv = 1.0 / smp;
-        auto w = getWidth();
-        auto h = getHeight();
-
-        // Now we have a sort of skew back and offset as we go. The skew is sort of a rotation
-        // and the depth is sort of how flattened it is. Finally the hCompress augments height.
-        auto skewPct = 0.4;
-        auto depthPct = 0.6;
-        auto hCompress = 0.55;
-
-        // calculate thinning factor for frame drawing
-        int thintbl = 1;
-        int nt = wt.n_tables;
-
-        while (nt > 16)
-        {
-            thintbl <<= 1;
-            nt >>= 1;
-        }
-
-        // calculate thinning factor for sample drawing
-        int thinsmp = 1;
-        int s = smp;
-
-        while (s > 128)
-        {
-            thinsmp <<= 1;
-            s >>= 1;
-        }
-
-        static constexpr float backingScale = 2.f;
-
-        auto wxf = w;
-        auto hxf = h;
-
-        if (!backingImage)
-        {
-            backingImage =
-                std::make_unique<juce::Image>(juce::Image::PixelFormat::ARGB, wxf, hxf, true);
-
-            // shadow on purpose
-            auto g = juce::Graphics(*backingImage);
-
-            // draw the wavetable frames
-            std::vector<int> ts;
-
-            for (int t = wt.n_tables - 1; t >= 0; t = t - thintbl)
-            {
-                ts.push_back(t);
-            }
-
-            if (ts.back() != 0)
-            {
-                ts.push_back(0);
-            }
-
-            for (auto t : ts)
-            {
-                auto tb = wt.TableF32WeakPointers[0][t];
-                float tpct = 1.0 * t / std::max((int)(wt.n_tables - 1), 1);
-
-                if (wt.n_tables == 1)
-                {
-                    tpct = 0.f;
-                }
-
-                float x0 = tpct * skewPct * wxf;
-                float y0 = (1.0 - tpct) * depthPct * hxf;
-                auto lw = wxf * (1.0 - skewPct);
-                auto hw = hxf * depthPct * hCompress;
-
-                juce::Path p;
-                juce::Path ribbon;
-
-                p.startNewSubPath(x0, y0 + (-tb[0] + 1) * 0.5 * hw);
-                ribbon.startNewSubPath(x0, y0 + (-tb[0] + 1) * 0.5 * hw);
-
-                for (int s = 1; s < smp; s = s + thinsmp)
-                {
-                    auto x = x0 + s * smpinv * lw;
-
-                    p.lineTo(x, y0 + (-tb[s] + 1) * 0.5 * hw);
-                    ribbon.lineTo(x, y0 + (-tb[s] + 1) * 0.5 * hw);
-                }
-
-                if (t > 0)
-                {
-                    nt = std::max(t - thintbl, 0);
-                    tpct = 1.0 * nt / (wt.n_tables - 1);
-                    tb = wt.TableF32WeakPointers[0][nt];
-                    x0 = tpct * skewPct * wxf;
-                    y0 = (1.0 - tpct) * depthPct * hxf;
-                    lw = w * (1.0 - skewPct);
-
-                    for (int s = smp - 1; s >= 0; s = s - thinsmp)
-                    {
-                        auto x = x0 + s * smpinv * lw;
-
-                        ribbon.lineTo(x, y0 + (-tb[s] + 1) * 0.5 * hw);
-                    }
-
-                    g.setColour(skin->getColor(Colors::Osc::Display::WaveFillStart3D)
-                                    .interpolatedWith(
-                                        skin->getColor(Colors::Osc::Display::WaveFillEnd3D), tpct)
-                                    .withMultipliedAlpha(parent->isMuted ? 0.5f : 1.f));
-                    g.fillPath(ribbon);
-                }
-
-                g.setColour(
-                    skin->getColor(Colors::Osc::Display::WaveStart3D)
-                        .interpolatedWith(skin->getColor(Colors::Osc::Display::WaveEnd3D), tpct)
-                        .withMultipliedAlpha((1.0 - abs(0.25 - (tpct * tpct * 0.5))) *
-                                             (parent->isMuted ? 0.5f : 1.f)));
-                g.strokePath(p, juce::PathStrokeType(0.75));
-            }
-        }
-
-        g.setOpacity(parent->isMuted ? 0.5f : 1.f);
-        g.drawImage(*backingImage, getLocalBounds().toFloat(),
-                    juce::RectanglePlacement::fillDestination);
-        g.setOpacity(1.f);
-
-        // draw currently selected frame
-        {
-            auto sel = std::clamp(tpos, 0.f, (wt.n_tables - 1.f));
-            auto tb = wt.TableF32WeakPointers[0][(int)std::floor(sel)];
-            float tpct = 1.0 * sel / std::max((int)(wt.n_tables - 1), 1);
-
-            if (wt.n_tables == 1)
-            {
-                tpct = 0.f;
-            }
-
-            float x0 = tpct * skewPct * w;
-            float y0 = (1.0 - tpct) * depthPct * h;
-            auto lw = w * (1.0 - skewPct);
-            auto hw = h * depthPct * hCompress;
-
-            auto osc = parent->setupOscillator();
-
-            if (!osc)
-            {
-                return;
-            }
-
-            int totalSamples = getWidth();
-            // empirically set up... don't ask!
-            float disp_pitch_rs =
-                12.f * std::log2f((700.f * (storage->samplerate / 48000.f)) / 440.f) + 69.f;
-
-            if (!storage->isStandardTuning)
-            {
-                // OK so in this case we need to find a better version of the note which gets us
-                // that pitch. Only way is to search really.
-                auto pit = storage->note_to_pitch_ignoring_tuning(disp_pitch_rs);
-                int bracket = -1;
-
-                for (int i = 0; i < 128; ++i)
-                {
-                    if (storage->note_to_pitch(i) < pit && storage->note_to_pitch(i + 1) > pit)
-                    {
-                        bracket = i;
-
-                        break;
-                    }
-                }
-
-                if (bracket >= 0)
-                {
-                    float f1 = storage->note_to_pitch(bracket);
-                    float f2 = storage->note_to_pitch(bracket + 1);
-                    float frac = (pit - f1) / (f2 - f1);
-
-                    disp_pitch_rs = bracket + frac;
-                }
-
-                // That's a strange non-monotonic tuning. Oh well.
-            }
-
-            bool use_display = osc->allow_display();
-
-            if (use_display)
-            {
-                osc->init(disp_pitch_rs, true, true);
-            }
-
-            int block_pos = BLOCK_SIZE_OS;
-            juce::Path wavePath;
-
-            wavePath.startNewSubPath(0.f, 0.f);
-
-            for (int i = 0; i < totalSamples; i++)
-            {
-                if (use_display && block_pos >= BLOCK_SIZE_OS)
-                {
-                    osc->process_block(disp_pitch_rs);
-                    block_pos = 0;
-                }
-
-                float val = 0.f;
-
-                if (use_display)
-                {
-                    val = osc->output[block_pos];
-                    block_pos++;
-                }
-
-                if (i >= 4)
-                {
-                    float xc = 1.f * (i - 4) / totalSamples;
-
-                    wavePath.lineTo(xc, val);
-                }
-            }
-
-            osc->~Oscillator();
-            osc = nullptr;
-
-            auto tf =
-                juce::AffineTransform().scaled(w * 0.61, h * -0.17).translated(x0, y0 + (0.5 * hw));
-
-            g.setColour(skin->getColor(Colors::Osc::Display::WaveCurrent3D)
-                            .withMultipliedAlpha(parent->isMuted ? 0.5f : 1.f));
-            g.strokePath(wavePath, juce::PathStrokeType(0.85), tf);
-        }
+        drawWavetable(g);
     }
 
     void mouseDown(const juce::MouseEvent &event) override
@@ -1731,6 +2082,11 @@ struct AliasAdditiveEditor : public juce::Component,
                 auto pos = (event.position.y - topTrim) / sliders[clickedSlider].getHeight();
                 auto d = (-1.f * pos + 0.5) * 2 * (!event.mods.isCommandDown());
 
+                if (event.mods.isAltDown())
+                {
+                    d = -oscdata->extraConfig.data[clickedSlider];
+                }
+
                 oscdata->extraConfig.data[clickedSlider] = limitpm1(d);
 
                 repaint();
@@ -1831,6 +2187,11 @@ struct AliasAdditiveEditor : public juce::Component,
 
             auto pos = (event.position.y - topTrim) / sliders[draggedSlider].getHeight();
             auto d = (-1.f * pos + 0.5) * 2 * (!event.mods.isCommandDown());
+
+            if (event.mods.isAltDown())
+            {
+                d = -oscdata->extraConfig.data[draggedSlider];
+            }
 
             oscdata->extraConfig.data[draggedSlider] = limitpm1(d);
 
@@ -1941,6 +2302,8 @@ void OscillatorWaveformDisplay::showCustomEditor()
         auto b = getLocalBounds().withTrimmedBottom(wtbheight);
         customEditor->setBounds(b);
         addAndMakeVisible(*customEditor);
+        customEditor->resized(); // Resize needs to happen after it has been added to the scene.
+                                 // Otherwise bounds will return 0
         repaint();
 
         customEditorAccOverlay->setTitle("Close Custom Editor");
@@ -1989,7 +2352,7 @@ void OscillatorWaveformDisplay::drawEditorBox(juce::Graphics &g, const std::stri
 {
     customEditorBox = getLocalBounds()
                           .withTop(getHeight() - wtbheight)
-                          .withRight(60)
+                          .withRight(141)
                           .withTrimmedBottom(1)
                           .toFloat();
 

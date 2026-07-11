@@ -4,7 +4,7 @@
  *
  * Learn more at https://surge-synthesizer.github.io/
  *
- * Copyright 2018-2023, various authors, as described in the GitHub
+ * Copyright 2018-2024, various authors, as described in the GitHub
  * transaction log.
  *
  * Surge XT is released under the GNU General Public Licence v3
@@ -57,11 +57,17 @@ std::string defaultKeyToString(DefaultKey k)
     case MPEPitchBendRange:
         r = "mpePitchBendRange";
         break;
+    case MPETimbreIsUnipolar:
+        r = "mpeTimbreIsUnipolar";
+        break;
     case UseCh2Ch3ToPlayScenesIndividually:
         r = "useCh2Ch3ToPlayScenesIndividually";
         break;
     case MenuBasedMIDILearnChannel:
         r = "menuBasedMIDILearnChannel";
+        break;
+    case MIDISoftTakeover:
+        r = "MIDISoftTakeover";
         break;
     case RestoreMSEGSnapFromPatch:
         r = "restoreMSEGSnapFromPatch";
@@ -121,6 +127,12 @@ std::string defaultKeyToString(DefaultKey k)
     case OverrideMappingOnPatchLoad:
         r = "overrideMappingOnPatchLoad";
         break;
+    case OverrideTempoOnPatchLoad:
+        r = "overrideTempoOnPatchLoad";
+        break;
+    case DefaultTransposeByTuningPeriod:
+        r = "defaultTransposeByTuningPeriod";
+        break;
     case DefaultPatchAuthor:
         r = "defaultPatchAuthor";
         break;
@@ -142,8 +154,14 @@ std::string defaultKeyToString(DefaultKey k)
     case ShowVirtualKeyboard_Standalone:
         r = "showVirtualKeyboardStandalone";
         break;
+    case VirtualKeyboardClickSetsVelocity:
+        r = "virtualKeyboardClickSetsVelocity";
+        break;
     case VirtualKeyboardLayout:
         r = "virtualKeyboardLayout";
+        break;
+    case UseSoftwareRenderer:
+        r = "useSoftwareRenderer";
         break;
     case InitialPatchName:
         r = "initialPatchName";
@@ -165,6 +183,9 @@ std::string defaultKeyToString(DefaultKey k)
         break;
     case LastWavetablePath:
         r = "lastWavetablePath";
+        break;
+    case LastIRPath:
+        r = "lastIRPath";
         break;
     // TODO: remove in XT2
     case TabKeyArmsModulators:
@@ -200,6 +221,9 @@ std::string defaultKeyToString(DefaultKey k)
     case FormulaOverlayLocation:
         r = "formulaOverlayLocation";
         break;
+    case WTScriptOverlayLocation:
+        r = "wtScriptOverlayLocation";
+        break;
     case WSAnalysisOverlayLocation:
         r = "wsAnalysisOverlayLocation";
         break;
@@ -221,6 +245,9 @@ std::string defaultKeyToString(DefaultKey k)
         break;
     case FormulaOverlayLocationTearOut:
         r = "formulaOverlayLocationTearOut";
+        break;
+    case WTScriptOverlayLocationTearOut:
+        r = "wtScriptOverlayLocationTearOut";
         break;
     case WSAnalysisOverlayLocationTearOut:
         r = "wsAnalysisOverlayLocationTearOut";
@@ -246,6 +273,9 @@ std::string defaultKeyToString(DefaultKey k)
     case FormulaOverlaySizeTearOut:
         r = "formulaOverlaySizeTearOut";
         break;
+    case WTScriptOverlaySizeTearOut:
+        r = "wtScriptOverlaySizeTearOut";
+        break;
     case WSAnalysisOverlaySizeTearOut:
         r = "wsAnalysisOverlaySizeTearOut";
         break;
@@ -268,6 +298,9 @@ std::string defaultKeyToString(DefaultKey k)
     case FormulaOverlayTearOutAlwaysOnTop:
         r = "formulaOverlayTearOutAlwaysOnTop";
         break;
+    case WTScriptOverlayTearOutAlwaysOnTop:
+        r = "wtScriptOverlayTearOutAlwaysOnTop";
+        break;
     case WSAnalysisOverlayTearOutAlwaysOnTop:
         r = "wsAnalysisOverlayTearOutAlwaysOnTop";
         break;
@@ -289,6 +322,9 @@ std::string defaultKeyToString(DefaultKey k)
         break;
     case FormulaOverlayTearOutAlwaysOnTop_Plugin:
         r = "formulaOverlayTearOutAlwaysOnTop_Plugin";
+        break;
+    case WTScriptOverlayTearOutAlwaysOnTop_Plugin:
+        r = "wtScriptOverlayTearOutAlwaysOnTop_Plugin";
         break;
     case WSAnalysisOverlayTearOutAlwaysOnTop_Plugin:
         r = "wsAnalysisOverlayTearOutAlwaysOnTop_Plugin";
@@ -331,6 +367,10 @@ std::string defaultKeyToString(DefaultKey k)
 
     case FocusModEditorAfterAddModulationFrom:
         r = "focusModEditorAfterAddModulationFrom";
+        break;
+
+    case NeverMoveKeyboardFocus:
+        r = "neverMoveKeyboardFocus";
         break;
 
     case IgnoreMIDIProgramChange_Deprecated:

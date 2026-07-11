@@ -4,7 +4,7 @@
  *
  * Learn more at https://surge-synthesizer.github.io/
  *
- * Copyright 2018-2023, various authors, as described in the GitHub
+ * Copyright 2018-2024, various authors, as described in the GitHub
  * transaction log.
  *
  * Surge XT is released under the GNU General Public Licence v3
@@ -19,10 +19,12 @@
  * All source for Surge XT is available at
  * https://github.com/surge-synthesizer/surge
  */
+
 #include <random>
 
 #include "SpringReverbProc.h"
 #include "sst/basic-blocks/dsp/FastMath.h"
+#include <cstdint>
 
 namespace
 {
@@ -44,7 +46,7 @@ void SpringReverbProc::prepare(float sampleRate, int samplesPerBlock)
 {
     fs = sampleRate;
 
-    delay.prepare({sampleRate, (juce::uint32)samplesPerBlock, 2});
+    delay.prepare({sampleRate, (size_t)samplesPerBlock, 2});
 
     dcBlocker.prepare(sampleRate, 2);
     dcBlocker.setCutoffFrequency(40.0f);
@@ -103,9 +105,7 @@ void SpringReverbProc::setParams(const Params &params, int numSamples)
 
     auto apfG = 0.5f - 0.4f * params.spin;
     float apfGVec alignas(16)[4] = {apfG, -apfG, apfG, -apfG};
-    VecType apfGVecAsVecType = 0;
-    for (int i = 0; i < 4; ++i)
-        apfGVecAsVecType[i] = apfGVec[i];
+    VecType apfGVecAsVecType{apfGVec};
     for (auto &apf : vecAPFs)
         apf.setParams(msToSamples(0.35f + 3.0f * params.size), apfGVecAsVecType);
 

@@ -4,7 +4,7 @@
  *
  * Learn more at https://surge-synthesizer.github.io/
  *
- * Copyright 2018-2023, various authors, as described in the GitHub
+ * Copyright 2018-2024, various authors, as described in the GitHub
  * transaction log.
  *
  * Surge XT is released under the GNU General Public Licence v3
@@ -78,8 +78,8 @@ class LFOModulationSource : public ModulationSource
         else
             return 3;
     }
-    float get_output(int which) override { return output_multi[which]; }
-    float get_output01(int which) override { return output_multi[which]; }
+    float get_output(int which) const override { return output_multi[which]; }
+    float get_output01(int which) const override { return output_multi[which]; }
     void set_output(int which, float f) override
     {
         // set_output on an LFO should never be called. Blow up in debug if it is
@@ -107,9 +107,11 @@ class LFOModulationSource : public ModulationSource
     StepSequencerStorage *ss;
     MSEGStorage *ms;
 
+  public:
     FormulaModulatorStorage *fs;
 
-    float output_multi[Surge::Formula::max_formula_outputs];
+  private:
+    float output_multi[Surge::Formula::max_formula_outputs] = {0};
 
   public:
     Surge::MSEG::EvaluatorState msegstate;
@@ -125,8 +127,27 @@ class LFOModulationSource : public ModulationSource
   private:
     pdata *localcopy;
     bool phaseInitialized;
+
     void initPhaseFromStartPhase();
     void msegEnvelopePhaseAdjustment();
+
+    inline float startPhaseClamped() const
+    {
+        // start_phase doubles as shuffle parameter for step sequencer
+        // where it must remain as unscaled, full [0, 1] range
+        // which is also used in extended mode as (x * 2 - 1).
+        // Scale only for basic LFO shapes
+        if (lfo->shape.val.i == lt_stepseq || lfo->shape.val.i == lt_formula ||
+            lfo->shape.val.i == lt_envelope || lfo->shape.val.i == lt_mseg)
+        {
+            return localcopy[startphase].f;
+        }
+
+        // Prevent full-circle: scale to [0, 1) so val_max != val_min
+        constexpr float maxPhase = 1.0f - (1.0f / 360.0f);
+
+        return std::clamp(localcopy[startphase].f, 0.f, maxPhase);
+    }
 
     float phase, target, noise, noised1, env_phase, priorPhase;
     int unwrappedphase_intpart;

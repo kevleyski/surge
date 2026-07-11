@@ -4,7 +4,7 @@
  *
  * Learn more at https://surge-synthesizer.github.io/
  *
- * Copyright 2018-2023, various authors, as described in the GitHub
+ * Copyright 2018-2024, various authors, as described in the GitHub
  * transaction log.
  *
  * Surge XT is released under the GNU General Public Licence v3
@@ -20,6 +20,10 @@
  * https://github.com/surge-synthesizer/surge
  */
 
+#if SURGE_INCLUDE_MELATONIN_INSPECTOR
+#include "melatonin_inspector/melatonin_inspector.h"
+#endif
+
 #include "SurgeGUIEditor.h"
 #include "SurgeGUIEditorTags.h"
 #include "SurgeGUIUtils.h"
@@ -29,9 +33,14 @@
 #include "AccessibleHelpers.h"
 #include "DebugHelpers.h"
 #include "ModulatorPresetManager.h"
+#include "FormulaModulationHelper.h"
 
 #include "fmt/core.h"
 
+#include "overlays/LuaEditors.h"
+#include "overlays/MSEGEditor.h"
+
+#include "widgets/MenuCustomComponents.h"
 #include "widgets/ModulatableSlider.h"
 #include "widgets/PatchSelector.h"
 #include "widgets/XMLConfiguredMenus.h"
@@ -39,10 +48,6 @@
 #ifndef SURGE_SKIP_ODDSOUND_MTS
 #include "libMTSClient.h"
 #include "libMTSMaster.h"
-#endif
-
-#if HAS_JUCE
-#include "SurgeSharedBinary.h"
 #endif
 
 #include <regex>
@@ -74,82 +79,21 @@ juce::PopupMenu SurgeGUIEditor::makeLfoMenu(const juce::Point<int> &where)
         break;
     }
 
-    auto msurl = SurgeGUIEditor::helpURLForSpecial("lfo-presets");
-    auto hurl = SurgeGUIEditor::fullyResolvedHelpURL(msurl);
-
     auto lfoSubMenu = juce::PopupMenu();
 
-    addHelpHeaderTo("LFO Presets", hurl, lfoSubMenu);
-    lfoSubMenu.addSeparator();
-
-    lfoSubMenu.addItem(
-        Surge::GUI::toOSCase("Save " + what + " Preset As..."), [this, currentLfoId, what]() {
-            promptForMiniEdit(
-                "", "Enter the preset name:", what + " Preset Name", juce::Point<int>{},
-                [this, currentLfoId](const std::string &s) {
-                    this->synth->storage.modulatorPreset->savePresetToUser(
-                        string_to_path(s), &(this->synth->storage), current_scene, currentLfoId);
-                },
-                lfoMenuButton);
-        });
-
-    auto presetCategories = this->synth->storage.modulatorPreset->getPresets(&(synth->storage));
-    if (!presetCategories.empty())
-    {
-        lfoSubMenu.addSeparator();
-    }
-
-    std::function<void(juce::PopupMenu & m, const Surge::Storage::ModulatorPreset::Category &cat)>
+    std::function<void(juce::PopupMenu &, const Surge::Storage::ModulatorPreset::Category &,
+                       const std::vector<Surge::Storage::ModulatorPreset::Category> &)>
         recurseCat;
-    recurseCat = [this, currentLfoId, presetCategories, &recurseCat](
-                     juce::PopupMenu &m, const Surge::Storage::ModulatorPreset::Category &cat) {
+
+    recurseCat = [this, currentLfoId, &recurseCat](
+                     juce::PopupMenu &m, const Surge::Storage::ModulatorPreset::Category &cat,
+                     const std::vector<Surge::Storage::ModulatorPreset::Category> &presetCategories)
+
+    {
         for (const auto &p : cat.presets)
         {
             auto action = [this, p, currentLfoId]() {
-                undoManager()->pushFullLFO(current_scene, currentLfoId);
-                this->synth->storage.modulatorPreset->loadPresetFrom(
-                    p.path, &(this->synth->storage), current_scene, currentLfoId);
-
-                auto newshape = this->synth->storage.getPatch()
-                                    .scene[current_scene]
-                                    .lfo[currentLfoId]
-                                    .shape.val.i;
-
-                for (const auto &ov : {MSEG_EDITOR, FORMULA_EDITOR})
-                {
-                    if (isAnyOverlayPresent(ov))
-                    {
-                        bool tornOut = false;
-                        juce::Point<int> tearOutPos;
-
-                        auto olw = getOverlayWrapperIfOpen(ov);
-
-                        if (olw && olw->isTornOut())
-                        {
-                            tornOut = true;
-                            tearOutPos = olw->currentTearOutLocation();
-                        }
-
-                        closeOverlay(ov);
-
-                        if (newshape == lt_mseg || newshape == lt_formula)
-                        {
-                            showOverlay(ov);
-
-                            if (tornOut)
-                            {
-                                auto olw = getOverlayWrapperIfOpen(ov);
-
-                                if (olw)
-                                {
-                                    olw->doTearOut(tearOutPos);
-                                }
-                            }
-                        }
-                    }
-                }
-
-                this->synth->refresh_editor = true;
+                loadModulatorPresetFrom(p.path, current_scene, currentLfoId);
             };
 
             m.addItem(p.name, action);
@@ -168,43 +112,130 @@ juce::PopupMenu SurgeGUIEditor::makeLfoMenu(const juce::Point<int> &where)
                 if (sc.parentPath == cat.path)
                 {
                     if (!haveD)
-                        m.addSeparator();
+                        m.addSeparator(); // Category subdirectory
                     haveD = true;
                     juce::PopupMenu subMenu;
-                    recurseCat(subMenu, sc);
+                    recurseCat(subMenu, sc, presetCategories);
                     m.addSubMenu(sc.name, subMenu);
                 }
             }
         }
     };
 
-    for (auto tlc : presetCategories)
+    auto addPresetCategoriesToMenu =
+        [&](juce::PopupMenu &menu,
+            const std::vector<Surge::Storage::ModulatorPreset::Category> &presetCategories) {
+            if (presetCategories.empty())
+                return;
+
+            for (auto &tlc : presetCategories)
+            {
+                if (tlc.path.empty())
+                {
+                    // We have presets in the root! Don't recurse forever and put them in the root
+                    recurseCat(menu, tlc, presetCategories);
+                    menu.addSeparator();
+                }
+                else if (tlc.parentPath.empty())
+                {
+                    juce::PopupMenu sm;
+                    recurseCat(sm, tlc, presetCategories);
+                    menu.addSubMenu(tlc.name, sm);
+                }
+            }
+        };
+
+    auto factoryPresetCategories = this->synth->storage.modulatorPreset->getPresets(
+        &(synth->storage), Surge::Storage::ModulatorPreset::PresetScanMode::FactoryOnly);
+    if (!factoryPresetCategories.empty())
     {
-        if (tlc.path.empty())
-        {
-            // We have presets in the root! Don't recurse forever and put them in the root
-            recurseCat(lfoSubMenu, tlc);
-            lfoSubMenu.addSeparator();
-        }
-        else if (tlc.parentPath.empty())
-        {
-            juce::PopupMenu sm;
-            recurseCat(sm, tlc);
-            lfoSubMenu.addSubMenu(tlc.name, sm);
-        }
+
+        Surge::Widgets::MenuCenteredBoldLabel::addToMenuAsSectionHeader(lfoSubMenu,
+                                                                        "FACTORY PRESETS");
+        addPresetCategoriesToMenu(lfoSubMenu, factoryPresetCategories);
     }
 
+    auto userPresetCategories = this->synth->storage.modulatorPreset->getPresets(
+        &(synth->storage), Surge::Storage::ModulatorPreset::PresetScanMode::UserOnly);
+    if (!userPresetCategories.empty())
+    {
+        lfoSubMenu.addColumnBreak();
+        Surge::Widgets::MenuCenteredBoldLabel::addToMenuAsSectionHeader(lfoSubMenu, "USER PRESETS");
+        addPresetCategoriesToMenu(lfoSubMenu, userPresetCategories);
+    }
+
+    lfoSubMenu.addColumnBreak();
+    Surge::Widgets::MenuCenteredBoldLabel::addToMenuAsSectionHeader(lfoSubMenu, "FUNCTIONS");
+
+    lfoSubMenu.addItem(
+        Surge::GUI::toOSCase("Save " + what + " Preset As..."), [this, currentLfoId, what]() {
+            const char *lfoName =
+                synth->storage.getPatch().LFOBankLabel[current_scene][currentLfoId][0];
+            promptForMiniEdit(
+                lfoName[0] != 0 ? lfoName : "",
+                "Enter the preset name:", "Save " + what + " Preset", juce::Point<int>{},
+                [this, currentLfoId](const std::string &s) {
+                    this->synth->storage.modulatorPreset->savePresetToUser(
+                        string_to_path(s), &(this->synth->storage), current_scene, currentLfoId);
+                },
+                lfoMenuButton);
+        });
     lfoSubMenu.addSeparator();
-    lfoSubMenu.addItem(Surge::GUI::toOSCase("Rescan Presets"),
+
+    lfoSubMenu.addItem(Surge::GUI::toOSCase("Refresh Presets"),
                        [this]() { this->synth->storage.modulatorPreset->forcePresetRescan(); });
+    lfoSubMenu.addSeparator();
+
+    auto hu = helpURLForSpecial("lfo-presets");
+    auto lurl = hu;
+
+    if (hu != "")
+    {
+        lurl = fullyResolvedHelpURL(hu);
+    }
+
+    auto hmen = std::make_unique<Surge::Widgets::MenuTitleHelpComponent>("LFO Presets", lurl);
+
+    hmen->setSkin(currentSkin, bitmapStore);
+    hmen->setCentered(false);
+    auto hment = hmen->getTitle();
+    lfoSubMenu.addCustomItem(-1, std::move(hmen), nullptr, hment);
 
     return lfoSubMenu;
+}
+
+void SurgeGUIEditor::makeMpeTimbreMenu(juce::PopupMenu &menu, const bool asSubMenu)
+{
+    using namespace Surge::Storage;
+
+    auto storage = &(synth->storage);
+    const bool mpeTimbreUnipolar =
+        getUserDefaultValue(&(synth->storage), MPETimbreIsUnipolar, false);
+
+    auto setter = [this, storage](bool value) {
+        synth->mpeTimbreIsUnipolar = value;
+        updateUserDefaultValue(storage, MPETimbreIsUnipolar, value);
+    };
+
+    if (asSubMenu)
+    {
+        auto entries = asSubMenu ? juce::PopupMenu() : menu;
+
+        entries.addItem("Unipolar", true, mpeTimbreUnipolar, [setter]() { setter(true); });
+        entries.addItem("Bipolar", true, !mpeTimbreUnipolar, [setter]() { setter(false); });
+
+        menu.addSubMenu(Surge::GUI::toOSCase("MPE Timbre Value Range"), entries);
+    }
+    else
+    {
+        menu.addItem("Unipolar", true, mpeTimbreUnipolar, [setter]() { setter(true); });
+        menu.addItem("Bipolar", true, !mpeTimbreUnipolar, [setter]() { setter(false); });
+    }
 }
 
 juce::PopupMenu SurgeGUIEditor::makeMpeMenu(const juce::Point<int> &where, bool showhelp)
 {
     auto mpeSubMenu = juce::PopupMenu();
-
     auto hu = helpURLForSpecial("mpe-menu");
 
     if (hu != "" && showhelp)
@@ -215,22 +246,15 @@ juce::PopupMenu SurgeGUIEditor::makeMpeMenu(const juce::Point<int> &where, bool 
         mpeSubMenu.addSeparator();
     }
 
-    std::string endis = "Enable MPE";
-
-    if (synth->mpeEnabled)
-    {
-        endis = "Disable MPE";
-    }
-
-    mpeSubMenu.addItem(endis.c_str(), [this]() { toggleMPE(); });
+    mpeSubMenu.addItem(fmt::format("{}able MPE", synth->mpeEnabled ? "Dis" : "En"),
+                       [this]() { toggleMPE(); });
 
     mpeSubMenu.addSeparator();
 
-    std::ostringstream oss;
-    oss << "Change MPE Pitch Bend Range (Current: " << synth->storage.mpePitchBendRange
-        << " Semitones)";
+    auto str = fmt::format("Change MPE Pitch Bend Range (Current: {} Semitones)",
+                           synth->storage.mpePitchBendRange);
 
-    mpeSubMenu.addItem(Surge::GUI::toOSCase(oss.str().c_str()), [this, where]() {
+    mpeSubMenu.addItem(Surge::GUI::toOSCase(str), [this, where]() {
         const auto c{std::to_string(int(synth->storage.mpePitchBendRange))};
         promptForMiniEdit(
             c, "Enter a new value:", "MPE Pitch Bend Range", where,
@@ -241,12 +265,11 @@ juce::PopupMenu SurgeGUIEditor::makeMpeMenu(const juce::Point<int> &where, bool 
             mpeStatus);
     });
 
-    std::ostringstream oss2;
-    int def = Surge::Storage::getUserDefaultValue(&(synth->storage),
-                                                  Surge::Storage::MPEPitchBendRange, 48);
-    oss2 << "Change Default MPE Pitch Bend Range (Current: " << def << " Semitones)";
+    const int def = Surge::Storage::getUserDefaultValue(&(synth->storage),
+                                                        Surge::Storage::MPEPitchBendRange, 48);
+    str = fmt::format("Change Default MPE Pitch Bend Range (Current: {} Semitones)", def);
 
-    mpeSubMenu.addItem(Surge::GUI::toOSCase(oss2.str().c_str()), [this, where]() {
+    mpeSubMenu.addItem(Surge::GUI::toOSCase(str), [this, where]() {
         const auto c{std::to_string(int(synth->storage.mpePitchBendRange))};
         promptForMiniEdit(
             c, "Enter a default value:", "Default MPE Pitch Bend Range", where,
@@ -264,6 +287,10 @@ juce::PopupMenu SurgeGUIEditor::makeMpeMenu(const juce::Point<int> &where, bool 
                                      [this](auto md) { this->resetPitchSmoothing(md); });
 
     mpeSubMenu.addSubMenu(Surge::GUI::toOSCase("MPE Pitch Bend Smoothing"), smoothMenu);
+
+    mpeSubMenu.addSeparator();
+
+    makeMpeTimbreMenu(mpeSubMenu, true);
 
     return mpeSubMenu;
 }
@@ -349,10 +376,10 @@ juce::PopupMenu SurgeGUIEditor::makeTuningMenu(const juce::Point<int> &where, bo
 
         std::string openname = isAnyOverlayPresent(TUNING_EDITOR) ? "Close " : "Open ";
 
-        Surge::GUI::addMenuWithShortcut(tuningSubMenu,
-                                        Surge::GUI::toOSCase(openname + "Tuning Visualizer..."),
-                                        showShortcutDescription("Alt + T", u8"\U00002325T"),
-                                        [this]() { this->toggleOverlay(TUNING_EDITOR); });
+        Surge::GUI::addMenuItemWithShortcut(
+            tuningSubMenu, Surge::GUI::toOSCase(openname + "Tuning Visualizer..."),
+            getShortcutDescription(Surge::GUI::KeyboardActions::TOGGLE_TUNING_EDITOR),
+            [this]() { this->toggleOverlay(TUNING_EDITOR); });
 
         tuningSubMenu.addSeparator();
     }
@@ -391,26 +418,34 @@ juce::PopupMenu SurgeGUIEditor::makeTuningMenu(const juce::Point<int> &where, bo
 
         std::string openname = isAnyOverlayPresent(TUNING_EDITOR) ? "Close " : "Open ";
 
-        Surge::GUI::addMenuWithShortcut(tuningSubMenu,
-                                        Surge::GUI::toOSCase(openname + "Tuning Editor..."),
-                                        showShortcutDescription("Alt + T", u8"\U00002325T"),
-                                        [this]() { this->toggleOverlay(TUNING_EDITOR); });
+        Surge::GUI::addMenuItemWithShortcut(
+            tuningSubMenu, Surge::GUI::toOSCase(openname + "Tuning Editor..."),
+            getShortcutDescription(Surge::GUI::KeyboardActions::TOGGLE_TUNING_EDITOR),
+            [this]() { this->toggleOverlay(TUNING_EDITOR); });
 
         tuningSubMenu.addSeparator();
 
-        tuningSubMenu.addItem(Surge::GUI::toOSCase("Set to Standard Tuning"),
-                              !this->synth->storage.isStandardTuning, false, [this]() {
-                                  this->synth->storage.retuneTo12TETScaleC261Mapping();
-                                  this->synth->storage.resetTuningToggle();
-                                  this->synth->refresh_editor = true;
-                                  tuningChanged();
-                              });
+        tuningSubMenu.addItem(
+            Surge::GUI::toOSCase("Set to Standard Tuning"), !this->synth->storage.isStandardTuning,
+            false, [this]() {
+                this->synth->storage.retuneTo12TETScaleC261Mapping();
+                this->synth->storage.resetTuningToggle();
+                this->synth->refresh_editor = true;
+                tuningChanged();
+                juceEditor->processor.paramChangeToListeners(
+                    nullptr, true, juceEditor->processor.SCT_TUNING_SCL, .0, .0, .0, "(standard)");
+                juceEditor->processor.paramChangeToListeners(
+                    nullptr, true, juceEditor->processor.SCT_TUNING_KBM, .0, .0, .0, "(standard)");
+            });
 
         tuningSubMenu.addItem(Surge::GUI::toOSCase("Set to Standard Mapping (Concert C)"),
                               (!this->synth->storage.isStandardMapping), false, [this]() {
                                   this->synth->storage.remapToConcertCKeyboard();
                                   this->synth->refresh_editor = true;
                                   tuningChanged();
+                                  juceEditor->processor.paramChangeToListeners(
+                                      nullptr, true, juceEditor->processor.SCT_TUNING_KBM, .0, .0,
+                                      .0, "(standard)");
                               });
 
         tuningSubMenu.addItem(Surge::GUI::toOSCase("Set to Standard Scale (12-TET)"),
@@ -418,22 +453,23 @@ juce::PopupMenu SurgeGUIEditor::makeTuningMenu(const juce::Point<int> &where, bo
                                   this->synth->storage.retuneTo12TETScale();
                                   this->synth->refresh_editor = true;
                                   tuningChanged();
+                                  juceEditor->processor.paramChangeToListeners(
+                                      nullptr, true, juceEditor->processor.SCT_TUNING_SCL, .0, .0,
+                                      .0, "(standard)");
                               });
 
         tuningSubMenu.addSeparator();
 
         tuningSubMenu.addItem(Surge::GUI::toOSCase("Load .scl Tuning..."), [this]() {
-            auto cb = [this](std::string sf) {
-                std::string sfx = ".scl";
-                if (sf.length() >= sfx.length())
+            auto cb = [this](const fs::path &sf) {
+                auto ext = sf.extension().string();
+                std::transform(ext.begin(), ext.end(), ext.begin(), tolower);
+
+                if (!sf.has_extension() || ext != ".scl")
                 {
-                    if (sf.compare(sf.length() - sfx.length(), sfx.length(), sfx) != 0)
-                    {
-                        synth->storage.reportError("Please select only .scl files!",
-                                                   "Invalid Choice");
-                        std::cout << "FILE is [" << sf << "]" << std::endl;
-                        return;
-                    }
+                    synth->storage.reportError("Please select only .scl files!", "Invalid Choice");
+                    std::cout << "FILE is [" << sf << "]" << std::endl;
+                    return;
                 }
                 try
                 {
@@ -450,9 +486,13 @@ juce::PopupMenu SurgeGUIEditor::makeTuningMenu(const juce::Point<int> &where, bo
                 catch (Tunings::TuningError &e)
                 {
                     synth->storage.retuneTo12TETScaleC261Mapping();
-                    synth->storage.reportError(e.what(), "Loading Error");
+                    synth->storage.reportError(e.what(), "Load Error");
                 }
                 tuningChanged();
+                auto tuningLabel = path_to_string(fs::path(synth->storage.currentScale.name));
+                tuningLabel = tuningLabel.substr(0, tuningLabel.find_last_of("."));
+                juceEditor->processor.paramChangeToListeners(
+                    nullptr, true, juceEditor->processor.SCT_TUNING_SCL, .0, .0, .0, tuningLabel);
             };
 
             auto scl_path = this->synth->storage.datapath / "tuning_library" / "SCL";
@@ -470,30 +510,29 @@ juce::PopupMenu SurgeGUIEditor::makeTuningMenu(const juce::Point<int> &where, bo
                     if (ress.size() != 1)
                         return;
                     auto res = ress.getFirst();
-                    auto rString = res.getFullPathName().toStdString();
-                    auto dir =
-                        string_to_path(res.getParentDirectory().getFullPathName().toStdString());
-                    cb(rString);
-                    if (dir != scl_path)
+
+                    auto fullPath = juceFileToFSPath(res);
+
+                    cb(fullPath);
+
+                    if (auto parent{fullPath.parent_path()}; parent != scl_path)
                     {
                         Surge::Storage::updateUserDefaultPath(&(this->synth->storage),
-                                                              Surge::Storage::LastSCLPath, dir);
+                                                              Surge::Storage::LastSCLPath, parent);
                     }
                 });
         });
 
         tuningSubMenu.addItem(Surge::GUI::toOSCase("Load .kbm Keyboard Mapping..."), [this]() {
-            auto cb = [this](std::string sf) {
-                std::string sfx = ".kbm";
-                if (sf.length() >= sfx.length())
+            auto cb = [this](const fs::path &sf) {
+                auto ext = sf.extension().string();
+                std::transform(ext.begin(), ext.end(), ext.begin(), tolower);
+
+                if (!sf.has_extension() || ext != ".kbm")
                 {
-                    if (sf.compare(sf.length() - sfx.length(), sfx.length(), sfx) != 0)
-                    {
-                        synth->storage.reportError("Please select only .kbm files!",
-                                                   "Invalid Choice");
-                        std::cout << "FILE is [" << sf << "]" << std::endl;
-                        return;
-                    }
+                    synth->storage.reportError("Please select only .kbm files!", "Invalid Choice");
+                    std::cout << "FILE is [" << sf << "]" << std::endl;
+                    return;
                 }
                 try
                 {
@@ -511,9 +550,13 @@ juce::PopupMenu SurgeGUIEditor::makeTuningMenu(const juce::Point<int> &where, bo
                 catch (Tunings::TuningError &e)
                 {
                     synth->storage.remapToConcertCKeyboard();
-                    synth->storage.reportError(e.what(), "Loading Error");
+                    synth->storage.reportError(e.what(), "Load Error");
                 }
                 tuningChanged();
+                auto mappingLabel = synth->storage.currentMapping.name;
+                mappingLabel = mappingLabel.substr(0, mappingLabel.find_last_of("."));
+                juceEditor->processor.paramChangeToListeners(
+                    nullptr, true, juceEditor->processor.SCT_TUNING_KBM, .0, .0, .0, mappingLabel);
             };
 
             auto kbm_path = this->synth->storage.datapath / "tuning_library" / "KBM Concert Pitch";
@@ -525,22 +568,21 @@ juce::PopupMenu SurgeGUIEditor::makeTuningMenu(const juce::Point<int> &where, bo
 
             fileChooser->launchAsync(
                 juce::FileBrowserComponent::openMode | juce::FileBrowserComponent::canSelectFiles,
-                [this, cb, kbm_path](const juce::FileChooser &c)
-
-                {
+                [this, cb, kbm_path](const juce::FileChooser &c) {
                     auto ress = c.getResults();
                     if (ress.size() != 1)
                         return;
 
                     auto res = c.getResult();
-                    auto rString = res.getFullPathName().toStdString();
-                    auto dir =
-                        string_to_path(res.getParentDirectory().getFullPathName().toStdString());
-                    cb(rString);
-                    if (dir != kbm_path)
+
+                    auto fullPath = juceFileToFSPath(res);
+
+                    cb(fullPath);
+
+                    if (auto parent{fullPath.parent_path()}; parent != kbm_path)
                     {
                         Surge::Storage::updateUserDefaultPath(&(this->synth->storage),
-                                                              Surge::Storage::LastKBMPath, dir);
+                                                              Surge::Storage::LastKBMPath, parent);
                     }
                 });
         });
@@ -556,7 +598,15 @@ juce::PopupMenu SurgeGUIEditor::makeTuningMenu(const juce::Point<int> &where, bo
 
         tuningSubMenu.addItem(Surge::GUI::toOSCase("Factory Tuning Library..."), [this]() {
             auto path = this->synth->storage.datapath / "tuning_library";
-            Surge::GUI::openFileOrFolder(path);
+            if (!Surge::GUI::openFileOrFolder(path))
+            {
+                synth->storage.reportError(
+                    "The folder " + path_to_string(path) +
+                        " does not exist. It seems that your Surge factory data folder is "
+                        "missing.\n\n"
+                        "Please run the Surge installer to set up the factory data.",
+                    "Load Error");
+            }
         });
 
         tuningSubMenu.addSeparator();
@@ -593,7 +643,6 @@ juce::PopupMenu SurgeGUIEditor::makeTuningMenu(const juce::Point<int> &where, bo
                                   this->synth->storage.mapChannelToOctave =
                                       !(this->synth->storage.mapChannelToOctave);
                               });
-
         tuningSubMenu.addSeparator();
 
         tuningSubMenu.addItem(
@@ -610,6 +659,25 @@ juce::PopupMenu SurgeGUIEditor::makeTuningMenu(const juce::Point<int> &where, bo
         tuningSubMenu.addSeparator();
     }
 
+    tuningSubMenu.addItem(Surge::GUI::toOSCase("Transpose Octave by Tuning Period"), true,
+                          (bool)(synth->storage.transposeByTuningPeriod), [this]() {
+                              this->synth->storage.transposeByTuningPeriod =
+                                  !(this->synth->storage.transposeByTuningPeriod);
+                          });
+
+    {
+        bool defVal = (bool)Surge::Storage::getUserDefaultValue(
+            &(synth->storage), Surge::Storage::DefaultTransposeByTuningPeriod, 0);
+        tuningSubMenu.addItem(
+            Surge::GUI::toOSCase("Set Transpose Octave by Tuning Period as Default"), true, defVal,
+            [this, defVal]() {
+                Surge::Storage::updateUserDefaultValue(
+                    &(this->synth->storage), Surge::Storage::DefaultTransposeByTuningPeriod,
+                    defVal ? 0 : 1);
+            });
+    }
+    tuningSubMenu.addSeparator();
+
 #ifndef SURGE_SKIP_ODDSOUND_MTS
     auto canMaster = MTS_CanRegisterMaster();
 
@@ -619,6 +687,28 @@ juce::PopupMenu SurgeGUIEditor::makeTuningMenu(const juce::Point<int> &where, bo
 
     if (tsMode)
     {
+        tuningSubMenu.addItem(
+            Surge::GUI::toOSCase("Query Tuning at Note On Only"), true,
+            (this->synth->storage.oddsoundRetuneMode == SurgeStorage::RETUNE_NOTE_ON_ONLY),
+            [this]() {
+                if (this->synth->storage.oddsoundRetuneMode == SurgeStorage::RETUNE_CONSTANT)
+                {
+                    this->synth->storage.oddsoundRetuneMode = SurgeStorage::RETUNE_NOTE_ON_ONLY;
+                }
+                else
+                {
+                    this->synth->storage.oddsoundRetuneMode = SurgeStorage::RETUNE_CONSTANT;
+                }
+            });
+
+        tuningSubMenu.addItem(Surge::GUI::toOSCase("Use MIDI Channel for Octave Shift"),
+                              !synth->mpeEnabled, (synth->storage.mapChannelToOctave), [this]() {
+                                  this->synth->storage.mapChannelToOctave =
+                                      !(this->synth->storage.mapChannelToOctave);
+                              });
+
+        tuningSubMenu.addSeparator();
+
         std::string mtxt = "Act as" + Surge::GUI::toOSCase(" MTS-ESP Source");
 
         tuningSubMenu.addItem(mtxt, canMaster || getStorage()->oddsound_mts_active_as_main,
@@ -637,8 +727,9 @@ juce::PopupMenu SurgeGUIEditor::makeTuningMenu(const juce::Point<int> &where, bo
     if (getStorage()->oddsound_mts_active_as_main)
     {
         auto nc = MTS_GetNumClients();
-        tuningSubMenu.addItem("MTS-ESP has " + std::to_string(nc) + " clients", false, false,
-                              []() {});
+        tuningSubMenu.addItem(fmt::format("{} client{} connected",
+                                          nc == 0 ? "No" : std::to_string(nc), nc != 1 ? "s" : ""),
+                              false, false, []() {});
     }
 
     if (getStorage()->oddsound_mts_active_as_main || !canMaster)
@@ -647,8 +738,8 @@ juce::PopupMenu SurgeGUIEditor::makeTuningMenu(const juce::Point<int> &where, bo
         {
             tuningSubMenu.addItem("Reinitialize MTS Library and IPC", true, false, [this]() {
                 std::string msg =
-                    "Reinitializing MTS will disconnect all clients, including "
-                    "this one, and will generally require you to restart your DAW session, "
+                    "Reinitializing MTS will disconnect all clients including this one. "
+                    "It will also require you to restart your DAW session, "
                     "but it will clear up after particularly nasty crashes or IPC issues. "
                     "Are you sure you want to do this?";
                 alertYesNo("Reinitialize MTS-ESP", msg, MTS_Reinitialize);
@@ -676,22 +767,6 @@ juce::PopupMenu SurgeGUIEditor::makeTuningMenu(const juce::Point<int> &where, bo
             this->synth->storage.getPatch().dawExtraState.disconnectFromOddSoundMTS = true;
             MTS_DeregisterClient(q);
         });
-
-        tuningSubMenu.addSeparator();
-
-        tuningSubMenu.addItem(
-            Surge::GUI::toOSCase("Query Tuning at Note On Only"), true,
-            (this->synth->storage.oddsoundRetuneMode == SurgeStorage::RETUNE_NOTE_ON_ONLY),
-            [this]() {
-                if (this->synth->storage.oddsoundRetuneMode == SurgeStorage::RETUNE_CONSTANT)
-                {
-                    this->synth->storage.oddsoundRetuneMode = SurgeStorage::RETUNE_NOTE_ON_ONLY;
-                }
-                else
-                {
-                    this->synth->storage.oddsoundRetuneMode = SurgeStorage::RETUNE_CONSTANT;
-                }
-            });
     }
 
 #endif
@@ -748,11 +823,14 @@ juce::PopupMenu SurgeGUIEditor::makeZoomMenu(const juce::Point<int> &where, bool
     }
     else
     {
+        using namespace Surge::GUI;
+
         // These are somewhat arbitrary reasonable defaults also
         std::vector<int> jog = {-25, -10, 10, 25};
-        std::vector<std::string> sdesc = {
-            showShortcutDescription("Shift + -", u8"\U000021E7-"), showShortcutDescription("-"),
-            showShortcutDescription("+"), showShortcutDescription("Shift + +", u8"\U000021E7+")};
+        std::vector<std::string> sdesc = {getShortcutDescription(KeyboardActions::ZOOM_MINUS_25),
+                                          getShortcutDescription(KeyboardActions::ZOOM_MINUS_10),
+                                          getShortcutDescription(KeyboardActions::ZOOM_PLUS_10),
+                                          getShortcutDescription(KeyboardActions::ZOOM_PLUS_25)};
 
         for (int i = 0; i < jog.size(); i++)
         {
@@ -765,7 +843,7 @@ juce::PopupMenu SurgeGUIEditor::makeZoomMenu(const juce::Point<int> &where, bool
                 lab = fmt::format("Shrink by {:d}%", -jog[i]);
             }
 
-            Surge::GUI::addMenuWithShortcut(zoomSubMenu, lab, sdesc[i], [this, jog, i]() {
+            Surge::GUI::addMenuItemWithShortcut(zoomSubMenu, lab, sdesc[i], [this, jog, i]() {
                 resizeWindow(getZoomFactor() + jog[i]);
             });
         }
@@ -791,9 +869,10 @@ juce::PopupMenu SurgeGUIEditor::makeZoomMenu(const juce::Point<int> &where, bool
         {
             lab = fmt::format("Zoom to Default ({:d}%)", dzf);
 
-            Surge::GUI::addMenuWithShortcut(zoomSubMenu, Surge::GUI::toOSCase(lab),
-                                            showShortcutDescription("Shift + /", u8"\U000021E7/"),
-                                            [this, dzf]() { resizeWindow(dzf); });
+            Surge::GUI::addMenuItemWithShortcut(
+                zoomSubMenu, Surge::GUI::toOSCase(lab),
+                getShortcutDescription(Surge::GUI::KeyboardActions::ZOOM_TO_DEFAULT),
+                [this, dzf]() { resizeWindow(dzf); });
         }
 
         lab = fmt::format("Set Current Zoom Level ({:d}%) as Default", (int)zoomFactor);
@@ -835,9 +914,9 @@ juce::PopupMenu SurgeGUIEditor::makeZoomMenu(const juce::Point<int> &where, bool
 
                 if (cdw->isFullScreen())
                 {
-                    Surge::GUI::addMenuWithShortcut(
+                    Surge::GUI::addMenuItemWithShortcut(
                         zoomSubMenu, Surge::GUI::toOSCase("Exit Fullscreen Mode"),
-                        showShortcutDescription("F11"),
+                        showShortcutDescription(Surge::GUI::KeyboardActions::ZOOM_FULLSCREEN),
                         [this, w = juce::Component::SafePointer(cdw)]() {
                             if (w)
                             {
@@ -847,9 +926,9 @@ juce::PopupMenu SurgeGUIEditor::makeZoomMenu(const juce::Point<int> &where, bool
                 }
                 else
                 {
-                    Surge::GUI::addMenuWithShortcut(
+                    Surge::GUI::addMenuItemWithShortcut(
                         zoomSubMenu, Surge::GUI::toOSCase("Enter Fullscreen Mode"),
-                        showShortcutDescription("F11"),
+                        getShortcutDescription(Surge::GUI::KeyboardActions::ZOOM_FULLSCREEN),
                         [this, w = juce::Component::SafePointer(cdw)]() {
                             if (w)
                             {
@@ -953,6 +1032,8 @@ juce::PopupMenu SurgeGUIEditor::makeMouseBehaviorMenu(const juce::Point<int> &wh
 
     mouseMenu.addSeparator();
 
+    mouseMenu.addSeparator();
+
     return mouseMenu;
 }
 
@@ -1008,15 +1089,29 @@ juce::PopupMenu SurgeGUIEditor::makePatchDefaultsMenu(const juce::Point<int> &wh
             &(this->synth->storage).patch_category[patchSelector->getCurrentCategoryId()].name;
         auto patchCurId =
             &(this->synth->storage).patch_list[patchSelector->getCurrentPatchId()].name;
+        auto catIsFactory =
+            (this->synth->storage).patch_category[patchSelector->getCurrentCategoryId()].isFactory;
 
-        patchDefMenu.addItem(Surge::GUI::toOSCase("Set Current Patch as Default"), [this, catCurId,
-                                                                                    patchCurId]() {
-            Surge::Storage::updateUserDefaultValue(&(this->synth->storage),
-                                                   Surge::Storage::InitialPatchName, *patchCurId);
+        patchDefMenu.addItem(
+            Surge::GUI::toOSCase("Set Current Patch as Default"),
+            [this, catCurId, patchCurId, catIsFactory]() {
+                Surge::Storage::updateUserDefaultValue(
+                    &(this->synth->storage), Surge::Storage::InitialPatchName, *patchCurId);
 
-            Surge::Storage::updateUserDefaultValue(&(this->synth->storage),
-                                                   Surge::Storage::InitialPatchCategory, *catCurId);
-        });
+                Surge::Storage::updateUserDefaultValue(
+                    &(this->synth->storage), Surge::Storage::InitialPatchCategory, *catCurId);
+
+                Surge::Storage::updateUserDefaultValue(
+                    &(this->synth->storage), Surge::Storage::InitialPatchCategoryType,
+                    catIsFactory ? std::string("Factory") : std::string("User"));
+
+                this->synth->storage.initPatchName = Surge::Storage::getUserDefaultValue(
+                    &(this->synth->storage), Surge::Storage::InitialPatchName, "Init Saw");
+                this->synth->storage.initPatchCategory = Surge::Storage::getUserDefaultValue(
+                    &(this->synth->storage), Surge::Storage::InitialPatchCategory, "Templates");
+                this->synth->storage.initPatchCategoryType = Surge::Storage::getUserDefaultValue(
+                    &(this->synth->storage), Surge::Storage::InitialPatchCategoryType, "Factory");
+            });
     }
 
     patchDefMenu.addSeparator();
@@ -1032,6 +1127,30 @@ juce::PopupMenu SurgeGUIEditor::makePatchDefaultsMenu(const juce::Point<int> &wh
                          });
 
     patchDefMenu.addSeparator();
+
+    if (Surge::GUI::getIsStandalone())
+    {
+        auto tempoOnLoadMenu = juce::PopupMenu();
+
+        bool overrideTempoOnLoad = Surge::Storage::getUserDefaultValue(
+            &(synth->storage), Surge::Storage::OverrideTempoOnPatchLoad, true);
+
+        tempoOnLoadMenu.addItem(Surge::GUI::toOSCase("Keep Current Tempo"), true,
+                                !overrideTempoOnLoad, [this, overrideTempoOnLoad]() {
+                                    Surge::Storage::updateUserDefaultValue(
+                                        &(this->synth->storage),
+                                        Surge::Storage::OverrideTempoOnPatchLoad, false);
+                                });
+
+        tempoOnLoadMenu.addItem(Surge::GUI::toOSCase("Override With Embedded Tempo if Available"),
+                                true, overrideTempoOnLoad, [this, overrideTempoOnLoad]() {
+                                    Surge::Storage::updateUserDefaultValue(
+                                        &(this->synth->storage),
+                                        Surge::Storage::OverrideTempoOnPatchLoad, true);
+                                });
+
+        patchDefMenu.addSubMenu(Surge::GUI::toOSCase("Tempo on Patch Load"), tempoOnLoadMenu);
+    }
 
     auto tuningOnLoadMenu = juce::PopupMenu();
 
@@ -1086,14 +1205,14 @@ juce::PopupMenu SurgeGUIEditor::makeValueDisplaysMenu(const juce::Point<int> &wh
 {
     auto dispDefMenu = juce::PopupMenu();
 
-    bool precReadout = Surge::Storage::getUserDefaultValue(
-        &(this->synth->storage), Surge::Storage::HighPrecisionReadouts, false);
+    const bool detailedMode =
+        Surge::Storage::getValueDisplayIsHighPrecision(&(this->synth->storage));
 
-    dispDefMenu.addItem(Surge::GUI::toOSCase("High Precision Value Readouts"), true, precReadout,
-                        [this, precReadout]() {
+    dispDefMenu.addItem(Surge::GUI::toOSCase("High Precision Value Readouts"), true, detailedMode,
+                        [this, detailedMode]() {
                             Surge::Storage::updateUserDefaultValue(
                                 &(this->synth->storage), Surge::Storage::HighPrecisionReadouts,
-                                !precReadout);
+                                !detailedMode);
                         });
 
     // modulation value readout shows bounds
@@ -1200,8 +1319,8 @@ juce::PopupMenu SurgeGUIEditor::makeWorkflowMenu(const juce::Point<int> &where)
     bool patchStickySearchbox = Surge::Storage::getUserDefaultValue(
         &(this->synth->storage), Surge::Storage::RetainPatchSearchboxAfterLoad, true);
 
-    wfMenu.addItem(Surge::GUI::toOSCase("Retain Patch Search Results After Loading"), true,
-                   patchStickySearchbox, [this, patchStickySearchbox]() {
+    wfMenu.addItem(Surge::GUI::toOSCase("Retain Patch Search Results After Loading Via Click"),
+                   true, patchStickySearchbox, [this, patchStickySearchbox]() {
                        Surge::Storage::updateUserDefaultValue(
                            &(this->synth->storage), Surge::Storage::RetainPatchSearchboxAfterLoad,
                            !patchStickySearchbox);
@@ -1234,9 +1353,10 @@ juce::PopupMenu SurgeGUIEditor::makeWorkflowMenu(const juce::Point<int> &where)
 
     wfMenu.addItem(Surge::GUI::toOSCase("Use Keyboard Shortcuts"), true, kbShortcuts,
                    [this]() { toggleUseKeyboardShortcuts(); });
-    Surge::GUI::addMenuWithShortcut(wfMenu, Surge::GUI::toOSCase("Edit Keyboard Shortcuts..."),
-                                    showShortcutDescription("Alt + B", u8"\U00002325B"), true,
-                                    false, [this]() { toggleOverlay(KEYBINDINGS_EDITOR); });
+    Surge::GUI::addMenuItemWithShortcut(
+        wfMenu, Surge::GUI::toOSCase("Edit Keyboard Shortcuts..."),
+        getShortcutDescription(Surge::GUI::KeyboardActions::TOGGLE_KEYBIND_EDITOR), true, false,
+        [this]() { toggleOverlay(KEYBINDINGS_EDITOR); });
 
     bool knMode = Surge::Storage::getUserDefaultValue(
         &(this->synth->storage), Surge::Storage::MenuAndEditKeybindingsFollowKeyboardFocus, true);
@@ -1259,13 +1379,61 @@ juce::PopupMenu SurgeGUIEditor::makeWorkflowMenu(const juce::Point<int> &where)
 
     wfMenu.addSubMenu(str, kbfMenu);
 
+    bool neverMoveFocus = Surge::Storage::getUserDefaultValue(
+        &(this->synth->storage), Surge::Storage::NeverMoveKeyboardFocus, false);
+
+    wfMenu.addItem(Surge::GUI::toOSCase("Never Move Keyboard Focus"), true, neverMoveFocus,
+                   [this, neverMoveFocus]() {
+                       Surge::Storage::updateUserDefaultValue(
+                           &(this->synth->storage), Surge::Storage::NeverMoveKeyboardFocus,
+                           !neverMoveFocus);
+                       Surge::GUI::setNeverMoveKeyboardFocus(!neverMoveFocus);
+                   });
+
+#if WINDOWS
+    wfMenu.addSeparator();
+
+    auto swr = Surge::Storage::getUserDefaultValue(&(this->synth->storage),
+                                                   Surge::Storage::UseSoftwareRenderer, false);
+
+    wfMenu.addItem("Use software renderer", true, swr, [this, swr]() {
+        Surge::Storage::updateUserDefaultValue(&(this->synth->storage),
+                                               Surge::Storage::UseSoftwareRenderer, !swr);
+        juce::AlertWindow::showMessageBoxAsync(
+            juce::AlertWindow::WarningIcon, "Graphics Renderer Change",
+            fmt::format("Graphics renderer will change to {} after reloading the plugin!",
+                        swr ? "Direct2D" : "software"));
+    });
+#endif
+
     wfMenu.addSeparator();
 
     bool showVirtualKeyboard = getShowVirtualKeyboard();
 
-    Surge::GUI::addMenuWithShortcut(wfMenu, Surge::GUI::toOSCase("Virtual Keyboard"),
-                                    showShortcutDescription("Alt + K", u8"\U00002325K"), true,
-                                    showVirtualKeyboard, [this]() { toggleVirtualKeyboard(); });
+    Surge::GUI::addMenuItemWithShortcut(
+        wfMenu, Surge::GUI::toOSCase("Virtual Keyboard"),
+        getShortcutDescription(Surge::GUI::KeyboardActions::TOGGLE_VIRTUAL_KEYBOARD), true,
+        showVirtualKeyboard, [this]() { toggleVirtualKeyboard(); });
+
+    // Virtual Keyboard mouse behavior
+    bool virtualKeyboardClickSetsVelocity = Surge::Storage::getUserDefaultValue(
+        &(this->synth->storage), Surge::Storage::VirtualKeyboardClickSetsVelocity, false);
+
+    wfMenu.addItem(
+        Surge::GUI::toOSCase("Virtual Keyboard: Click Sets Overall Velocity"), true,
+        virtualKeyboardClickSetsVelocity, [this, virtualKeyboardClickSetsVelocity]() {
+            Surge::Storage::updateUserDefaultValue(&(this->synth->storage),
+                                                   Surge::Storage::VirtualKeyboardClickSetsVelocity,
+                                                   !virtualKeyboardClickSetsVelocity);
+
+            // Update the keyboard component
+            if (auto vkb = dynamic_cast<SurgeVirtualKeyboard *>(juceEditor->keyboard.get()))
+            {
+                vkb->useClickPositionForOverallVelocity = !virtualKeyboardClickSetsVelocity;
+            }
+        });
+
+    wfMenu.addSeparator();
 
     makeScopeEntry(wfMenu);
 
@@ -1433,8 +1601,10 @@ juce::PopupMenu SurgeGUIEditor::makeSkinMenu(const juce::Point<int> &where)
         skinSubMenu.addSeparator();
     }
 
-    Surge::GUI::addMenuWithShortcut(skinSubMenu, Surge::GUI::toOSCase("Reload Current Skin"),
-                                    showShortcutDescription("F5"), [this]() { refreshSkin(); });
+    Surge::GUI::addMenuItemWithShortcut(
+        skinSubMenu, Surge::GUI::toOSCase("Reload Current Skin"),
+        getShortcutDescription(Surge::GUI::KeyboardActions::REFRESH_SKIN),
+        [this]() { refreshSkin(); });
 
     skinSubMenu.addItem(Surge::GUI::toOSCase("Rescan Skins"), [this]() {
         auto r = this->currentSkin->root;
@@ -1503,8 +1673,16 @@ juce::PopupMenu SurgeGUIEditor::makeDataMenu(const juce::Point<int> &where)
 {
     auto dataSubMenu = juce::PopupMenu();
 
-    dataSubMenu.addItem(Surge::GUI::toOSCase("Open Factory Data Folder..."),
-                        [this]() { Surge::GUI::openFileOrFolder(this->synth->storage.datapath); });
+    dataSubMenu.addItem(Surge::GUI::toOSCase("Open Factory Data Folder..."), [this]() {
+        if (!Surge::GUI::openFileOrFolder(this->synth->storage.datapath))
+        {
+            synth->storage.reportError(
+                "The folder " + path_to_string(this->synth->storage.datapath) +
+                    " does not exist. It seems that your Surge factory data folder is missing.\n\n"
+                    "Please run the Surge installer to set up the factory data.",
+                "Load Error");
+        }
+    });
 
     dataSubMenu.addItem(Surge::GUI::toOSCase("Open User Data Folder..."), [this]() {
         // make it if it isn't there
@@ -1515,57 +1693,31 @@ juce::PopupMenu SurgeGUIEditor::makeDataMenu(const juce::Point<int> &where)
     dataSubMenu.addItem(Surge::GUI::toOSCase("Set Custom User Data Folder..."), [this]() {
         fileChooser = std::make_unique<juce::FileChooser>(
             "Set Custom User Data Folder", juce::File(path_to_string(synth->storage.userDataPath)));
-        fileChooser->launchAsync(
-            juce::FileBrowserComponent::openMode | juce::FileBrowserComponent::canSelectDirectories,
-            [this](const juce::FileChooser &f) {
-                auto r = f.getResult();
-                if (!r.isDirectory())
-                    return;
-                auto s = f.getResult().getFullPathName().toStdString();
+        fileChooser->launchAsync(juce::FileBrowserComponent::openMode |
+                                     juce::FileBrowserComponent::canSelectDirectories,
+                                 [this](const juce::FileChooser &f) {
+                                     auto r = f.getResult();
+                                     if (!r.isDirectory())
+                                         return;
+                                     auto s = f.getResult().getFullPathName().toStdString();
 
-                Surge::Storage::updateUserDefaultValue(&(this->synth->storage),
-                                                       Surge::Storage::UserDataPath, s);
+                                     // Use the new file-based approach to store user data path
+                                     // override
+                                     fs::path newPath(s);
+                                     this->synth->storage.setOverridenUserPath(&newPath);
 
-                this->synth->storage.userDataPath = s;
-                synth->storage.createUserDirectory();
+                                     this->synth->storage.userDataPath = s;
+                                     this->synth->storage.initializeUserDataPaths();
+                                     synth->storage.createUserDirectory();
 
-                this->synth->storage.refresh_wtlist();
-                this->synth->storage.refresh_patchlist();
-            });
+                                     this->rescanAllDataFolders();
+                                 });
     });
 
     dataSubMenu.addSeparator();
 
-    dataSubMenu.addItem(Surge::GUI::toOSCase("Rescan All Data Folders"), [this]() {
-        this->synth->storage.refresh_wtlist();
-        this->synth->storage.refresh_patchlist();
-        this->scannedForMidiPresets = false;
-
-        this->synth->storage.fxUserPreset->doPresetRescan(&(this->synth->storage), true);
-        this->synth->storage.modulatorPreset->forcePresetRescan();
-
-        // Rescan for skins
-        auto r = this->currentSkin->root;
-        auto n = this->currentSkin->name;
-
-        auto *db = Surge::GUI::SkinDB::get();
-        db->rescanForSkins(&(this->synth->storage));
-
-        // So go find the skin
-        auto e = db->getEntryByRootAndName(r, n);
-
-        if (e.has_value())
-        {
-            setupSkinFromEntry(*e);
-        }
-        else
-        {
-            setupSkinFromEntry(db->getDefaultSkinEntry());
-        }
-
-        // Will need to rebuild the FX menu also so...
-        this->synth->refresh_editor = true;
-    });
+    dataSubMenu.addItem(Surge::GUI::toOSCase("Rescan All Data Folders"),
+                        [this]() { this->rescanAllDataFolders(); });
 
     return dataSubMenu;
 }
@@ -1602,9 +1754,9 @@ juce::PopupMenu SurgeGUIEditor::makeMidiMenu(const juce::Point<int> &where)
 {
     auto midiSubMenu = juce::PopupMenu();
 
-    auto smen =
-        makeSmoothMenu(where, Surge::Storage::SmoothingMode, (int)Modulator::SmoothingMode::LEGACY,
-                       [this](auto md) { this->resetSmoothing(md); });
+    auto smen = makeSmoothMenu(where, Surge::Storage::SmoothingMode,
+                               (int)Modulator::SmoothingMode::FAST_LINE,
+                               [this](auto md) { this->resetSmoothing(md); });
     midiSubMenu.addSubMenu(Surge::GUI::toOSCase("Controller Smoothing"), smen);
 
     auto mmom = makeMonoModeOptionsMenu(where, true);
@@ -1644,6 +1796,19 @@ juce::PopupMenu SurgeGUIEditor::makeMidiMenu(const juce::Point<int> &where)
 
     midiSubMenu.addSubMenu(Surge::GUI::toOSCase("Default Channel For Menu-Based MIDI Learn"),
                            chanSubMenu);
+
+    bool softTakeover = Surge::Storage::getUserDefaultValue(&(this->synth->storage),
+                                                            Surge::Storage::MIDISoftTakeover, 0);
+
+    midiSubMenu.addItem(Surge::GUI::toOSCase("Soft Takeover MIDI Learned Parameters"), true,
+                        softTakeover, [this, softTakeover]() {
+                            Surge::Storage::updateUserDefaultValue(&(this->synth->storage),
+                                                                   Surge::Storage::MIDISoftTakeover,
+                                                                   !softTakeover);
+                            this->synth->midiSoftTakeover = !softTakeover;
+                        });
+
+    midiSubMenu.addSeparator();
 
     midiSubMenu.addItem(Surge::GUI::toOSCase("Save MIDI Mapping As..."), [this, where]() {
         this->scannedForMidiPresets = false; // force a rescan
@@ -1710,258 +1875,41 @@ juce::PopupMenu SurgeGUIEditor::makeMidiMenu(const juce::Point<int> &where)
     return midiSubMenu;
 }
 
-#if SURGE_HAS_OSC
-
 juce::PopupMenu SurgeGUIEditor::makeOSCMenu(const juce::Point<int> &where)
 {
     auto storage = &(synth->storage);
     auto des = &(synth->storage.getPatch().dawExtraState);
     auto oscSubMenu = juce::PopupMenu();
 
-    if (storage->oscListenerRunning || storage->oscSending)
-    {
-        oscSubMenu.addItem(Surge::GUI::toOSCase("Stop OSC Connections"), [this]() {
-            juceEditor->processor.oscHandler.stopListening();
-            juceEditor->processor.stopOSCOut();
-        });
-    }
-    else
-    {
-        oscSubMenu.addItem(Surge::GUI::toOSCase("Start OSC Connections"), [this, des]() {
-            if (des->oscPortIn > 0)
-            {
-                if (!juceEditor->processor.initOSCIn(des->oscPortIn))
-                {
-                    juceEditor->processor.initOSCError(des->oscPortIn);
-                }
-            }
-
-            if (des->oscPortOut > 0)
-            {
-                if (!juceEditor->processor.initOSCOut(des->oscPortOut, des->oscIPAddrOut))
-                {
-                    juceEditor->processor.initOSCError(des->oscPortOut, des->oscIPAddrOut);
-                }
-            }
-        });
-    }
-
-    oscSubMenu.addSeparator();
-
-    std::string iport = (storage->oscPortIn == 0) ? "not used" : std::to_string(storage->oscPortIn);
-
-    oscSubMenu.addItem(Surge::GUI::toOSCase("Change OSC Input Port (current: " + iport + ")..."),
-                       [this, storage]() {
-                           const auto c{std::to_string(storage->oscPortIn)};
-
-                           promptForMiniEdit(
-                               c, "Enter a new value:", "OSC Input Port Number",
-                               juce::Point<int>(10, 10),
-                               [this, storage](const std::string &c) {
-                                   int newPort = storage->oscPortIn;
-
-                                   try
-                                   {
-                                       newPort = std::stoi(c);
-                                   }
-                                   catch (...)
-                                   {
-                                       std::ostringstream msg;
-                                       msg << "Entered value is not a number. Please try again!";
-                                       storage->reportError(msg.str(), "Input Error");
-                                       return;
-                                   }
-
-                                   if (newPort > 65535 || newPort < 0)
-                                   {
-                                       std::ostringstream msg;
-                                       msg << "Port number must be between 0 and 65535!";
-                                       storage->reportError(msg.str(), "Port Number Out Of Range");
-                                       return;
-                                   }
-
-                                   if (newPort == 0)
-                                   {
-                                       juceEditor->processor.oscHandler.stopListening();
-                                       storage->oscPortIn = newPort;
-                                   }
-                                   else if (juceEditor->processor.changeOSCInPort(newPort))
-                                   {
-                                       storage->oscPortIn = newPort;
-                                   }
-                                   else
-                                   {
-                                       juceEditor->processor.initOSCError(newPort);
-                                   }
-                               },
-                               mainMenu);
-                       });
-
-    std::string oport =
-        (storage->oscPortOut == 0) ? "not used" : std::to_string(storage->oscPortOut);
-
-    oscSubMenu.addItem(
-        Surge::GUI::toOSCase("Change OSC Output Port (current: " + oport + ")..."),
-        [this, storage]() {
-            const auto c{std::to_string(storage->oscPortOut)};
-
-            promptForMiniEdit(
-                c, "Enter a new value:", "OSC Output Port Number", juce::Point<int>(10, 10),
-                [this, storage](const std::string &c) {
-                    int newPort = storage->oscPortOut;
-
-                    try
-                    {
-                        newPort = std::stoi(c);
-                    }
-                    catch (...)
-                    {
-                        std::ostringstream msg;
-                        msg << "Entered value is not a number. Please try again!";
-                        storage->reportError(msg.str(), "Input Error");
-                        return;
-                    }
-
-                    if (newPort > 65535 || newPort < 0)
-                    {
-                        std::ostringstream msg;
-                        msg << "Port number must be between 0 and 65535!";
-                        storage->reportError(msg.str(), "Port Number Out Of Range");
-                        return;
-                    }
-
-                    if (newPort == 0)
-                    {
-                        juceEditor->processor.stopOSCOut();
-                        storage->oscPortOut = newPort;
-                    }
-                    else if (juceEditor->processor.changeOSCOut(newPort, storage->oscOutIP))
-                    {
-                        storage->oscPortOut = newPort;
-                    }
-                    else
-                    {
-                        juceEditor->processor.initOSCError(newPort);
-                    }
-                },
-                mainMenu);
-        });
-
-    std::string oipaddr = storage->oscOutIP;
-
-    oscSubMenu.addItem(
-        Surge::GUI::toOSCase("Change OSC Output IP Address (current: " + oipaddr + ")..."),
-        [this, storage]() {
-            const auto c{storage->oscOutIP};
-
-            promptForMiniEdit(
-                c, "Enter a new value:", "OSC Output IP Address", juce::Point<int>(10, 10),
-                [this, storage](const std::string &c) {
-                    std::string newIP = c;
-
-                    // Define a regular expression pattern for an IPv4 address
-                    std::regex ipPattern(
-                        "^((25[0-5]|(2[0-4]|1[0-9]|[1-9]|)[0-9])(\\.(?!$)|$)){4}$");
-                    // Use regex_match to check if the input string matches the pattern
-                    if (!std::regex_match(newIP, ipPattern))
-                    {
-                        storage->reportError("Please enter a valid IPv4 address, which consists of "
-                                             "four numbers between 0 and 255,\n"
-                                             "separated by periods.",
-                                             "Input Error");
-                    }
-                    else if (juceEditor->processor.changeOSCOut(storage->oscPortOut, newIP))
-                    {
-                        storage->oscOutIP = newIP;
-                    }
-                    else
-                    {
-                        storage->reportError("Unable to change OSC output!", "OSC Error");
-                    }
-                },
-                mainMenu);
-        });
-
-    const int defaultOSCInPort = Surge::Storage::getUserDefaultValue(
-        storage, Surge::Storage::OSCPortIn, DEFAULT_OSC_PORT_IN);
-    const int defaultOSCOutPort = Surge::Storage::getUserDefaultValue(
-        storage, Surge::Storage::OSCPortOut, DEFAULT_OSC_PORT_OUT);
-    const std::string defaultOSCOutIP = Surge::Storage::getUserDefaultValue(
-        storage, Surge::Storage::OSCIPOut, DEFAULT_OSC_IPADDR_OUT);
-
-    int iportnum = juceEditor->processor.oscHandler.iportnum;
-    int oportnum = juceEditor->processor.oscHandler.oportnum;
-    std::string outIPAddr = juceEditor->processor.oscHandler.outIPAddr;
-
-    if (iportnum != defaultOSCInPort || oportnum != defaultOSCOutPort ||
-        outIPAddr != defaultOSCOutIP)
-    {
-        oscSubMenu.addSeparator();
-
-        oscSubMenu.addItem(
-            Surge::GUI::toOSCase("Set Current OSC Settings as Default"), [this, storage]() {
-                Surge::Storage::updateUserDefaultValue(storage, Surge::Storage::OSCPortIn,
-                                                       storage->oscPortIn);
-                Surge::Storage::updateUserDefaultValue(storage, Surge::Storage::OSCPortOut,
-                                                       storage->oscPortOut);
-                Surge::Storage::updateUserDefaultValue(storage, Surge::Storage::OSCIPOut,
-                                                       storage->oscOutIP);
-            });
-
-        oscSubMenu.addItem(
-            Surge::GUI::toOSCase("Reset OSC Settings to Default"),
-            [this, storage, defaultOSCInPort, defaultOSCOutPort, defaultOSCOutIP]() {
-                if (defaultOSCInPort > 0)
-                {
-                    if (juceEditor->processor.changeOSCInPort(defaultOSCInPort))
-                    {
-                        storage->oscPortIn = defaultOSCInPort;
-                    }
-                    else
-                    {
-                        juceEditor->processor.initOSCError(defaultOSCInPort);
-                    }
-                }
-
-                if (defaultOSCOutPort > 0)
-                {
-                    if (juceEditor->processor.changeOSCOut(defaultOSCOutPort, defaultOSCOutIP))
-                    {
-                        storage->oscPortOut = defaultOSCOutPort;
-                        storage->oscOutIP = defaultOSCOutIP;
-                    }
-                    else
-                    {
-                        juceEditor->processor.initOSCError(defaultOSCOutPort);
-                    }
-                }
-            });
-    }
-
-#if HAS_JUCE
-    oscSubMenu.addSeparator();
+    oscSubMenu.addItem(Surge::GUI::toOSCase("Show OSC Settings..."),
+                       [this]() { showOverlay(OPEN_SOUND_CONTROL_SETTINGS); });
 
     oscSubMenu.addItem(Surge::GUI::toOSCase("Show OSC Specification..."), [this]() {
-        auto oscSpec = std::string(SurgeSharedBinary::oscspecification_html,
-                                   SurgeSharedBinary::oscspecification_htmlSize) +
-                       "\n";
-        showHTML(oscSpec);
+        if (auto oscSpecRes = Surge::Storage::getSurgeCommonBinaryResource("oscspecification.html"))
+        {
+            auto oscSpec = std::string(oscSpecRes->data(), oscSpecRes->size()) + "\n";
+            showHTML(oscSpec);
+        }
     });
-#endif
+
+    oscSubMenu.addSeparator();
+
+    oscSubMenu.addItem(Surge::GUI::toOSCase("Download TouchOSC Template..."), []() {
+        juce::URL(fmt::format("{}touchosc", stringWebsite)).launchInDefaultBrowser();
+    });
 
     return oscSubMenu;
 }
-
-#endif
 
 juce::PopupMenu SurgeGUIEditor::makeDevMenu(const juce::Point<int> &where)
 {
     auto devSubMenu = juce::PopupMenu();
 
 #if WINDOWS
-    Surge::GUI::addMenuWithShortcut(devSubMenu, Surge::GUI::toOSCase("Show Debug Console..."),
-                                    showShortcutDescription("Alt + D", u8"\U00002325D"),
-                                    []() { Surge::Debug::toggleConsole(); });
+    Surge::GUI::addMenuItemWithShortcut(
+        devSubMenu, Surge::GUI::toOSCase("Show Debug Console..."),
+        getShortcutDescription(Surge::GUI::KeyboardActions::TOGGLE_DEBUG_CONSOLE),
+        []() { Surge::Debug::toggleConsole(); });
 #endif
 
     devSubMenu.addItem(Surge::GUI::toOSCase("Use Focus Debugger"), true, debugFocus, [this]() {
@@ -1972,6 +1920,28 @@ juce::PopupMenu SurgeGUIEditor::makeDevMenu(const juce::Point<int> &where)
 
     devSubMenu.addItem(Surge::GUI::toOSCase("Dump Undo/Redo Stack to stdout"), true, false,
                        [this]() { undoManager()->dumpStack(); });
+
+#if SURGE_INCLUDE_MELATONIN_INSPECTOR
+    if (melatoninInspector)
+    {
+        devSubMenu.addItem("Close Melatonin Inspector", [this]() {
+            if (melatoninInspector)
+            {
+                melatoninInspector->setVisible(false);
+                melatoninInspector.reset();
+            }
+        });
+    }
+    else
+    {
+        devSubMenu.addItem("Launch Melatonin Inspector", [this] {
+            melatoninInspector = std::make_unique<melatonin::Inspector>(*frame);
+            melatoninInspector->onClose = [this]() { melatoninInspector.reset(); };
+
+            melatoninInspector->setVisible(true);
+        });
+    }
+#endif
 
 #ifdef INSTRUMENT_UI
     devSubMenu.addItem(Surge::GUI::toOSCase("Show UI Instrumentation..."),
@@ -2051,10 +2021,8 @@ void SurgeGUIEditor::showSettingsMenu(const juce::Point<int> &where,
     auto midiSubMenu = makeMidiMenu(where);
     settingsMenu.addSubMenu(Surge::GUI::toOSCase("MIDI Settings"), midiSubMenu);
 
-#if SURGE_HAS_OSC
     auto oscSubMenu = makeOSCMenu(where);
     settingsMenu.addSubMenu(Surge::GUI::toOSCase("OSC Settings"), oscSubMenu);
-#endif
 
     auto tuningSubMenu = makeTuningMenu(where, false);
     settingsMenu.addSubMenu("Tuning", tuningSubMenu);
@@ -2092,18 +2060,59 @@ void SurgeGUIEditor::showSettingsMenu(const juce::Point<int> &where,
         juce::URL(fmt::format("{}skin-library", stringWebsite)).launchInDefaultBrowser();
     });
 
-    Surge::GUI::addMenuWithShortcut(settingsMenu, Surge::GUI::toOSCase("Surge XT Manual..."),
-                                    showShortcutDescription("F1"),
-                                    []() { juce::URL(stringManual).launchInDefaultBrowser(); });
+    Surge::GUI::addMenuItemWithShortcut(
+        settingsMenu, Surge::GUI::toOSCase("Surge XT Manual..."),
+        getShortcutDescription(Surge::GUI::KeyboardActions::OPEN_MANUAL),
+        []() { juce::URL(stringManual).launchInDefaultBrowser(); });
 
     settingsMenu.addItem(Surge::GUI::toOSCase("Surge XT Website..."),
                          []() { juce::URL(stringWebsite).launchInDefaultBrowser(); });
 
     settingsMenu.addSeparator();
 
-    Surge::GUI::addMenuWithShortcut(settingsMenu, "About Surge XT", showShortcutDescription("F12"),
-                                    [this]() { this->showAboutScreen(); });
+    Surge::GUI::addMenuItemWithShortcut(
+        settingsMenu, "About Surge XT",
+        getShortcutDescription(Surge::GUI::KeyboardActions::TOGGLE_ABOUT),
+        [this]() { this->showAboutScreen(); });
 
     settingsMenu.showMenuAsync(popupMenuOptions(where),
                                Surge::GUI::makeEndHoverCallback(launchFrom));
+}
+
+/* MISC */
+
+void SurgeGUIEditor::loadModulatorPresetFrom(const fs::path &path, int scene, int lfoId)
+{
+    forceLfoDisplayRepaint();
+
+    // clear formula state for target slot, same as menu path
+    synth->storage.getPatch().dawExtraState.editor.clearFormulaStateInScene(scene, lfoId);
+
+    undoManager()->pushFullLFO(scene, lfoId);
+    synth->storage.modulatorPreset->loadPresetFrom(path, &synth->storage, scene, lfoId);
+
+    auto newshape = synth->storage.getPatch().scene[scene].lfo[lfoId].shape.val.i;
+
+    if (newshape == lt_formula)
+    {
+        Surge::Formula::requestSharedDataWipe(&(synth->storage));
+    }
+
+    if (auto ol = getOverlayIfOpenAs<Surge::Overlays::MSEGEditor>(MSEG_EDITOR))
+    {
+        if (newshape == lt_mseg)
+            ol->forceRefresh();
+        else
+            closeOverlay(MSEG_EDITOR);
+    }
+
+    if (auto ol = getOverlayIfOpenAs<Surge::Overlays::FormulaModulatorEditor>(FORMULA_EDITOR))
+    {
+        if (newshape == lt_formula)
+            ol->forceRefresh();
+        else
+            closeOverlay(FORMULA_EDITOR);
+    }
+
+    synth->refresh_editor = true;
 }

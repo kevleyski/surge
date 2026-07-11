@@ -4,7 +4,7 @@
  *
  * Learn more at https://surge-synthesizer.github.io/
  *
- * Copyright 2018-2023, various authors, as described in the GitHub
+ * Copyright 2018-2024, various authors, as described in the GitHub
  * transaction log.
  *
  * Surge XT is released under the GNU General Public Licence v3
@@ -96,10 +96,12 @@ enum ctrltypes
     ct_freq_mod,
     ct_freq_hpf,
     ct_freq_shift,
+    ct_freq_fm2_offset,
     ct_freq_vocoder_low,
     ct_freq_vocoder_high,
     ct_bandwidth,
     ct_envtime,
+    ct_envtime_deformable,
     ct_envtime_deactivatable,
     ct_envtime_lfodecay,
     ct_envshape,
@@ -147,8 +149,9 @@ enum ctrltypes
     ct_sineoscmode,
     ct_ringmod_sineoscmode,
     ct_sinefmlegacy,
-    ct_countedset_percent,            // what % through a counted set are we
-    ct_countedset_percent_extendable, // what % through a counted set are we
+    ct_countedset_percent,                     // what % through a counted set are we
+    ct_countedset_percent_extendable,          // what % through a counted set are we
+    ct_countedset_percent_extendable_wtdeform, // what % through a counted set are we
     ct_vocoder_bandcount,
     ct_distortion_waveshape,
     ct_flangerpitch,
@@ -210,6 +213,10 @@ enum ctrltypes
     ct_bonsai_sat_filter,
     ct_bonsai_sat_mode,
     ct_bonsai_noise_mode,
+    ct_floaty_warp_time,
+    ct_floaty_delay_time,
+    ct_floaty_delay_playrate,
+    ct_convolution_delay,
 
     num_ctrltypes,
 };
@@ -229,6 +236,14 @@ enum ControlGroup
     cg_LFO = 6,
     cg_FX = 7,
     endCG
+};
+
+enum SoftTakeoverStatus
+{
+    sts_waiting_for_first_look,
+    sts_waiting_below,
+    sts_waiting_above,
+    sts_locked
 };
 
 const char ControlGroupDisplay[endCG][32] = {"Global",  "",          "Oscillators", "Mixer",
@@ -512,21 +527,14 @@ class Parameter
     int ctrlstyle = cs_off;
     int midictrl{};
     int midichan{};
+    SoftTakeoverStatus miditakeover_status{sts_waiting_for_first_look};
+
     int param_id_in_scene{};
     bool affect_other_parameters{};
     float moverate{};
     bool per_voice_processing{};
     // remember these need to be stashed specially in undo
-    bool temposync{}, absolute{}, deactivated{};
-
-#define DEBUG_WRITABLE_EXTEND_RANGE 0
-#if DEBUG_WRITABLE_EXTEND_RANGE
-    bool extend_range_internal{};
-    const bool &extend_range = extend_range_internal;
-#else
-    bool extend_range{};
-#endif
-
+    bool temposync{}, absolute{}, deactivated{}, extend_range{};
     bool porta_constrate{}, porta_gliss{}, porta_retrigger{};
     int porta_curve{};
     int deform_type{};
@@ -549,9 +557,10 @@ class Parameter
         kHasCustomMaxValue = 1U << 4U,
         kUnitsAreSemitonesOrKeys = 1U << 5U,
         kScaleBasedOnIsBiPolar = 1U << 6U,
-        kAllowsTuningFractionTypein = 1U << 7U,
+        kAllowsTuningFractionTypein = 1U << 7U, // disallows kAllowsLinearFractionTypein
         kAllowsModulationsInNotesAndCents = 1U << 8U,
         kSwitchesFromSecToMillisec = 1U << 9U,
+        kAllowsLinearFractionTypein = 1U << 10U, // disallows kAllowsTuningFractionTypein
     };
 
 #define DISPLAYINFO_TXT_SIZE 128

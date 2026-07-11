@@ -4,7 +4,7 @@
  *
  * Learn more at https://surge-synthesizer.github.io/
  *
- * Copyright 2018-2023, various authors, as described in the GitHub
+ * Copyright 2018-2024, various authors, as described in the GitHub
  * transaction log.
  *
  * Surge XT is released under the GNU General Public Licence v3
@@ -40,12 +40,27 @@ bool getLineIntersection(float p0_x, float p0_y, float p1_x, float p1_y, float p
 void constrainPointOnLineWithinRectangle(const juce::Rectangle<float> rect,
                                          const juce::Line<float> l, juce::Point<float> &p);
 
-void openFileOrFolder(const std::string &f);
-inline void openFileOrFolder(const fs::path &f) { openFileOrFolder(path_to_string(f)); }
+bool openFileOrFolder(const std::string &f);
+inline bool openFileOrFolder(const fs::path &f) { return openFileOrFolder(path_to_string(f)); }
 
 // Are we standalone exe vs a plugin (clap, vst, au, etc...)
 void setIsStandalone(bool);
 bool getIsStandalone();
+
+// Some hosts (Logic Pro, GarageBand) do not support cursor hiding
+void setHostRequiresShowCursor(bool);
+bool getHostRequiresShowCursor();
+
+// User preference (NeverMoveKeyboardFocus): when true Surge never actively
+// grabs keyboard focus, so hosts/workflows that find focus stealing disruptive
+// keep their keyboard focus. Off by default. Mirrored here from the user
+// default by SurgeGUIEditor so deep widget code can honor it without a storage.
+void setNeverMoveKeyboardFocus(bool);
+bool getNeverMoveKeyboardFocus();
+
+// Grabs keyboard focus on c unless the user asked us to never move focus. Call
+// this instead of juce::Component::grabKeyboardFocus() everywhere in the GUI.
+void grabKeyboardFocusIfAllowed(juce::Component *c);
 
 } // namespace GUI
 } // namespace Surge

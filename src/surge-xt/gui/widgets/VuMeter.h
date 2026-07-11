@@ -4,7 +4,7 @@
  *
  * Learn more at https://surge-synthesizer.github.io/
  *
- * Copyright 2018-2023, various authors, as described in the GitHub
+ * Copyright 2018-2024, various authors, as described in the GitHub
  * transaction log.
  *
  * Surge XT is released under the GNU General Public Licence v3
@@ -59,7 +59,9 @@ struct VuMeter : public juce::Component,
 
     void paint(juce::Graphics &g) override;
 
+    void mouseUp(const juce::MouseEvent &event) override;
     void mouseDown(const juce::MouseEvent &event) override;
+    void mouseMove(const juce::MouseEvent &event) override;
 
     bool isAudioActive{true};
     void setIsAudioActive(bool isIn)

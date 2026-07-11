@@ -4,7 +4,7 @@
  *
  * Learn more at https://surge-synthesizer.github.io/
  *
- * Copyright 2018-2023, various authors, as described in the GitHub
+ * Copyright 2018-2024, various authors, as described in the GitHub
  * transaction log.
  *
  * Surge XT is released under the GNU General Public Licence v3
@@ -115,7 +115,6 @@ inline std::unordered_set<int> allowedImageIds()
     allowed.insert(134);
     allowed.insert(136);
     allowed.insert(137);
-    allowed.insert(140);
     allowed.insert(140);
     allowed.insert(143);
     allowed.insert(144);

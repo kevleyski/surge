@@ -4,7 +4,7 @@
  *
  * Learn more at https://surge-synthesizer.github.io/
  *
- * Copyright 2018-2023, various authors, as described in the GitHub
+ * Copyright 2018-2024, various authors, as described in the GitHub
  * transaction log.
  *
  * Surge XT is released under the GNU General Public Licence v3
@@ -42,6 +42,7 @@ struct KeyBindingsOverlay : public OverlayComponent, public Surge::GUI::SkinCons
 
     SurgeStorage *storage{nullptr};
     SurgeGUIEditor *editor{nullptr};
+
     KeyBindingsOverlay(SurgeStorage *storage, SurgeGUIEditor *editor);
     ~KeyBindingsOverlay();
 
@@ -56,11 +57,14 @@ struct KeyBindingsOverlay : public OverlayComponent, public Surge::GUI::SkinCons
 
     bool isLearning{false};
     int learnAction{0};
+
     bool keyPressed(const juce::KeyPress &key) override;
 
     std::unique_ptr<Surge::Widgets::SelfDrawButton> okS, cancelS, resetAll, vkbLayout;
     std::unique_ptr<KeyBindingsListBoxModel> bindingListBoxModel;
     std::unique_ptr<juce::ListBox> bindingList;
+
+    juce::Component::SafePointer<juce::Component> focusedLearnComponent;
 };
 } // namespace Overlays
 } // namespace Surge

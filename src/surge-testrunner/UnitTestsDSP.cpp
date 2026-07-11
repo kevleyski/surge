@@ -4,7 +4,7 @@
  *
  * Learn more at https://surge-synthesizer.github.io/
  *
- * Copyright 2018-2023, various authors, as described in the GitHub
+ * Copyright 2018-2024, various authors, as described in the GitHub
  * transaction log.
  *
  * Surge XT is released under the GNU General Public Licence v3
@@ -19,6 +19,7 @@
  * All source for Surge XT is available at
  * https://github.com/surge-synthesizer/surge
  */
+
 #include <iostream>
 #include <algorithm>
 
@@ -29,13 +30,12 @@
 
 #include "UnitTestUtilities.h"
 
-#include "samplerate.h"
-
 #include "SSEComplex.h"
 #include <complex>
 #include "sst/basic-blocks/mechanics/simd-ops.h"
 
 #include "sst/plugininfra/cpufeatures.h"
+#include "dsp/effects/chowdsp/shared/chowdsp_DelayLine.h"
 
 using namespace Surge::Test;
 
@@ -241,7 +241,7 @@ TEST_CASE("Unison at Different Sample Rates", "[osc]")
         }
     };
 
-    std::vector<int> srs = {{44100, 48000}};
+    static constexpr std::initializer_list<int> srs{44100, 48000};
 
     SECTION("Wavetable Oscillator")
     {
@@ -339,76 +339,6 @@ TEST_CASE("All Patches Have Bounded Output", "[dsp]")
     };
 
     // Surge::Headless::playOnNRandomPatches(surge, scale, 100, callBack);
-}
-
-TEST_CASE("libsamplerate Basics", "[dsp]")
-{
-    for (auto tsr : {44100, 48000}) // { 44100, 48000, 88200, 96000, 192000 })
-    {
-        for (auto ssr : {44100, 48000, 88200})
-        {
-            DYNAMIC_SECTION("libsamplerate from " << ssr << " to " << tsr)
-            {
-                int error;
-                auto state = src_new(SRC_SINC_FASTEST, 1, &error);
-                REQUIRE(state);
-                REQUIRE(error == 0);
-
-                static constexpr int buffer_size = 1024 * 100;
-                static constexpr int output_block = 64;
-
-                float input_data[buffer_size];
-                float copied_output[buffer_size];
-
-                int cwp = 0, irp = 0;
-                float output_data[output_block];
-
-                float dPhase = 440.0 / ssr * 2.0 * M_PI;
-                float phase = 0;
-                for (int i = 0; i < buffer_size; ++i)
-                {
-                    input_data[i] = std::sin(phase);
-                    phase += dPhase;
-                    if (phase >= 2.0 * M_PI)
-                        phase -= 2.0 * M_PI;
-                }
-
-                SRC_DATA sdata;
-                sdata.end_of_input = 0;
-                while (irp + output_block < buffer_size && cwp + output_block < buffer_size)
-                {
-                    sdata.data_in = &(input_data[irp]);
-                    sdata.data_out = output_data;
-                    sdata.input_frames = 64;
-                    sdata.output_frames = 64;
-                    sdata.src_ratio = 1.0 * tsr / ssr;
-
-                    auto res = src_process(state, &sdata);
-                    memcpy((void *)(copied_output + cwp), (void *)output_data,
-                           sdata.output_frames_gen * sizeof(float));
-                    irp += sdata.input_frames_used;
-                    cwp += sdata.output_frames_gen;
-                    REQUIRE(res == 0);
-                    REQUIRE(sdata.input_frames_used + sdata.output_frames_gen > 0);
-                }
-
-                state = src_delete(state);
-                REQUIRE(!state);
-
-                // At this point the output block should be a 440hz sine wave at the target rate
-                dPhase = 440.0 / tsr * 2.0 * M_PI;
-                phase = 0;
-                for (int i = 0; i < cwp; ++i)
-                {
-                    auto cw = std::sin(phase);
-                    REQUIRE(copied_output[i] == Approx(cw).margin(1e-2));
-                    phase += dPhase;
-                    if (phase >= 2.0 * M_PI)
-                        phase -= 2.0 * M_PI;
-                }
-            }
-        }
-    }
 }
 
 TEST_CASE("Every Oscillator Plays", "[dsp]")
@@ -511,7 +441,7 @@ TEST_CASE("SSE std::complex", "[dsp]")
             sum += qtr.atIndex(i).real();
 
         float sumSSE alignas(16)[4];
-        _mm_store1_ps(sumSSE, sst::basic_blocks::mechanics::sum_ps_to_ss(qtr.real()));
+        SIMD_MM(store1_ps)(sumSSE, sst::basic_blocks::mechanics::sum_ps_to_ss(qtr.real()));
         REQUIRE(sum == Approx(sumSSE[0]).margin(1e-5));
 
         float angles alignas(16)[4];
@@ -519,7 +449,7 @@ TEST_CASE("SSE std::complex", "[dsp]")
         angles[1] = M_PI / 2;
         angles[2] = 3 * M_PI / 4;
         angles[3] = M_PI;
-        auto asse = _mm_load_ps(angles);
+        auto asse = SIMD_MM(load_ps)(angles);
         auto c = SSEComplex::fastExp(asse);
 
         auto c0 = c.atIndex(0);
@@ -622,7 +552,7 @@ TEST_CASE("Wavehaper Lookup Table", "[dsp]")
         auto shafted_tanh = [](double x) { return (exp(x) - exp(-x * 1.2)) / (exp(x) + exp(-x)); };
         sst::waveshapers::QuadWaveshaperState qss{};
         for (int i = 0; i < sst::waveshapers::n_waveshaper_registers; ++i)
-            qss.R[i] = _mm_setzero_ps();
+            qss.R[i] = SIMD_MM(setzero_ps)();
 
         /*
          * asym:
@@ -635,13 +565,13 @@ TEST_CASE("Wavehaper Lookup Table", "[dsp]")
          */
         for (float x = -8; x < 8; x += 0.07)
         {
-            auto d = _mm_set1_ps(1.0);
+            auto d = SIMD_MM(set1_ps)(1.0);
             float out alignas(16)[4], inv alignas(16)[4];
-            auto in = _mm_set_ps(x, x + 0.01, x + 0.03, x + 0.05);
-            _mm_store_ps(inv, in);
+            auto in = SIMD_MM(set_ps)(x, x + 0.01, x + 0.03, x + 0.05);
+            SIMD_MM(store_ps)(inv, in);
 
             auto r = wst(&qss, in, d);
-            _mm_store_ps(out, r);
+            SIMD_MM(store_ps)(out, r);
 
             // sinus has functional form sin((i-512) * PI/512)
             // or i = 256 x + 512
@@ -768,5 +698,81 @@ TEST_CASE("Reverb1 White Noise Blast", "[dsp]")
             REQUIRE(std::fabs(surge->output[1][s]) < 1e-6);
         }
         since++;
+    }
+}
+
+TEST_CASE("Oscillator Onset", "[dsp]") // See issue 7570
+{
+    for (const auto &rt : {true, false})
+    {
+        for (const auto &ot :
+             {ot_classic, ot_wavetable, ot_window, ot_sine, ot_twist, ot_shnoise, ot_FM2, ot_FM3})
+        {
+            auto surge = Surge::Headless::createSurge(44100, ot == ot_wavetable || ot == ot_window);
+            auto storage = &surge->storage;
+
+            auto oscstorage = &(storage->getPatch().scene[0].osc[0]);
+
+            unsigned char oscbuffer alignas(16)[oscillator_buffer_size];
+
+            oscstorage->retrigger.val.b = rt;
+
+            auto o = spawn_osc(ot, storage, oscstorage, storage->getPatch().scenedata[0],
+                               storage->getPatch().scenedataOrig[0], oscbuffer);
+            o->init_ctrltypes();
+            o->init_default_values();
+            o->init_extra_config();
+
+            o->init(60);
+
+            int itUntilBigger{0};
+            bool continueChecking{true};
+
+            for (int j = 0; j < 10 && continueChecking; ++j)
+            {
+                o->process_block(60, 0, true, false, 0);
+                for (int i = 0; i < BLOCK_SIZE_OS && continueChecking; ++i)
+                {
+                    itUntilBigger++;
+                    if (std::fabs(o->output[i]) > 1e-6)
+                    {
+                        continueChecking = false;
+                        break;
+                    }
+                }
+            }
+            o->~Oscillator();
+            /*std::cout << "Onset Delay for " << osc_type_names[ot] << " with retrig=" << rt << " is
+               "
+                      << (continueChecking ? "Unknown" : std::to_string(itUntilBigger))
+                      << std::endl;*/
+        }
+    }
+}
+
+TEST_CASE("Chow DSP Delay", "[dsp]")
+{
+    chowdsp::DelayLine<float> floatDelay(1024);
+    floatDelay.prepare({48000, 16, 2});
+    floatDelay.setDelay(128);
+    for (int i = 0; i < 1024; ++i)
+    {
+        auto dL = floatDelay.popSample(0);
+        auto dR = floatDelay.popSample(1);
+        floatDelay.pushSample(0, i / 1024.);
+        floatDelay.pushSample(1, 1 - i / 1024.);
+        if (i >= 128)
+        {
+            INFO("I = " << i);
+            auto ni = i - 128;
+            REQUIRE(dL == ni / 1024.);
+            REQUIRE(dR == 1 - ni / 1024.);
+        }
+        else
+        {
+            INFO("i = " << i);
+            REQUIRE(dL == 0.f);
+            REQUIRE(dR == 0.f);
+        }
     }
 }

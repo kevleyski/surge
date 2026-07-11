@@ -4,7 +4,7 @@
  *
  * Learn more at https://surge-synthesizer.github.io/
  *
- * Copyright 2018-2023, various authors, as described in the GitHub
+ * Copyright 2018-2024, various authors, as described in the GitHub
  * transaction log.
  *
  * Surge XT is released under the GNU General Public Licence v3
@@ -114,6 +114,10 @@ struct UndoManagerImpl
         std::shared_ptr<Wavetable> wt;
 
         std::string displayName;
+
+        std::string wavetable_script = "";
+        int wavetable_script_res_base = 5, // 32 * 2^this
+            wavetable_script_nframes = 10;
     };
     struct UndoOscillatorExtraConfig
     {
@@ -127,6 +131,25 @@ struct UndoManagerImpl
         int type;
         std::vector<UndoParam> undoParamValues;
         std::vector<UndoModulation> undoModulations;
+        std::unordered_map<std::string, std::shared_ptr<std::vector<std::uint8_t>>> user_data;
+        std::size_t estimateUserDataSize() const
+        {
+            std::size_t total = 0;
+            // Originally we tried to estimate the size of the data table, but
+            // then we started to use reference counting on it and it became
+            // bogus for the purposes of pushing/popping on the undo stack and
+            // tracking memory that way. Instead since it's reference counted
+            // now, we just don't include the data itself since it will
+            // eventually be inconsistent and mess up that push/pop size number.
+            // This means more memory can get used by the undo stack if the data
+            // goes away elsewhere, but so be it.
+            for (const auto &[key, ptr] : user_data)
+            {
+                total += key.size() + sizeof(std::string);
+                total += sizeof(ptr);
+            }
+            return total;
+        }
     };
     struct UndoStep
     {
@@ -209,6 +232,10 @@ struct UndoManagerImpl
         if (auto pt = std::get_if<UndoPatch>(&a))
         {
             res += pt->dataSz;
+        }
+        if (auto pt = std::get_if<UndoFX>(&a))
+        {
+            res += pt->estimateUserDataSize();
         }
         return res;
     }
@@ -420,15 +447,15 @@ struct UndoManagerImpl
         while (undoStackMem > maxUndoStackMem)
         {
             auto r = undoStack.front();
-            freeAction(r.action);
             undoStackMem -= actionSize(r.action);
+            freeAction(r.action);
             undoStack.pop_front();
         }
         while (redoStackMem > maxRedoStackMem)
         {
             auto r = redoStack.front();
-            freeAction(r.action);
             redoStackMem -= actionSize(r.action);
+            freeAction(r.action);
             redoStack.pop_front();
         }
     }
@@ -453,14 +480,21 @@ struct UndoManagerImpl
 
         r.val = val;
 
-        if (p->ctrltype == vt_float)
+        if (p->valtype == vt_float)
         {
             txt = p->get_display(true, val.f);
         }
-        else if (p->ctrltype == vt_int)
+        else if (p->valtype == vt_int)
         {
-            txt = p->get_display(true,
-                                 Parameter::intScaledToFloat(val.i, p->val_max.i, p->val_min.i));
+            if (p->ctrltype == ct_none)
+            {
+                txt = "-";
+            }
+            else
+            {
+                txt = p->get_display(
+                    true, Parameter::intScaledToFloat(val.i, p->val_max.i, p->val_min.i));
+            }
         }
         else
         {
@@ -579,10 +613,23 @@ struct UndoManagerImpl
         r.current_id = os->wt.current_id;
 
         r.wt = nullptr;
-        if (r.current_id < 0)
+        bool isWTS = false;
+
+        if (r.current_id >= 0)
+        {
+            isWTS = synth->storage.wt_list[r.current_id].path.extension() == ".wtscript";
+        }
+
+        if (r.current_id < 0 || isWTS)
         {
             r.wt = std::make_shared<Wavetable>();
             r.wt->Copy(&(os->wt));
+            if (!os->wavetable_script.empty())
+            {
+                r.wavetable_script = os->wavetable_script;
+                r.wavetable_script_res_base = os->wavetable_script_res_base;
+                r.wavetable_script_nframes = os->wavetable_script_nframes;
+            }
         }
 
         r.scene = scene;
@@ -616,6 +663,7 @@ struct UndoManagerImpl
         auto r = UndoFX();
         r.fxslot = fxslot;
         r.type = fx->type.val.i;
+        r.user_data = fx->user_data;
 
         for (int i = 0; i < n_fx_params; ++i)
         {
@@ -911,7 +959,14 @@ struct UndoManagerImpl
             {
                 os->wavetable_display_name = p->displayName;
             }
+
+            bool isWTS = false;
             if (p->current_id >= 0)
+            {
+                isWTS = synth->storage.wt_list[p->current_id].path.extension() == ".wtscript";
+            }
+
+            if (p->current_id >= 0 && !isWTS)
             {
                 os->wt.queue_id = p->current_id;
             }
@@ -919,6 +974,11 @@ struct UndoManagerImpl
             {
                 os->wt.Copy(p->wt.get());
                 synth->refresh_editor = true;
+
+                os->wavetable_script = p->wavetable_script;
+                os->wavetable_script_res_base = p->wavetable_script_res_base;
+                os->wavetable_script_nframes = p->wavetable_script_nframes;
+                os->wt.refresh_script_editor = true;
             }
             else
             {
@@ -980,6 +1040,7 @@ struct UndoManagerImpl
             int cge = p->fxslot;
 
             synth->fxsync[cge].type.val.i = p->type;
+            synth->fxsync[cge].user_data = p->user_data;
             Effect *t_fx = spawn_effect(synth->fxsync[cge].type.val.i, &synth->storage,
                                         &synth->fxsync[cge], 0);
             if (t_fx)

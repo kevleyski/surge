@@ -4,7 +4,7 @@
  *
  * Learn more at https://surge-synthesizer.github.io/
  *
- * Copyright 2018-2023, various authors, as described in the GitHub
+ * Copyright 2018-2024, various authors, as described in the GitHub
  * transaction log.
  *
  * Surge XT is released under the GNU General Public Licence v3
@@ -25,13 +25,16 @@
 
 #include "SurgeFXProcessor.h"
 #include "SurgeLookAndFeel.h"
+#include "FxPresetAndClipboardManager.h"
 
 #include "juce_gui_basics/juce_gui_basics.h"
 
 //==============================================================================
 /**
  */
-class SurgefxAudioProcessorEditor : public juce::AudioProcessorEditor, juce::AsyncUpdater
+class SurgefxAudioProcessorEditor : public juce::AudioProcessorEditor,
+                                    juce::AsyncUpdater,
+                                    SurgeStorage::ErrorListener
 {
   public:
     SurgefxAudioProcessorEditor(SurgefxAudioProcessor &);
@@ -50,16 +53,28 @@ class SurgefxAudioProcessorEditor : public juce::AudioProcessorEditor, juce::Asy
     };
     std::vector<FxMenu> menu;
     std::unique_ptr<juce::Component> picker;
+    std::unique_ptr<juce::Component> presetPicker;
 
     static constexpr int topSection = 80;
 
     void makeMenu();
     void showMenu();
     void toggleLatencyMode();
+    void changeOSCInputPort();
+
+    void showPresetMenu();
+    void stepPreset(int direction); // -1 = prev, +1 = next
+    void loadCurrentPreset();
+    void rebuildCurrentPresets();
 
     //==============================================================================
     void paint(juce::Graphics &) override;
     void resized() override;
+    void parentHierarchyChanged() override;
+    void mouseDown(const juce::MouseEvent &) override;
+    void mouseUp(const juce::MouseEvent &) override;
+
+    float getImpliedZoom() const { return getWidth() * 1.0 / baseWidth; }
 
     /**
      * findLargestFittingZoomBetween
@@ -92,7 +107,21 @@ class SurgefxAudioProcessorEditor : public juce::AudioProcessorEditor, juce::Asy
     // access the processor object that created it.
     SurgefxAudioProcessor &processor;
 
+    void promptForTypeinValue(const std::string &prompt, const std::string &initValue,
+                              std::function<void(const std::string &)> cb);
+    struct PromptOverlay;
+    std::unique_ptr<PromptOverlay> promptOverlay;
+
+    void onSurgeError(const std::string &msg, const std::string &title,
+                      const SurgeStorage::ErrorType &errorType) override;
+
     static constexpr int baseWidth = 600, baseHeight = 55 * 6 + 80 + topSection;
+
+    std::vector<Surge::Storage::FxUserPreset::Preset> currentPresets;
+    int currentPresetIndex{-1};
+    int lastSeenEffectType{-1};
+
+    int defaultPresetIndexForCurrentType() const { return currentPresets.empty() ? -1 : 0; }
 
   private:
     struct AccSlider : public juce::Slider
@@ -148,18 +177,26 @@ class SurgefxAudioProcessorEditor : public juce::AudioProcessorEditor, juce::Asy
             return false;
         }
     };
+
     AccSlider fxParamSliders[n_fx_params];
     SurgeFXParamDisplay fxParamDisplay[n_fx_params];
-    SurgeTempoSyncSwitch fxTempoSync[n_fx_params];
-    SurgeTempoSyncSwitch fxDeactivated[n_fx_params];
-    SurgeTempoSyncSwitch fxExtended[n_fx_params];
-    SurgeTempoSyncSwitch fxAbsoluted[n_fx_params];
+    SurgeParamOptionSwitch fxTempoSync[n_fx_params];
+    SurgeParamOptionSwitch fxDeactivated[n_fx_params];
+    SurgeParamOptionSwitch fxExtended[n_fx_params];
+    SurgeParamOptionSwitch fxAbsoluted[n_fx_params];
+
+    int rubberbandParamIdx{-1};
+    float rubberbandValue{0.f};
+    bool rubberbandMode{false};
 
     void blastToggleState(int i);
     void resetLabels();
 
+    juce::PopupMenu makeOSCMenu();
+
     std::unique_ptr<SurgeLookAndFeel> surgeLookFeel;
     std::unique_ptr<juce::Label> fxNameLabel;
+    std::unique_ptr<Surge::Storage::FxUserPreset> fxPresetManager;
 
     void addAndMakeVisibleRecordOrder(juce::Component *c)
     {

@@ -4,7 +4,7 @@
  *
  * Learn more at https://surge-synthesizer.github.io/
  *
- * Copyright 2018-2023, various authors, as described in the GitHub
+ * Copyright 2018-2024, various authors, as described in the GitHub
  * transaction log.
  *
  * Surge XT is released under the GNU General Public Licence v3
@@ -24,6 +24,7 @@
 #include "SurgeGUIEditor.h"
 #include "SurgeGUICallbackInterfaces.h"
 #include "AccessibleHelpers.h"
+#include "CurrentFxDisplay.h"
 #include "MultiSwitch.h"
 #include "SurgeGUIEditorTags.h"
 #include <version.h>
@@ -71,7 +72,12 @@ void MainFrame::mouseDown(const juce::MouseEvent &event)
 
     editor->hideTypeinParamEditor();
 
+#if JUCE_VERSION >= 0x080009
+    if (event.mods.isMiddleButtonDown() || event.mods.isBackButtonDown() ||
+        event.mods.isForwardButtonDown())
+#else
     if (event.mods.isMiddleButtonDown())
+#endif
     {
         editor->toggle_mod_editing();
     }
@@ -126,8 +132,6 @@ juce::Component *MainFrame::getControlGroupLayer(ControlGroup cg)
     if (!cgOverlays[cg])
     {
         auto ol = std::make_unique<OverlayComponent>();
-        ol->setBounds(getLocalBounds());
-        ol->setInterceptsMouseClicks(false, true);
         auto t = "Group " + std::to_string((int)cg);
         switch (cg)
         {
@@ -151,11 +155,15 @@ juce::Component *MainFrame::getControlGroupLayer(ControlGroup cg)
             break;
         case cg_FX:
             t = "FX Controls";
+            // Special case: we have an overlay component just for this.
+            ol = std::make_unique<CurrentFxDisplay>(editor);
             break;
         default:
             t = "Unknown Controls";
             break;
         }
+        ol->setBounds(getLocalBounds());
+        ol->setInterceptsMouseClicks(false, true);
         ol->setDescription(t);
         ol->setTitle(t);
         ol->getProperties().set("ControlGroup", (int)cg + 1000);

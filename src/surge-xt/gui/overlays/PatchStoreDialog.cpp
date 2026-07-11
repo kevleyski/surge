@@ -4,7 +4,7 @@
  *
  * Learn more at https://surge-synthesizer.github.io/
  *
- * Copyright 2018-2023, various authors, as described in the GitHub
+ * Copyright 2018-2024, various authors, as described in the GitHub
  * transaction log.
  *
  * Surge XT is released under the GNU General Public Licence v3
@@ -27,6 +27,7 @@
 #include "widgets/TypeAheadTextEditor.h"
 #include "widgets/SurgeTextButton.h"
 #include "AccessibleHelpers.h"
+#include "juce/JuceAPICope.h"
 
 namespace Surge
 {
@@ -106,7 +107,7 @@ struct PatchStoreDialogCategoryProvider : public Surge::Widgets::TypeAheadDataPr
         return res;
     }
 
-    juce::Font font{12};
+    juce::Font font{SST_JUCE_FONT_OPTIONS(12)};
     juce::Colour hl, hlbg, txt, bg;
 
     void paintDataItem(int searchIndex, juce::Graphics &g, int width, int height,
@@ -145,6 +146,7 @@ PatchStoreDialog::PatchStoreDialog()
         auto ed = std::make_unique<juce::TextEditor>(n);
         ed->setJustification(juce::Justification::centredLeft);
         ed->setWantsKeyboardFocus(true);
+        ed->addListener(this);
         Surge::Widgets::fixupJuceTextEditorAccessibility(*ed);
         ed->setTitle(n);
         addAndMakeVisible(*ed);
@@ -170,6 +172,7 @@ PatchStoreDialog::PatchStoreDialog()
 
     ta->setJustification(juce::Justification::centredLeft);
     ta->setSelectAllWhenFocused(true);
+    ta->addListener(this);
     ta->setToElementZeroOnReturn = true;
 
     catEd = std::move(ta);
@@ -207,7 +210,7 @@ PatchStoreDialog::PatchStoreDialog()
     okOverButton->addListener(this);
     addAndMakeVisible(*okOverButton);
 
-    auto stbTitle = "Store Tuning in Patch";
+    auto stbTitle = "Save Tuning";
 
     storeTuningLabel = makeL(Surge::GUI::toOSCase(stbTitle));
 
@@ -216,6 +219,16 @@ PatchStoreDialog::PatchStoreDialog()
     storeTuningButton->setTitle(stbTitle);
     storeTuningButton->setDescription(stbTitle);
     addAndMakeVisible(*storeTuningButton);
+
+    auto ssbTitle = "Save Wavetable Script Snapshots";
+
+    storeSnapshotsLabel = makeL(Surge::GUI::toOSCase(ssbTitle));
+
+    storeSnapshotsButton = std::make_unique<juce::ToggleButton>();
+    storeSnapshotsButton->setButtonText("");
+    storeSnapshotsButton->setTitle(ssbTitle);
+    storeSnapshotsButton->setDescription(ssbTitle);
+    addAndMakeVisible(*storeSnapshotsButton);
 }
 
 PatchStoreDialog::~PatchStoreDialog() = default;
@@ -230,7 +243,13 @@ void PatchStoreDialog::setStorage(SurgeStorage *s)
 
 void PatchStoreDialog::setStoreTuningInPatch(const bool value)
 {
-    storeTuningButton->setToggleState(value, juce::dontSendNotification);
+    bool showTuning = editor && !editor->synth->storage.isStandardTuning;
+    storeTuningButton->setToggleState(showTuning && value, juce::dontSendNotification);
+}
+
+void PatchStoreDialog::setStoreSnapshotsInPatch(const bool value)
+{
+    storeSnapshotsButton->setToggleState(hasSnapshots && value, juce::dontSendNotification);
 }
 
 void PatchStoreDialog::paint(juce::Graphics &g)
@@ -253,8 +272,18 @@ void PatchStoreDialog::shownInParent()
 {
     if (nameEd->isShowing() && isVisible())
     {
-        nameEd->grabKeyboardFocus();
+        Surge::GUI::grabKeyboardFocusIfAllowed(nameEd.get());
     }
+}
+
+void PatchStoreDialog::textEditorFocusLost(juce::TextEditor &ed)
+{
+    if (!editor || !storage)
+    {
+        return;
+    }
+
+    ed.setHighlightedRegion(juce::Range(-1, -1));
 }
 
 void PatchStoreDialog::onSkinChanged()
@@ -273,6 +302,8 @@ void PatchStoreDialog::onSkinChanged()
                           skin->getColor(Colors::Dialog::Entry::Border));
         typein->setColour(juce::TextEditor::focusedOutlineColourId,
                           skin->getColor(Colors::Dialog::Entry::Border));
+
+        typein->applyColourToAllText(skin->getColor(Colors::Dialog::Entry::Text));
     };
 
     auto resetLabel = [this](const auto &label) {
@@ -294,11 +325,17 @@ void PatchStoreDialog::onSkinChanged()
     resetLabel(licenseEdL);
     resetLabel(commentEdL);
     resetLabel(storeTuningLabel);
+    resetLabel(storeSnapshotsLabel);
 
     storeTuningButton->setColour(juce::ToggleButton::tickDisabledColourId,
                                  skin->getColor(Colors::Dialog::Checkbox::Border));
     storeTuningButton->setColour(juce::ToggleButton::tickColourId,
                                  skin->getColor(Colors::Dialog::Checkbox::Tick));
+
+    storeSnapshotsButton->setColour(juce::ToggleButton::tickDisabledColourId,
+                                    skin->getColor(Colors::Dialog::Checkbox::Border));
+    storeSnapshotsButton->setColour(juce::ToggleButton::tickColourId,
+                                    skin->getColor(Colors::Dialog::Checkbox::Tick));
 
     catEd->setColour(Surge::Widgets::TypeAhead::ColourIds::emptyBackgroundId,
                      skin->getColor(Colors::Dialog::Entry::Background));
@@ -321,7 +358,10 @@ void PatchStoreDialog::setIsRename(bool b) { isRename = b; }
 void PatchStoreDialog::resized()
 {
     auto h = 25;
-    auto commH = getHeight() - (6 + showTagsField) * h + 8;
+    bool showTuning = editor && !editor->synth->storage.isStandardTuning;
+    bool showCheckboxRow = hasSnapshots || showTuning;
+    int extraRowH = showCheckboxRow ? 22 : 0;
+    auto commH = getHeight() - (6 + showTagsField) * h - extraRowH + 8;
     auto xSplit = 70;
     auto buttonHeight = 17;
     auto buttonWidth = 50;
@@ -348,7 +388,7 @@ void PatchStoreDialog::resized()
 
     if (isVisible())
     {
-        nameEd->grabKeyboardFocus();
+        Surge::GUI::grabKeyboardFocusIfAllowed(nameEd.get());
     }
 
     if (showTagsField)
@@ -364,7 +404,8 @@ void PatchStoreDialog::resized()
     commentEd->setBounds(q);
     ce = ce.translated(0, commH);
 
-    auto buttonRow = getLocalBounds().withHeight(buttonHeight).withY(ce.getY() + (margin2 * 3));
+    auto buttonRow =
+        getLocalBounds().withHeight(buttonHeight).withY(ce.getY() + (margin2 * 3) + extraRowH);
 
     auto be =
         buttonRow.withTrimmedLeft(dialogCenter - buttonWidth - margin2).withWidth(buttonWidth);
@@ -395,22 +436,48 @@ void PatchStoreDialog::resized()
 
     cl = cl.translated(0, h);
     commentEdL->setBounds(cl);
-    cl = cl.translated(0, commH)
-             .withY(okButton->getY() - 1)
-             .withWidth(h + buttonWidth * 2.5)
-             .withHeight(okButton->getHeight() + 2);
 
-    if (!editor || editor->synth->storage.isStandardTuning)
+    if (showCheckboxRow)
     {
-        storeTuningButton->setVisible(false);
-        storeTuningLabel->setVisible(false);
+        int checkboxRowH = 32;
+        int checkboxRowY = ce.getY() - (margin2 * 2);
+        int halfW = getLocalBounds().getWidth() / 2;
+        int boxH = 15;
+        int boxW = 17;
+        int boxY = checkboxRowY + (checkboxRowH - boxH) / 2;
+
+        auto tuningBox = juce::Rectangle<int>(margin, boxY, boxW, boxH);
+        auto tuningLabel = juce::Rectangle<int>(margin + boxW, checkboxRowY,
+                                                halfW - (margin + boxW + margin), checkboxRowH);
+
+        auto snapBox = juce::Rectangle<int>(halfW + margin, boxY, boxW, boxH);
+        auto snapLabel = juce::Rectangle<int>(halfW + margin + boxW, checkboxRowY,
+                                              halfW - (margin + boxW + margin), checkboxRowH);
+
+        storeTuningLabel->setVisible(true);
+        storeTuningLabel->setBounds(tuningLabel);
+        storeTuningLabel->setEnabled(showTuning);
+        storeTuningLabel->setAlpha(showTuning ? 1.0f : 0.5f);
+        storeTuningButton->setVisible(true);
+        storeTuningButton->setEnabled(showTuning);
+        storeTuningButton->setAlpha(showTuning ? 1.0f : 0.5f);
+        storeTuningButton->setBounds(tuningBox);
+
+        storeSnapshotsLabel->setVisible(true);
+        storeSnapshotsLabel->setBounds(snapLabel);
+        storeSnapshotsLabel->setEnabled(hasSnapshots);
+        storeSnapshotsLabel->setAlpha(hasSnapshots ? 1.0f : 0.5f);
+        storeSnapshotsButton->setVisible(true);
+        storeSnapshotsButton->setEnabled(hasSnapshots);
+        storeSnapshotsButton->setAlpha(hasSnapshots ? 1.0f : 0.5f);
+        storeSnapshotsButton->setBounds(snapBox);
     }
     else
     {
-        auto lb = cl.withX(cl.withWidth(h).getRight() - margin).withWidth(buttonWidth * 2.5);
-
-        storeTuningButton->setBounds(cl);
-        storeTuningLabel->setBounds(lb);
+        storeTuningButton->setVisible(false);
+        storeTuningLabel->setVisible(false);
+        storeSnapshotsButton->setVisible(false);
+        storeSnapshotsLabel->setVisible(false);
     }
 }
 
@@ -451,7 +518,9 @@ void PatchStoreDialog::buttonClicked(juce::Button *button)
 
         synth->storage.getPatch().tags = tags;
         synth->storage.getPatch().patchTuning.tuningStoredInPatch =
-            storeTuningButton->isVisible() && storeTuningButton->getToggleState();
+            storeTuningButton->isEnabled() && storeTuningButton->getToggleState();
+        synth->storage.getPatch().snapshotsStoredInPatch =
+            storeSnapshotsButton->isEnabled() && storeSnapshotsButton->getToggleState();
 
         if (synth->storage.getPatch().patchTuning.tuningStoredInPatch)
         {

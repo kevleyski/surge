@@ -4,7 +4,7 @@
  *
  * Learn more at https://surge-synthesizer.github.io/
  *
- * Copyright 2018-2023, various authors, as described in the GitHub
+ * Copyright 2018-2024, various authors, as described in the GitHub
  * transaction log.
  *
  * Surge XT is released under the GNU General Public Licence v3
@@ -126,12 +126,12 @@ struct OverlayWrapper : public juce::Component,
     bool showCloseButton{true};
     void setShowCloseButton(bool b) { showCloseButton = b; }
 
-    void onClose()
-    {
-        closeOverlay();
-        if (isTornOut())
-            tearOutParent.reset(nullptr);
-    }
+    bool retainOnRecreate{true};
+    bool getRetainOpenStateOnEditorRecreate() { return retainOnRecreate; }
+    void setRetainOpenStateOnEditorRecreate(bool b) { retainOnRecreate = b; }
+
+    void onClose();
+
     std::function<void()> closeOverlay = []() {};
     void setCloseOverlay(std::function<void()> f) { closeOverlay = std::move(f); }
 

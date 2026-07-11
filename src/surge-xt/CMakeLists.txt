@@ -7,6 +7,8 @@ file(GLOB SURGE_XT_JUCE_RESOURCES_GLOB
   ${CMAKE_SOURCE_DIR}/resources/fonts/IndieFlower.ttf
   ${CMAKE_SOURCE_DIR}/resources/fonts/FiraMono-Regular.ttf
   ${CMAKE_SOURCE_DIR}/resources/surge-xt/memory-skin.xml
+  ${CMAKE_SOURCE_DIR}/resources/surge-xt/wtfile_icon.svg
+  ${CMAKE_SOURCE_DIR}/resources/surge-xt/wtscript_icon.svg
 )
 
 juce_add_binary_data(surge-xt-binary
@@ -36,15 +38,18 @@ juce_add_plugin(${PROJECT_NAME}
   NEEDS_MIDI_OUTPUT FALSE
   IS_MIDI_EFFECT FALSE
   MICROPHONE_PERMISSION_ENABLED TRUE
-  MICROPHONE_PERMISSION_TEXT "Surge XT would like to use your microphone for Audio Input"
+  MICROPHONE_PERMISSION_TEXT "Surge XT would like to use your microphone for audio input"
 
   BLUETOOTH_PERMISSION_ENABLED TRUE
-  BLUETOOTH_PERMISSION_TEXT "Surge XT would like to use BlueTooth"
+  BLUETOOTH_PERMISSION_TEXT "Surge XT would like to use Bluetooth"
 
   COPY_PLUGIN_AFTER_BUILD ${SURGE_COPY_AFTER_BUILD}
 
   VST3_CATEGORIES Instrument Synth
+  VST3_AUTO_MANIFEST FALSE
+
   VST2_CATEGORY kPlugCategSynth
+
   AU_MAIN_TYPE kAudioUnitType_MusicDevice
   AU_SANDBOX_SAFE TRUE
 
@@ -61,12 +66,17 @@ if(SURGE_BUILD_CLAP)
   clap_juce_extensions_plugin(TARGET surge-xt
     CLAP_ID "org.surge-synth-team.surge-xt"
 
-    # CLAP_SUPPORTS_CUSTOM_FACTORY 1
-    CLAP_FEATURES "instrument" "synthesizer" "hybrid" "free and open source")
+    CLAP_SUPPORTS_CUSTOM_FACTORY 1
+    CLAP_FEATURES "instrument" "synthesizer" "stereo" "free and open source")
 endif()
 
 if(JUCE_ASIO_SUPPORT)
   target_compile_definitions(${PROJECT_NAME} PUBLIC JUCE_ASIO=1)
+endif()
+
+if (SURGE_EXPOSE_PRESETS)
+  message(STATUS "Building with JUCE Preset API (getProgramName etc) enabled")
+  target_compile_definitions(${PROJECT_NAME} PUBLIC SURGE_EXPOSE_PRESETS=1)
 endif()
 
 target_sources(${PROJECT_NAME} PRIVATE
@@ -74,6 +84,11 @@ target_sources(${PROJECT_NAME} PRIVATE
   SurgeSynthEditor.h
   SurgeSynthProcessor.cpp
   SurgeSynthProcessor.h
+
+  SurgeCLAPPresetDiscovery.cpp
+
+  util/LuaTokeniserSurge.cpp
+  util/LuaTokeniserSurge.h
 
   util/LockFreeStack.h
 
@@ -137,6 +152,9 @@ target_sources(${PROJECT_NAME} PRIVATE
   gui/overlays/TypeinParamEditor.h
   gui/overlays/WaveShaperAnalysis.cpp
   gui/overlays/WaveShaperAnalysis.h
+  gui/overlays/OpenSoundControlSettings.cpp
+  gui/widgets/CurrentFxDisplay.cpp
+  gui/widgets/CurrentFxDisplay.h
   gui/widgets/EffectChooser.cpp
   gui/widgets/EffectChooser.h
   gui/widgets/EffectLabel.h
@@ -144,6 +162,8 @@ target_sources(${PROJECT_NAME} PRIVATE
   gui/widgets/LFOAndStepDisplay.h
   gui/widgets/MainFrame.cpp
   gui/widgets/MainFrame.h
+  gui/widgets/MenuButtonFromAsset.cpp
+  gui/widgets/MenuButtonFromAsset.h
   gui/widgets/MenuCustomComponents.cpp
   gui/widgets/MenuCustomComponents.h
   gui/widgets/MenuForDiscreteParams.cpp
@@ -166,6 +186,8 @@ target_sources(${PROJECT_NAME} PRIVATE
   gui/widgets/Switch.cpp
   gui/widgets/Switch.h
   gui/widgets/SurgeTextButton.cpp
+  gui/widgets/Tooltip.cpp
+  gui/widgets/Tooltip.h
   gui/widgets/TypeAheadTextEditor.cpp
   gui/widgets/VerticalLabel.cpp
   gui/widgets/VerticalLabel.h
@@ -212,6 +234,8 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
   juce::juce_audio_processors
   juce::juce_audio_plugin_client
   juce::juce_osc
+  juce::juce_gui_basics
+  juce::juce_dsp
   surge-xt-binary
   sst-filters-extras
 )
@@ -230,13 +254,13 @@ if(APPLE)
   get_property(cliname TARGET ${PROJECT_NAME}-cli PROPERTY RUNTIME_OUTPUT_DIRECTORY)
   get_property(saname TARGET ${PROJECT_NAME}_Standalone PROPERTY RUNTIME_OUTPUT_DIRECTORY)
   set(cliexe ${cliname}/${PROJECT_NAME}-cli)
-  message(STATUS "macOS Standalone includes CLI")
+  message(STATUS "macOS standalone includes CLI")
 
   add_custom_command(
     TARGET ${PROJECT_NAME}_Standalone
     POST_BUILD
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-    COMMAND echo "Relocating cli executable into Standalone"
+    COMMAND echo "Relocating CLI executable into standalone"
     COMMAND ${CMAKE_COMMAND} -E copy "${cliexe}" "${saname}/Surge XT.app/Contents/MacOS"
   )
 endif()

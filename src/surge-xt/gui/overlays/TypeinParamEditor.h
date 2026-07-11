@@ -4,7 +4,7 @@
  *
  * Learn more at https://surge-synthesizer.github.io/
  *
- * Copyright 2018-2023, various authors, as described in the GitHub
+ * Copyright 2018-2024, various authors, as described in the GitHub
  * transaction log.
  *
  * Surge XT is released under the GNU General Public Licence v3
@@ -114,7 +114,7 @@ struct TypeinParamEditor : public juce::Component,
 
 struct TypeinLambdaEditor : public TypeinParamEditor
 {
-    TypeinLambdaEditor(std::function<bool(const std::string &)> c) : callback(c){};
+    TypeinLambdaEditor(std::function<bool(const std::string &)> c) : callback(c) {};
     bool handleTypein(const std::string &value, std::string &errMsg) override
     {
         return callback(value);

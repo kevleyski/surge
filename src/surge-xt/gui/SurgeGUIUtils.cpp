@@ -4,7 +4,7 @@
  *
  * Learn more at https://surge-synthesizer.github.io/
  *
- * Copyright 2018-2023, various authors, as described in the GitHub
+ * Copyright 2018-2024, various authors, as described in the GitHub
  * transaction log.
  *
  * Surge XT is released under the GNU General Public Licence v3
@@ -34,8 +34,25 @@ namespace Surge
 {
 namespace GUI
 {
+static bool hostRequiresShowCursor{false};
+void setHostRequiresShowCursor(bool b) { hostRequiresShowCursor = b; }
+bool getHostRequiresShowCursor() { return hostRequiresShowCursor; }
+
+static bool neverMoveKeyboardFocus{false};
+void setNeverMoveKeyboardFocus(bool b) { neverMoveKeyboardFocus = b; }
+bool getNeverMoveKeyboardFocus() { return neverMoveKeyboardFocus; }
+
+void grabKeyboardFocusIfAllowed(juce::Component *c)
+{
+    if (c && !neverMoveKeyboardFocus)
+        c->grabKeyboardFocus();
+}
+
 bool showCursor(SurgeStorage *storage)
 {
+    if (hostRequiresShowCursor)
+        return true;
+
     bool sc =
         Surge::Storage::getUserDefaultValue(storage, Surge::Storage::ShowCursorWhileEditing, 0);
     bool tm = Surge::Storage::getUserDefaultValue(storage, Surge::Storage::TouchMouseMode, false);
@@ -142,9 +159,14 @@ void constrainPointOnLineWithinRectangle(const juce::Rectangle<float> rect,
     }
 }
 
-void openFileOrFolder(const std::string &f)
+bool openFileOrFolder(const std::string &f)
 {
     auto path = juce::File(f);
+
+    if (!path.exists())
+    {
+        return false;
+    }
 
     if (path.isDirectory())
     {
@@ -166,6 +188,8 @@ void openFileOrFolder(const std::string &f)
     {
         path.revealToUser();
     }
+
+    return true;
 }
 
 } // namespace GUI

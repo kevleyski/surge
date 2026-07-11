@@ -4,7 +4,7 @@
  *
  * Learn more at https://surge-synthesizer.github.io/
  *
- * Copyright 2018-2023, various authors, as described in the GitHub
+ * Copyright 2018-2024, various authors, as described in the GitHub
  * transaction log.
  *
  * Surge XT is released under the GNU General Public Licence v3
@@ -23,6 +23,7 @@
 #define SURGE_SRC_SURGE_XT_GUI_RUNTIMEFONT_H
 
 #include "juce_graphics/juce_graphics.h"
+#include "juce/JuceAPICope.h"
 
 namespace Surge
 {
@@ -45,10 +46,10 @@ struct FontManager
 
     bool useOSLato{false};
 
-    juce::Font displayFont;
-    juce::Font patchNameFont;
-    juce::Font lfoTypeFont;
-    juce::Font aboutFont;
+    juce::Font displayFont{SST_JUCE_EMPTY_FONT};
+    juce::Font patchNameFont{SST_JUCE_EMPTY_FONT};
+    juce::Font lfoTypeFont{SST_JUCE_EMPTY_FONT};
+    juce::Font aboutFont{SST_JUCE_EMPTY_FONT};
     void setupFontMembers();
 
     juce::ReferenceCountedObjectPtr<juce::Typeface> latoRegularTypeface, latoBoldTypeface,
@@ -66,4 +67,11 @@ struct FontManager
 } // namespace GUI
 } // namespace Surge
 
+#if JUCE_VERSION >= 0x080002
+#define SST_STRING_WIDTH_INT(a, b) juce::GlyphArrangement::getStringWidthInt(a, b)
+#define SST_STRING_WIDTH_FLOAT(a, b) juce::GlyphArrangement::getStringWidth(a, b)
+#else
+#define SST_STRING_WIDTH_INT(a, b) a.getStringWidth(b)
+#define SST_STRING_WIDTH_FLOAT(a, b) a.getStringWidthFloat(b)
+#endif
 #endif // SURGE_SRC_SURGE_XT_GUI_RUNTIMEFONT_H

@@ -4,7 +4,7 @@
  *
  * Learn more at https://surge-synthesizer.github.io/
  *
- * Copyright 2018-2023, various authors, as described in the GitHub
+ * Copyright 2018-2024, various authors, as described in the GitHub
  * transaction log.
  *
  * Surge XT is released under the GNU General Public Licence v3
@@ -20,6 +20,8 @@
  * https://github.com/surge-synthesizer/surge
  */
 
+#include <juce_gui_basics/juce_gui_basics.h>
+#include <juce_gui_extra/juce_gui_extra.h>
 #include "KeyBindingsOverlay.h"
 #include <SurgeJUCELookAndFeel.h>
 #include "widgets/MenuCustomComponents.h"
@@ -75,7 +77,7 @@ struct KeyBindingsListRow : public juce::Component
         std::string desc = "";
         keyDesc = std::make_unique<juce::Label>("Key Binding", desc);
         keyDesc->setAccessible(true);
-        keyDesc->setFont(juce::Font(10));
+        keyDesc->setFont(juce::Font(SST_JUCE_FONT_OPTIONS(10)));
         addAndMakeVisible(*keyDesc);
 
         reset = std::make_unique<Surge::Widgets::SelfDrawButton>("Reset");
@@ -105,10 +107,16 @@ struct KeyBindingsListRow : public juce::Component
             }
             else
             {
-                overlay->isLearning = false;
-                overlay->learnAction = -1;
+                if ((int)overlay->learnAction == (int)action)
+                {
+                    overlay->isLearning = false;
+                    overlay->learnAction = -1;
+                }
             }
+
+            overlay->bindingList->updateContent();
         };
+
         addAndMakeVisible(*learn);
 
         setFocusContainerType(juce::Component::FocusContainerType::focusContainer);
@@ -141,39 +149,14 @@ struct KeyBindingsListRow : public juce::Component
 
         reset->setDeactivated(binding == dbinding);
 
-        int flags = juce::ModifierKeys::noModifiers;
-
-        if (binding.modifier & SurgeGUIEditor::keymap_t::SHIFT)
-            flags |= juce::ModifierKeys::shiftModifier;
-        if (binding.modifier & SurgeGUIEditor::keymap_t::COMMAND)
-            flags |= juce::ModifierKeys::commandModifier;
-        if (binding.modifier & SurgeGUIEditor::keymap_t::CONTROL)
-            flags |= juce::ModifierKeys::ctrlModifier;
-        if (binding.modifier & SurgeGUIEditor::keymap_t::ALT)
-            flags |= juce::ModifierKeys::altModifier;
-
-        auto kp = juce::KeyPress(binding.keyCode, flags, binding.keyCode);
-
-        if (binding.type == SurgeGUIEditor::keymap_t::Binding::TEXTCHAR)
-        {
-            kp = juce::KeyPress(binding.textChar, flags, binding.textChar);
-        }
-
-        auto desc = kp.getTextDescription().toStdString();
-
-#if MAC
-        Surge::Storage::findReplaceSubstring(desc, "command", u8"\U00002318");
-        Surge::Storage::findReplaceSubstring(desc, "option", u8"\U00002325");
-        Surge::Storage::findReplaceSubstring(desc, "shift", u8"\U000021E7");
-        Surge::Storage::findReplaceSubstring(desc, "ctrl", u8"\U00002303");
-#else
-        Surge::Storage::findReplaceSubstring(desc, "ctrl", "Ctrl");
-        Surge::Storage::findReplaceSubstring(desc, "alt", "Alt");
-        Surge::Storage::findReplaceSubstring(desc, "shift", "Shift");
-#endif
+        auto desc = editor->getShortcutDescription(action);
 
         keyDesc->setText(desc, juce::dontSendNotification);
-        learn->setValue(0);
+
+        bool isThisRowLearning = (overlay->isLearning && (int)overlay->learnAction == (int)action);
+
+        learn->setToggleState(isThisRowLearning);
+        learn->setValue(isThisRowLearning);
 
         repaint();
     }
@@ -345,6 +328,12 @@ KeyBindingsOverlay::KeyBindingsOverlay(SurgeStorage *st, SurgeGUIEditor *ed)
     addAndMakeVisible(*bindingList);
 }
 
+KeyBindingsOverlay::~KeyBindingsOverlay()
+{
+    bindingList.reset(nullptr);
+    bindingListBoxModel.reset(nullptr); // order matters here
+}
+
 void KeyBindingsOverlay::resetAllToDefault()
 {
     for (auto const &[k, b] : editor->keyMapManager->bindings)
@@ -387,18 +376,58 @@ void KeyBindingsOverlay::createVKBLayoutMenu()
 
 void KeyBindingsOverlay::changeVKBLayout(const std::string layout)
 {
-    Surge::Storage::updateUserDefaultValue(editor->getStorage(),
-                                           Surge::Storage::VirtualKeyboardLayout, layout);
-    editor->juceEditor->setVKBLayout(layout);
+    const auto vkbl = editor->juceEditor->vkbLayouts;
+    auto searchTerm = [&layout](const auto &x) { return x.first == layout; };
+    auto search = std::find_if(vkbl.begin(), vkbl.end(), searchTerm);
+    std::vector<Surge::GUI::KeyboardActions> conflicts;
 
-    vkbLayout->setLabels({"VKB Layout: " + layout});
-    vkbLayout->repaint();
-}
+    conflicts.clear();
 
-KeyBindingsOverlay::~KeyBindingsOverlay()
-{
-    bindingList.reset(nullptr);
-    bindingListBoxModel.reset(nullptr); // order matters here
+    if (search != vkbl.end())
+    {
+        for (auto key : search->second)
+        {
+            // VKB layouts store keycodes as lowercase, but SST keybindings store them as uppercase
+            // because of juce::KeyPress::getTextDescription()
+            // see keyCodeToString() template instantiation in SurgeGUIEditor.h
+            const auto kp = juce::KeyPress(juce::CharacterFunctions::toUpperCase(key),
+                                           juce::ModifierKeys::noModifiers, 0);
+
+            for (auto const &[k, b] : editor->keyMapManager->bindings)
+            {
+                if (b.matches(kp))
+                {
+                    conflicts.emplace_back(k);
+                }
+            }
+        }
+    }
+
+    if (!conflicts.empty())
+    {
+        std::string keyNames;
+
+        for (auto &b : conflicts)
+        {
+            keyNames += Surge::GUI::keyboardActionDescription(b) + " (" +
+                        editor->getShortcutDescription(b) + ")\n";
+        }
+
+        storage->reportError(fmt::format("Selected virtual keyboard layout has conflicts with the "
+                                         "following keyboard shortcuts:\n\n{}\nPlease modify these "
+                                         "in order to be able to use this virtual keyboard layout!",
+                                         keyNames),
+                             "Virtual Keyboard Layout Conflict");
+    }
+    else
+    {
+        Surge::Storage::updateUserDefaultValue(editor->getStorage(),
+                                               Surge::Storage::VirtualKeyboardLayout, layout);
+        editor->juceEditor->setVKBLayout(layout);
+
+        vkbLayout->setLabels({"VKB Layout: " + layout});
+        vkbLayout->repaint();
+    }
 }
 
 void KeyBindingsOverlay::paint(juce::Graphics &g)
@@ -432,7 +461,7 @@ void KeyBindingsOverlay::resized()
     okS->setBounds(okRect);
     cancelS->setBounds(canRect);
     resetAll->setBounds(canRect.translated(175, 0).withWidth(58));
-    vkbLayout->setBounds(okRect.translated(-183, 0).withWidth(128));
+    vkbLayout->setBounds(okRect.translated(-183, 0).withWidth(138));
 
     bindingList->setBounds(l);
 }
@@ -449,30 +478,82 @@ void KeyBindingsOverlay::onSkinChanged()
 
 bool KeyBindingsOverlay::keyPressed(const juce::KeyPress &key)
 {
+    using namespace Surge::GUI;
+
     if (isLearning)
     {
-        auto &binding = editor->keyMapManager->bindings[(Surge::GUI::KeyboardActions)learnAction];
+        // this is a copy in case we conflict with an existing keybinding
+        auto newBinding = editor->keyMapManager->bindings[(KeyboardActions)learnAction];
 
-        binding.type = SurgeGUIEditor::keymap_t::Binding::KEYCODE;
-        binding.keyCode = key.getKeyCode();
-        binding.modifier = 0;
+        newBinding.type = SurgeGUIEditor::keymap_t::Binding::KEYCODE;
+        newBinding.keyCode = key.getKeyCode();
+        newBinding.modifier = 0;
 #if SST_COMMAND_CTRL_SAME_KEY
         if (key.getModifiers().isCommandDown() || key.getModifiers().isCtrlDown())
-            binding.modifier |= SurgeGUIEditor::keymap_t::Modifiers::COMMAND;
+            newBinding.modifier |= SurgeGUIEditor::keymap_t::Modifiers::COMMAND;
 #else
         if (key.getModifiers().isCommandDown())
-            binding.modifier |= SurgeGUIEditor::keymap_t::Modifiers::COMMAND;
+            newBinding.modifier |= SurgeGUIEditor::keymap_t::Modifiers::COMMAND;
         if (key.getModifiers().isCtrlDown())
-            binding.modifier |= SurgeGUIEditor::keymap_t::Modifiers::CONTROL;
+            newBinding.modifier |= SurgeGUIEditor::keymap_t::Modifiers::CONTROL;
 #endif
         if (key.getModifiers().isShiftDown())
-            binding.modifier |= SurgeGUIEditor::keymap_t::Modifiers::SHIFT;
+            newBinding.modifier |= SurgeGUIEditor::keymap_t::Modifiers::SHIFT;
         if (key.getModifiers().isAltDown())
-            binding.modifier |= SurgeGUIEditor::keymap_t::Modifiers::ALT;
+            newBinding.modifier |= SurgeGUIEditor::keymap_t::Modifiers::ALT;
 
-        bindingList->updateContent();
-        return true;
+        KeyboardActions conflictedAction{KeyboardActions::n_kbdActions};
+
+        for (auto const &[k, b] : editor->keyMapManager->bindings)
+        {
+            if (b == newBinding)
+            {
+                conflictedAction = k;
+            }
+        }
+
+        // we've found a conflict
+        if (conflictedAction < KeyboardActions::n_kbdActions)
+        {
+            // which row are we learning
+            auto *rowComp = dynamic_cast<KeyBindingsListRow *>(
+                bindingList->getComponentForRowNumber(learnAction));
+
+            // which learn button we want to keep focus on
+            focusedLearnComponent = rowComp ? rowComp->learn.get() : nullptr;
+
+            std::string keyNames = Surge::GUI::keyboardActionDescription(conflictedAction) + " (" +
+                                   editor->getShortcutDescription(conflictedAction) + ")\n";
+
+            storage->reportError(
+                fmt::format("The keyboard shortcut you have just entered is already assigned "
+                            "to:\n\n{}\nDismiss this dialog and try again!",
+                            keyNames),
+                "Keyboard Shortcut Conflict");
+
+            isLearning = true;
+
+            editor->componentToFocusAfterAlertDismissal = focusedLearnComponent;
+
+            return true;
+        }
+        else
+        {
+            auto &oldBinding = editor->keyMapManager->bindings[(KeyboardActions)learnAction];
+
+            oldBinding = newBinding;
+
+            isLearning = false;
+            learnAction = -1;
+
+            focusedLearnComponent = nullptr;
+
+            bindingList->updateContent();
+
+            return true;
+        }
     }
+
     return Component::keyPressed(key);
 }
 

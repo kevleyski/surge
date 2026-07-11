@@ -4,7 +4,7 @@
  *
  * Learn more at https://surge-synthesizer.github.io/
  *
- * Copyright 2018-2023, various authors, as described in the GitHub
+ * Copyright 2018-2024, various authors, as described in the GitHub
  * transaction log.
  *
  * Surge XT is released under the GNU General Public Licence v3
@@ -29,6 +29,7 @@
 #include "RuntimeFont.h"
 #include "AccessibleHelpers.h"
 #include <version.h>
+#include "gui/widgets/CurrentFxDisplay.h"
 #include "gui/widgets/MainFrame.h"
 
 struct VKeyboardWheel : public juce::Component
@@ -135,9 +136,21 @@ static std::weak_ptr<SurgeJUCELookAndFeel> surgeLookAndFeelWeakPointer;
 static std::mutex surgeLookAndFeelSetupMutex;
 
 //==============================================================================
+
+SurgeVirtualKeyboard::~SurgeVirtualKeyboard() { clearAllLatches(); }
+
+float SurgeVirtualKeyboard::getCurrentVelocity() const { return editor->midiKeyboardVelocity; }
+
+//==============================================================================
+
 SurgeSynthEditor::SurgeSynthEditor(SurgeSynthProcessor &p)
     : juce::AudioProcessorEditor(&p), processor(p)
 {
+    // Marks this editor as the popup-scale anchor for the SURGE PATCH in
+    // juce_TextEditor.cpp so TextEditor right-click menus inherit only the
+    // host scale factor and not the UI zoom transform applied to frame.
+    getProperties().set("SSTPopupAnchor", true);
+
     {
         std::lock_guard<std::mutex> grd(surgeLookAndFeelSetupMutex);
         if (auto sp = surgeLookAndFeelWeakPointer.lock())
@@ -165,14 +178,25 @@ SurgeSynthEditor::SurgeSynthEditor(SurgeSynthProcessor &p)
     auto mcValue = Surge::Storage::getUserDefaultValue(&(this->processor.surge->storage),
                                                        Surge::Storage::MiddleC, 1);
 
-    keyboard = std::make_unique<juce::MidiKeyboardComponent>(
-        processor.midiKeyboardState, juce::MidiKeyboardComponent::Orientation::horizontalKeyboard);
+    keyboard = std::make_unique<SurgeVirtualKeyboard>(
+        this, processor.midiKeyboardState,
+        juce::MidiKeyboardComponent::Orientation::horizontalKeyboard);
     keyboard->setVelocity(midiKeyboardVelocity, true);
     keyboard->setOctaveForMiddleC(5 - mcValue);
     keyboard->setKeyPressBaseOctave(midiKeyboardOctave);
     keyboard->setLowestVisibleKey(24);
     // this makes VKB always receive keyboard input (except when we focus on any typeins, of course)
     keyboard->setWantsKeyboardFocus(false);
+
+    // Load the saved VKB click velocity mode setting
+    bool virtualKeyboardClickSetsVelocity = Surge::Storage::getUserDefaultValue(
+        &(this->processor.surge->storage), Surge::Storage::VirtualKeyboardClickSetsVelocity, false);
+    if (auto vkb = dynamic_cast<SurgeVirtualKeyboard *>(keyboard.get()))
+    {
+        vkb->useClickPositionForOverallVelocity = virtualKeyboardClickSetsVelocity;
+        // Set up callback to update midiKeyboardVelocity when mode is enabled
+        vkb->onVelocityChanged = [this](float vel) { midiKeyboardVelocity = vel; };
+    }
 
     auto vkbLayout = Surge::Storage::getUserDefaultValue(
         &(this->processor.surge->storage), Surge::Storage::VirtualKeyboardLayout, "QWERTY");
@@ -211,6 +235,7 @@ SurgeSynthEditor::SurgeSynthEditor(SurgeSynthProcessor &p)
         float newT = std::atof(tempoTypein->getText().toRawUTF8());
 
         processor.standaloneTempo = newT;
+        processor.surge->storage.unstreamedTempo = newT;
         tempoTypein->giveAwayKeyboardFocus();
     };
 
@@ -279,7 +304,6 @@ void SurgeSynthEditor::setVKBLayout(const std::string layout)
 {
     auto searchTerm = [&layout](const auto &x) { return x.first == layout; };
     auto search = std::find_if(vkbLayouts.begin(), vkbLayouts.end(), searchTerm);
-    currentVKBLayout = layout;
 
     if (search != vkbLayouts.end())
     {
@@ -302,7 +326,16 @@ void SurgeSynthEditor::setVKBLayout(const std::string layout)
                     continue;
                 }
             }
+#if JUCE_LINUX
+            // See issue #7604
+            if (i < 128)
+            {
+                keyboard->setKeyPressForNote((juce::KeyPress)i, n);
+            }
+#else
             keyboard->setKeyPressForNote((juce::KeyPress)i, n);
+#endif
+
             n++;
         }
     }
@@ -328,7 +361,23 @@ void SurgeSynthEditor::paint(juce::Graphics &g)
 #endif
 }
 
-void SurgeSynthEditor::idle() { sge->idle(); }
+void SurgeSynthEditor::idle()
+{
+    sge->idle();
+
+    if (processor.surge->refresh_vkb)
+    {
+        const int curTypeinBPM = std::atoi(tempoTypein->getText().toStdString().c_str());
+        const int curBPM = std::round(processor.surge->time_data.tempo);
+
+        if (curTypeinBPM != curBPM)
+        {
+            tempoTypein->setText(fmt::format("{}", curBPM));
+        }
+
+        processor.surge->refresh_vkb = false;
+    }
+}
 
 void SurgeSynthEditor::reapplySurgeComponentColours()
 {
@@ -530,7 +579,24 @@ void SurgeSynthEditor::resized()
     }
 }
 
-void SurgeSynthEditor::parentHierarchyChanged() { reapplySurgeComponentColours(); }
+void SurgeSynthEditor::parentHierarchyChanged()
+{
+    reapplySurgeComponentColours();
+
+#if WINDOWS
+    auto swr = Surge::Storage::getUserDefaultValue(&(this->processor.surge->storage),
+                                                   Surge::Storage::UseSoftwareRenderer, false);
+
+    if (swr)
+    {
+        if (auto peer = getPeer())
+        {
+            // 0 for software mode, 1 for Direct2D mode
+            peer->setCurrentRenderingEngine(0);
+        }
+    }
+#endif
+}
 
 void SurgeSynthEditor::IdleTimer::timerCallback() { ed->idle(); }
 
@@ -551,8 +617,14 @@ bool SurgeSynthEditor::isInterestedInFileDrag(const juce::StringArray &files)
     if (files.size() != 1)
         return false;
 
+    auto *fxw =
+        dynamic_cast<Surge::Widgets::CurrentFxDisplay *>(sge->frame->getControlGroupLayer(cg_FX));
+
     for (auto i = files.begin(); i != files.end(); ++i)
     {
+        if (fxw->canDropTarget(*i))
+            return true;
+
         if (sge->canDropTarget(i->toStdString()))
             return true;
     }
@@ -564,9 +636,15 @@ void SurgeSynthEditor::filesDropped(const juce::StringArray &files, int x, int y
     if (files.size() != 1)
         return;
 
+    auto *fxw =
+        dynamic_cast<Surge::Widgets::CurrentFxDisplay *>(sge->frame->getControlGroupLayer(cg_FX));
+
     for (auto i = files.begin(); i != files.end(); ++i)
     {
-        if (sge->canDropTarget(i->toStdString()))
+        if (fxw->canDropTarget(*i) &&
+            fxw->reallyContains(fxw->getLocalPoint(this, juce::Point<int>(x, y)), true))
+            fxw->onDrop(*i);
+        else if (sge->canDropTarget(i->toStdString()))
             sge->onDrop(i->toStdString());
     }
 }
@@ -584,7 +662,8 @@ void SurgeSynthEditor::endParameterEdit(Parameter *p)
     auto par = processor.paramsByID[processor.surge->idForParameter(p)];
     par->inEditGesture = false;
     par->endChangeGesture();
-    processor.paramChangeToListeners(p);
+    if (fireListenersOnEndEdit)
+        processor.paramChangeToListeners(p);
 }
 
 void SurgeSynthEditor::beginMacroEdit(long macroNum)
@@ -599,7 +678,8 @@ void SurgeSynthEditor::endMacroEdit(long macroNum)
     par->endChangeGesture();
     // echo change to OSC out
     float newval = par->getValue();
-    processor.paramChangeToListeners(nullptr, true, processor.SCT_MACRO, macroNum, newval, "");
+    processor.paramChangeToListeners(nullptr, true, processor.SCT_MACRO, (float)macroNum, newval,
+                                     .0, "");
 }
 
 #if LINUX
@@ -607,24 +687,105 @@ void SurgeSynthEditor::endMacroEdit(long macroNum)
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 #endif
 
+juce::PopupMenu SurgeSynthEditor::modifyHostMenu(juce::PopupMenu menu)
+{
+    // make things look a bit nicer for our friends from Image-Line
+    if (juce::PluginHostType().isFruityLoops())
+    {
+        auto it = juce::PopupMenu::MenuItemIterator(menu);
+
+        while (it.next())
+        {
+            auto txt = it.getItem().text;
+
+            if (txt.startsWithChar('-'))
+            {
+                it.getItem().isSectionHeader = true;
+                it.getItem().text = txt.fromFirstOccurrenceOf("-", false, false);
+            }
+        }
+
+        return menu;
+    }
+
+    // we really don't need that parameter name repeated in Reaper...
+    if (juce::PluginHostType().isReaper())
+    {
+        auto newMenu = juce::PopupMenu();
+        auto it = juce::PopupMenu::MenuItemIterator(menu);
+
+        while (it.next())
+        {
+            auto txt = it.getItem().text;
+            bool include = true;
+
+            if (txt.startsWithChar('[') && txt.endsWithChar(']'))
+            {
+                include = it.next();
+            }
+
+            if (include)
+            {
+                newMenu.addItem(it.getItem());
+            }
+        }
+
+        return newMenu;
+    }
+
+    return menu;
+}
+
 juce::PopupMenu SurgeSynthEditor::hostMenuFor(Parameter *p)
 {
+    if (sge)
+    {
+        if (sge->synth->hostProgram.compare("Unknown") == 0)
+        {
+            return juce::PopupMenu();
+        }
+    }
+
     auto par = processor.paramsByID[processor.surge->idForParameter(p)];
 
     if (auto *c = getHostContext())
+    {
         if (auto menuInfo = c->getContextMenuForParameterIndex(par))
-            return menuInfo->getEquivalentPopupMenu();
+        {
+            auto menu = menuInfo->getEquivalentPopupMenu();
+
+            menu = modifyHostMenu(menu);
+
+            return menu;
+        }
+    }
 
     return juce::PopupMenu();
 }
 
 juce::PopupMenu SurgeSynthEditor::hostMenuForMacro(int macro)
 {
+    if (sge)
+    {
+        if (sge->synth->hostProgram.compare("Unknown") == 0)
+        {
+            return juce::PopupMenu();
+        }
+    }
+
     auto par = processor.macrosById[macro];
 
     if (auto *c = getHostContext())
+    {
         if (auto menuInfo = c->getContextMenuForParameterIndex(par))
-            return menuInfo->getEquivalentPopupMenu();
+        {
+            auto menu = menuInfo->getEquivalentPopupMenu();
+
+            modifyHostMenu(menu);
+
+            return menu;
+        }
+    }
 
     return juce::PopupMenu();
 }
@@ -675,21 +836,6 @@ bool SurgeSynthEditor::keyPressed(const juce::KeyPress &key, juce::Component *or
                     break;
                 }
             }
-        }
-
-        auto textChar = key.getTextCharacter();
-
-        // set VKB velocity to basic dynamic levels (ppp, pp, p, mp, mf, f, ff, fff)
-        if (textChar >= '1' && textChar <= '8')
-        {
-            float const velJump = 16.f / 127.f;
-
-            // juce::getTextCharacter() returns ASCII code of the char
-            // so subtract the first one we need to get our factor
-            midiKeyboardVelocity = std::clamp(velJump * (textChar - '1' + 1), 0.f, 1.f);
-            keyboard->setVelocity(midiKeyboardVelocity, true);
-
-            return true;
         }
 
         if (sge->shouldForwardKeysToVKB() && orig != keyboard.get())

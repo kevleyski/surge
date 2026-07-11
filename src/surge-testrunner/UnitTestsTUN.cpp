@@ -4,7 +4,7 @@
  *
  * Learn more at https://surge-synthesizer.github.io/
  *
- * Copyright 2018-2023, various authors, as described in the GitHub
+ * Copyright 2018-2024, various authors, as described in the GitHub
  * transaction log.
  *
  * Surge XT is released under the GNU General Public Licence v3
@@ -171,7 +171,7 @@ TEST_CASE("KBM File Parsing", "[tun]")
     SECTION("Parse A440 File")
     {
         auto k = Tunings::readKBMFile("resources/test-data/scl/mapping-a440-constant.kbm");
-        REQUIRE(k.name == "resources/test-data/scl/mapping-a440-constant.kbm");
+        REQUIRE(k.name == "mapping-a440-constant");
         REQUIRE(k.count == 12);
         REQUIRE(k.firstMidi == 0);
         REQUIRE(k.lastMidi == 127);
@@ -186,7 +186,7 @@ TEST_CASE("KBM File Parsing", "[tun]")
     SECTION("Parse 7 to 12 Mapping File")
     {
         auto k = Tunings::readKBMFile("resources/test-data/scl/mapping-a442-7-to-12.kbm");
-        REQUIRE(k.name == "resources/test-data/scl/mapping-a442-7-to-12.kbm");
+        REQUIRE(k.name == "mapping-a442-7-to-12");
         REQUIRE(k.count == 12);
         REQUIRE(k.firstMidi == 0);
         REQUIRE(k.lastMidi == 127);
@@ -1724,5 +1724,233 @@ TEST_CASE("Portamento With Repeated Notes", "[tun]")
             REQUIRE(freq ==
                     Approx(surge->storage.currentTuning.frequencyForMidiNote(31 * 3)).margin(2));
         }
+    }
+}
+
+TEST_CASE("Transpose by Tuning Period", "[tun]")
+{
+    /*
+     * transposeByTuningPeriod=true: unconditionally uses tuningPeriodSemitones().
+     *   RETUNE_ALL    → scale.count (same as the else-branch, so no visible change)
+     *   RETUNE_MIDI_ONLY → cents/100 (e.g. ~19.02 for BP, giving the 3:1 tritave)
+     *   MTS           → MTS_GetPeriodSemitones (not exercised in unit tests)
+     *
+     * transposeByTuningPeriod=false (else-branch):
+     *   RETUNE_ALL + non-standard tuning → scale.count (old pre-feature behaviour)
+     *   everything else                  → 12 (standard octave)
+     */
+
+    // osc octave+1 frequency ratio on note 60
+    auto oscRatio = [](std::shared_ptr<SurgeSynthesizer> surge) {
+        surge->storage.getPatch().scene[0].osc[0].octave.val.i = 0;
+        auto fBase = frequencyForNote(surge, 60);
+        surge->storage.getPatch().scene[0].osc[0].octave.val.i = 1;
+        auto fUp = frequencyForNote(surge, 60);
+        surge->storage.getPatch().scene[0].osc[0].octave.val.i = 0;
+        return fUp / fBase;
+    };
+
+    // osc octave-1 frequency ratio on note 60
+    auto oscRatioDown = [](std::shared_ptr<SurgeSynthesizer> surge) {
+        surge->storage.getPatch().scene[0].osc[0].octave.val.i = 0;
+        auto fBase = frequencyForNote(surge, 60);
+        surge->storage.getPatch().scene[0].osc[0].octave.val.i = -1;
+        auto fDown = frequencyForNote(surge, 60);
+        surge->storage.getPatch().scene[0].osc[0].octave.val.i = 0;
+        return fDown / fBase;
+    };
+
+    // scene octave+1 frequency ratio on note 60
+    auto sceneRatio = [](std::shared_ptr<SurgeSynthesizer> surge) {
+        surge->storage.getPatch().scene[0].octave.val.i = 0;
+        auto fBase = frequencyForNote(surge, 60);
+        surge->storage.getPatch().scene[0].octave.val.i = 1;
+        auto fUp = frequencyForNote(surge, 60);
+        surge->storage.getPatch().scene[0].octave.val.i = 0;
+        return fUp / fBase;
+    };
+
+    // scene octave-1 frequency ratio on note 60
+    auto sceneRatioDown = [](std::shared_ptr<SurgeSynthesizer> surge) {
+        surge->storage.getPatch().scene[0].octave.val.i = 0;
+        auto fBase = frequencyForNote(surge, 60);
+        surge->storage.getPatch().scene[0].octave.val.i = -1;
+        auto fDown = frequencyForNote(surge, 60);
+        surge->storage.getPatch().scene[0].octave.val.i = 0;
+        return fDown / fBase;
+    };
+
+    // ---- ED2-12  (period == standard octave, bool makes no observable difference) ----
+
+    SECTION("ED2-12 RETUNE_ALL bool off: osc octave up doubles, down halves")
+    {
+        auto surge = surgeOnSine();
+        surge->storage.setTuningApplicationMode(SurgeStorage::RETUNE_ALL);
+        surge->storage.retuneToScale(Tunings::evenDivisionOfSpanByM(2, 12));
+        surge->storage.transposeByTuningPeriod = false;
+        REQUIRE(oscRatio(surge) == Approx(2.0).margin(0.01));
+        REQUIRE(oscRatioDown(surge) == Approx(0.5).margin(0.005));
+    }
+
+    SECTION("ED2-12 RETUNE_ALL bool on: osc octave up doubles, down halves")
+    {
+        auto surge = surgeOnSine();
+        surge->storage.setTuningApplicationMode(SurgeStorage::RETUNE_ALL);
+        surge->storage.retuneToScale(Tunings::evenDivisionOfSpanByM(2, 12));
+        surge->storage.transposeByTuningPeriod = true;
+        REQUIRE(oscRatio(surge) == Approx(2.0).margin(0.01));
+        REQUIRE(oscRatioDown(surge) == Approx(0.5).margin(0.005));
+    }
+
+    SECTION("ED2-12 RETUNE_ALL bool off: scene octave up doubles, down halves")
+    {
+        auto surge = surgeOnSine();
+        surge->storage.setTuningApplicationMode(SurgeStorage::RETUNE_ALL);
+        surge->storage.retuneToScale(Tunings::evenDivisionOfSpanByM(2, 12));
+        surge->storage.transposeByTuningPeriod = false;
+        REQUIRE(sceneRatio(surge) == Approx(2.0).margin(0.01));
+        REQUIRE(sceneRatioDown(surge) == Approx(0.5).margin(0.005));
+    }
+
+    SECTION("ED2-12 RETUNE_ALL bool on: scene octave up doubles, down halves")
+    {
+        auto surge = surgeOnSine();
+        surge->storage.setTuningApplicationMode(SurgeStorage::RETUNE_ALL);
+        surge->storage.retuneToScale(Tunings::evenDivisionOfSpanByM(2, 12));
+        surge->storage.transposeByTuningPeriod = true;
+        REQUIRE(sceneRatio(surge) == Approx(2.0).margin(0.01));
+        REQUIRE(sceneRatioDown(surge) == Approx(0.5).margin(0.005));
+    }
+
+    // ---- ED2-19  (period == octave; scale.count=19 = one 2:1 period) ----
+
+    SECTION("ED2-19 RETUNE_ALL bool off: osc octave up doubles, down halves")
+    {
+        // else-branch: octaveSize = scale.count = 19, one full 2:1 period
+        auto surge = surgeOnSine();
+        surge->storage.setTuningApplicationMode(SurgeStorage::RETUNE_ALL);
+        surge->storage.retuneToScale(Tunings::evenDivisionOfSpanByM(2, 19));
+        surge->storage.transposeByTuningPeriod = false;
+        REQUIRE(oscRatio(surge) == Approx(2.0).margin(0.01));
+        REQUIRE(oscRatioDown(surge) == Approx(0.5).margin(0.005));
+    }
+
+    SECTION("ED2-19 RETUNE_ALL bool on: osc octave up doubles, down halves")
+    {
+        // tuningPeriodSemitones() = scale.count = 19 in RETUNE_ALL, same result
+        auto surge = surgeOnSine();
+        surge->storage.setTuningApplicationMode(SurgeStorage::RETUNE_ALL);
+        surge->storage.retuneToScale(Tunings::evenDivisionOfSpanByM(2, 19));
+        surge->storage.transposeByTuningPeriod = true;
+        REQUIRE(oscRatio(surge) == Approx(2.0).margin(0.01));
+        REQUIRE(oscRatioDown(surge) == Approx(0.5).margin(0.005));
+    }
+
+    SECTION("ED2-19 RETUNE_ALL bool off: scene octave up doubles, down halves")
+    {
+        auto surge = surgeOnSine();
+        surge->storage.setTuningApplicationMode(SurgeStorage::RETUNE_ALL);
+        surge->storage.retuneToScale(Tunings::evenDivisionOfSpanByM(2, 19));
+        surge->storage.transposeByTuningPeriod = false;
+        REQUIRE(sceneRatio(surge) == Approx(2.0).margin(0.01));
+        REQUIRE(sceneRatioDown(surge) == Approx(0.5).margin(0.005));
+    }
+
+    SECTION("ED2-19 RETUNE_ALL bool on: scene octave up doubles, down halves")
+    {
+        auto surge = surgeOnSine();
+        surge->storage.setTuningApplicationMode(SurgeStorage::RETUNE_ALL);
+        surge->storage.retuneToScale(Tunings::evenDivisionOfSpanByM(2, 19));
+        surge->storage.transposeByTuningPeriod = true;
+        REQUIRE(sceneRatio(surge) == Approx(2.0).margin(0.01));
+        REQUIRE(sceneRatioDown(surge) == Approx(0.5).margin(0.005));
+    }
+
+    // ---- ED3-13 Bohlen-Pierce (period == tritave 3:1; scale.count=13) ----
+
+    SECTION("ED3-13 RETUNE_ALL bool off: osc octave up triples, down thirds")
+    {
+        // else-branch: octaveSize = scale.count = 13, one full 3:1 tritave
+        auto surge = surgeOnSine();
+        surge->storage.setTuningApplicationMode(SurgeStorage::RETUNE_ALL);
+        surge->storage.retuneToScale(Tunings::evenDivisionOfSpanByM(3, 13));
+        surge->storage.transposeByTuningPeriod = false;
+        REQUIRE(oscRatio(surge) == Approx(3.0).margin(0.05));
+        REQUIRE(oscRatioDown(surge) == Approx(1.0 / 3.0).margin(0.005));
+    }
+
+    SECTION("ED3-13 RETUNE_ALL bool on: osc octave up triples, down thirds")
+    {
+        // tuningPeriodSemitones() = scale.count = 13 in RETUNE_ALL, same result
+        auto surge = surgeOnSine();
+        surge->storage.setTuningApplicationMode(SurgeStorage::RETUNE_ALL);
+        surge->storage.retuneToScale(Tunings::evenDivisionOfSpanByM(3, 13));
+        surge->storage.transposeByTuningPeriod = true;
+        REQUIRE(oscRatio(surge) == Approx(3.0).margin(0.05));
+        REQUIRE(oscRatioDown(surge) == Approx(1.0 / 3.0).margin(0.005));
+    }
+
+    SECTION("ED3-13 RETUNE_ALL bool off: scene octave up triples, down thirds")
+    {
+        auto surge = surgeOnSine();
+        surge->storage.setTuningApplicationMode(SurgeStorage::RETUNE_ALL);
+        surge->storage.retuneToScale(Tunings::evenDivisionOfSpanByM(3, 13));
+        surge->storage.transposeByTuningPeriod = false;
+        REQUIRE(sceneRatio(surge) == Approx(3.0).margin(0.05));
+        REQUIRE(sceneRatioDown(surge) == Approx(1.0 / 3.0).margin(0.005));
+    }
+
+    SECTION("ED3-13 RETUNE_ALL bool on: scene octave up triples, down thirds")
+    {
+        auto surge = surgeOnSine();
+        surge->storage.setTuningApplicationMode(SurgeStorage::RETUNE_ALL);
+        surge->storage.retuneToScale(Tunings::evenDivisionOfSpanByM(3, 13));
+        surge->storage.transposeByTuningPeriod = true;
+        REQUIRE(sceneRatio(surge) == Approx(3.0).margin(0.05));
+        REQUIRE(sceneRatioDown(surge) == Approx(1.0 / 3.0).margin(0.005));
+    }
+
+    // ---- RETUNE_MIDI_ONLY: bool=off preserves 12-semitone octave; bool=on uses tuning period ----
+
+    SECTION("ED3-13 RETUNE_MIDI_ONLY bool off: osc octave doubles (standard 12-semitone shift)")
+    {
+        auto surge = surgeOnSine();
+        surge->storage.setTuningApplicationMode(SurgeStorage::RETUNE_MIDI_ONLY);
+        surge->storage.retuneToScale(Tunings::evenDivisionOfSpanByM(3, 13));
+        surge->storage.transposeByTuningPeriod = false;
+        REQUIRE(oscRatio(surge) == Approx(2.0).margin(0.01));
+        REQUIRE(oscRatioDown(surge) == Approx(0.5).margin(0.005));
+    }
+
+    SECTION("ED3-13 RETUNE_MIDI_ONLY bool on: osc octave gives BP tritave (period-aware)")
+    {
+        // tuningPeriodSemitones() returns cents/100 ~= 19.02 in RETUNE_MIDI_ONLY.
+        // In the 12-TET pitch table that is 2^(19.02/12) ~= 3.0x — the BP tritave.
+        auto surge = surgeOnSine();
+        surge->storage.setTuningApplicationMode(SurgeStorage::RETUNE_MIDI_ONLY);
+        surge->storage.retuneToScale(Tunings::evenDivisionOfSpanByM(3, 13));
+        surge->storage.transposeByTuningPeriod = true;
+        REQUIRE(oscRatio(surge) == Approx(3.0).margin(0.05));
+        REQUIRE(oscRatioDown(surge) == Approx(1.0 / 3.0).margin(0.01));
+    }
+
+    SECTION("ED3-13 RETUNE_MIDI_ONLY bool off: scene octave doubles")
+    {
+        auto surge = surgeOnSine();
+        surge->storage.setTuningApplicationMode(SurgeStorage::RETUNE_MIDI_ONLY);
+        surge->storage.retuneToScale(Tunings::evenDivisionOfSpanByM(3, 13));
+        surge->storage.transposeByTuningPeriod = false;
+        REQUIRE(sceneRatio(surge) == Approx(2.0).margin(0.01));
+        REQUIRE(sceneRatioDown(surge) == Approx(0.5).margin(0.005));
+    }
+
+    SECTION("ED3-13 RETUNE_MIDI_ONLY bool on: scene octave gives BP tritave (period-aware)")
+    {
+        auto surge = surgeOnSine();
+        surge->storage.setTuningApplicationMode(SurgeStorage::RETUNE_MIDI_ONLY);
+        surge->storage.retuneToScale(Tunings::evenDivisionOfSpanByM(3, 13));
+        surge->storage.transposeByTuningPeriod = true;
+        REQUIRE(sceneRatio(surge) == Approx(3.0).margin(0.05));
+        REQUIRE(sceneRatioDown(surge) == Approx(1.0 / 3.0).margin(0.01));
     }
 }

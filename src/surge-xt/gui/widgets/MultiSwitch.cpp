@@ -4,7 +4,7 @@
  *
  * Learn more at https://surge-synthesizer.github.io/
  *
- * Copyright 2018-2023, various authors, as described in the GitHub
+ * Copyright 2018-2024, various authors, as described in the GitHub
  * transaction log.
  *
  * Surge XT is released under the GNU General Public Licence v3
@@ -238,6 +238,8 @@ void MultiSwitch::mouseDrag(const juce::MouseEvent &event)
             setValue(limit_range((float)sel / (rows * columns - 1), 0.f, 1.f));
             notifyValueChanged();
         }
+
+        repaint();
     }
 }
 
@@ -284,10 +286,7 @@ void MultiSwitch::endHover()
 void MultiSwitch::mouseWheelMove(const juce::MouseEvent &event,
                                  const juce::MouseWheelDetails &wheel)
 {
-    // If we aren't draggable and a drag is happening, ignore the mouse wheel gesture
-    // This (vs just a plain !draggable) reverts the 1.9 behaviour of mouse wheel through
-    // the presets.
-    if (!draggable && (event.mouseWasDraggedSinceMouseDown() || event.getLengthOfMousePress() > 0))
+    if (!mousewheelable)
     {
         return;
     }
@@ -496,7 +495,7 @@ void MultiSwitch::updateAccessibleStateOnUserValueChange()
     {
         return;
     }
-    selectionComponents[getIntegerValue()]->grabKeyboardFocus();
+    Surge::GUI::grabKeyboardFocusIfAllowed(selectionComponents[getIntegerValue()].get());
 }
 
 template <> struct DiscreteAHRange<MultiSwitch>

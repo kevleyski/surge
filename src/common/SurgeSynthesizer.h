@@ -4,7 +4,7 @@
  *
  * Learn more at https://surge-synthesizer.github.io/
  *
- * Copyright 2018-2023, various authors, as described in the GitHub
+ * Copyright 2018-2024, various authors, as described in the GitHub
  * transaction log.
  *
  * Surge XT is released under the GNU General Public Licence v3
@@ -396,6 +396,21 @@ class alignas(16) SurgeSynthesizer
         virtual void modMuted(long ptag, modsources modsource, int modsourceScene, int index,
                               bool mute) = 0;
         virtual void modCleared(long ptag, modsources modsource, int modsourceScene, int index) = 0;
+
+        /*
+         * These two methods are called optionally if an event is initiated by a user drag
+         * action or so on. They will only be called on the UI thread. Not every set etc...
+         * is contained in a begin/end and mute and cleared almost definitely will never
+         * be wrapped.
+         */
+        virtual void modBeginEdit(long ptag, modsources modsource, int modsourceScene, int index,
+                                  float depth01)
+        {
+        }
+        virtual void modEndEdit(long ptag, modsources modsource, int modsourceScene, int index,
+                                float depth01)
+        {
+        }
     };
     std::set<ModulationAPIListener *> modListeners;
     void addModulationAPIListener(ModulationAPIListener *l) { modListeners.insert(l); }
@@ -444,8 +459,23 @@ class alignas(16) SurgeSynthesizer
     void deletePatchLoadedListener(std::string key) { patchLoadedListeners.erase(key); }
 
     //==============================================================================
+    // Parameter changes coming from within the synth (e.g. from MIDI-learned input)
+    // are communicated to listeners here
+    std::unordered_map<std::string, std::function<void(const std::string oscname, const float fval,
+                                                       std::string valstr)>>
+        audioThreadParamListeners;
+
+    void addAudioParamListener(std::string key,
+                               std::function<void(const std::string oscname, const float fval,
+                                                  std::string valstr)> const &l)
+    {
+        audioThreadParamListeners.insert({key, l});
+    }
+    void deleteAudioParamListener(std::string key) { audioThreadParamListeners.erase(key); }
+
+    //==============================================================================
     // synth -> editor variables
-    bool refresh_editor, patch_loaded;
+    bool refresh_editor{false}, refresh_vkb{false}, patch_loaded{false};
     int learn_param_from_cc, learn_macro_from_cc, learn_param_from_note;
     int refresh_ctrl_queue[8];
     int refresh_parameter_queue[8];
@@ -457,11 +487,11 @@ class alignas(16) SurgeSynthesizer
     std::atomic<int> patchid_queue;
 
     // updated in audio thread, read from UI, so have assignments be atomic
-    std::atomic<int> polydisplay;
-    std::atomic<int> hasUpdatedMidiCC;
-    std::atomic<int> modwheelCC, pitchbendMIDIVal, sustainpedalCC;
+    std::atomic<int> hasUpdatedMidiCC{false};
+    std::atomic<int> modwheelCC{0}, pitchbendMIDIVal{0}, sustainpedalCC{0};
+    std::atomic<bool> midiSoftTakeover{false};
 
-    float vu_peak[8];
+    float vu_peak[8]{};
     std::atomic<float> cpu_level{0.f};
 
     void populateDawExtraState();
@@ -481,6 +511,7 @@ class alignas(16) SurgeSynthesizer
     bool &mpeEnabled;
     int mpeVoices = 0;
     int mpeGlobalPitchBendRange = 0;
+    bool mpeTimbreIsUnipolar = false;
 
     std::bitset<128> disallowedLearnCCs{0};
     std::array<uint64_t, 128> midiKeyPressedForScene[n_scenes];
@@ -488,6 +519,7 @@ class alignas(16) SurgeSynthesizer
     std::atomic<uint64_t> midiNoteEvents{0};
 
     int current_category_id = 0;
+    bool patchSelectedFromFavorites = false;
     bool modsourceused[n_modsources];
     bool midiprogramshavechanged = false;
 
@@ -542,6 +574,8 @@ class alignas(16) SurgeSynthesizer
     bool activateExtraOutputs = true;
 
     void changeModulatorSmoothing(Modulator::SmoothingMode m);
+
+    void queueForRefresh(int param_index);
 
     // these have to be thread-safe, so keep them private
   private:

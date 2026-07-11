@@ -4,7 +4,7 @@
  *
  * Learn more at https://surge-synthesizer.github.io/
  *
- * Copyright 2018-2023, various authors, as described in the GitHub
+ * Copyright 2018-2024, various authors, as described in the GitHub
  * transaction log.
  *
  * Surge XT is released under the GNU General Public Licence v3
@@ -21,6 +21,7 @@
  */
 
 #include "SurgeGUIEditor.h"
+#include "SurgeGUIUtils.h"
 
 #include "overlays/ModulationEditor.h"
 #include "overlays/PatchDBViewer.h"
@@ -32,9 +33,11 @@
 #include "overlays/Oscilloscope.h"
 #include "overlays/OverlayWrapper.h"
 #include "overlays/KeyBindingsOverlay.h"
+#include "overlays/OpenSoundControlSettings.h"
 #include "widgets/MainFrame.h"
 #include "widgets/WaveShaperSelector.h"
 #include "UserDefaults.h"
+#include "SurgeSynthEditor.h"
 
 std::unique_ptr<Surge::Overlays::OverlayComponent> SurgeGUIEditor::makeStorePatchDialog()
 {
@@ -103,6 +106,8 @@ std::unique_ptr<Surge::Overlays::OverlayComponent> SurgeGUIEditor::makeStorePatc
     pb->setSurgeGUIEditor(this);
     pb->setStorage(&(this->synth->storage));
     pb->setStoreTuningInPatch(this->synth->storage.getPatch().patchTuning.tuningStoredInPatch);
+    pb->setHasSnapshots(synth->storage.getPatch().hasAnySnapshots());
+    pb->setStoreSnapshotsInPatch(synth->storage.getPatch().snapshotsStoredInPatch);
 
     // since it is now modal center in the window
     auto posRect = skinCtrl->getRect().withCentre(frame->getBounds().getCentre());
@@ -165,7 +170,6 @@ std::unique_ptr<Surge::Overlays::OverlayComponent> SurgeGUIEditor::createOverlay
 
         return pt;
     }
-    break;
 
     case MSEG_EDITOR:
     {
@@ -279,9 +283,65 @@ std::unique_ptr<Surge::Overlays::OverlayComponent> SurgeGUIEditor::createOverlay
         return fme;
     }
 
+    case WTS_EDITOR:
+    {
+
+        auto os = &synth->storage.getPatch().scene[current_scene].osc[current_osc[current_scene]];
+
+        if (!os)
+        {
+            return nullptr;
+        }
+
+        auto wtse = std::make_unique<Surge::Overlays::WavetableScriptEditor>(
+            this, &(this->synth->storage), os, current_osc[current_scene], current_scene,
+            currentSkin);
+
+        std::string title =
+            fmt::format("Osc {} Wavetable Script Editor", current_osc[current_scene] + 1);
+
+        wtse->setSkin(currentSkin, bitmapStore);
+        wtse->setEnclosingParentTitle(title);
+        wtse->setCanTearOut({true, Surge::Storage::WTScriptOverlayLocationTearOut,
+                             Surge::Storage::WTScriptOverlayTearOutAlwaysOnTop,
+                             Surge::Storage::WTScriptOverlayTearOutAlwaysOnTop_Plugin});
+        wtse->setCanTearOutResize({true, Surge::Storage::WTScriptOverlaySizeTearOut});
+        wtse->setMinimumSize(500, 400);
+        locationGet(wtse.get(), Surge::Skin::Connector::NonParameterConnection::WTS_EDITOR_WINDOW,
+                    Surge::Storage::WTScriptOverlayLocation);
+
+        return wtse;
+    }
+
     case SAVE_PATCH:
     {
-        return makeStorePatchDialog();
+        if (synth->storage.userDataPathValid)
+        {
+            return makeStorePatchDialog();
+        }
+        else
+        {
+            messageBox("Documents Folder Not Writable",
+                       "You have a non-writable User Data Path; patch saving is not available");
+            return nullptr;
+        }
+    }
+
+    case OPEN_SOUND_CONTROL_SETTINGS:
+    {
+        auto te = std::make_unique<Surge::Overlays::OpenSoundControlSettings>();
+
+        te->setStorage(&(this->synth->storage));
+        te->setSurgeGUIEditor(this);
+        te->setSkin(currentSkin, bitmapStore);
+        te->setEnclosingParentTitle("Open Sound Control Settings");
+
+        auto posRect =
+            juce::Rectangle<int>(0, 0, 315, 145).withCentre(frame->getBounds().getCentre());
+
+        te->setEnclosingParentPosition(posRect);
+
+        return te;
     }
 
     case TUNING_EDITOR:
@@ -302,25 +362,6 @@ std::unique_ptr<Surge::Overlays::OverlayComponent> SurgeGUIEditor::createOverlay
                     Surge::Storage::TuningOverlayLocation);
 
         return te;
-    }
-
-    case WT_SCRIPTING_EDITOR:
-    {
-        int w = 800, h = 520;
-        auto px = (getWindowSizeX() - w) / 2;
-        auto py = (getWindowSizeY() - h) / 2;
-        auto r = juce::Rectangle<int>(px, py, w, h);
-
-        auto os = &synth->storage.getPatch().scene[current_scene].osc[current_osc[current_scene]];
-
-        auto wtse = std::make_unique<Surge::Overlays::WavetableEquationEditor>(
-            this, &(this->synth->storage), os, currentSkin);
-
-        wtse->setSkin(currentSkin, bitmapStore);
-        wtse->setEnclosingParentPosition(juce::Rectangle<int>(px, py, w, h));
-        wtse->setEnclosingParentTitle("Wavetable Script Editor");
-
-        return wtse;
     }
 
     case WAVESHAPER_ANALYZER:
@@ -515,7 +556,7 @@ void SurgeGUIEditor::showOverlay(OverlayTags olt,
 
     if (wantsInitialKeyboardFocus)
     {
-        getOverlayIfOpen(olt)->grabKeyboardFocus();
+        Surge::GUI::grabKeyboardFocusIfAllowed(getOverlayIfOpen(olt));
     }
 }
 
@@ -544,7 +585,15 @@ void SurgeGUIEditor::closeOverlay(OverlayTags olt)
 
     if (isAnyOverlayPresent(olt))
     {
-        dismissEditorOfType(olt);
+        if (olt == FORMULA_EDITOR || olt == WTS_EDITOR)
+        {
+            // Run the chickenbox path
+            olw->onClose();
+        }
+        else
+        {
+            dismissEditorOfType(olt);
+        }
     }
 
     switch (olt)
@@ -593,6 +642,7 @@ Surge::Overlays::OverlayWrapper *SurgeGUIEditor::addJuceEditorOverlay(
     {
         ol->setCanTearOut(olc->getCanTearOut());
         ol->setCanTearOutResize(olc->getCanTearOutResize());
+        ol->setRetainOpenStateOnEditorRecreate(olc->getRetainOpenStateOnEditorRecreate());
     }
 
     ol->addAndTakeOwnership(std::move(c));
@@ -776,6 +826,7 @@ bool SurgeGUIEditor::updateOverlayContentIfPresent(OverlayTags tag)
     case TUNING_EDITOR:
     {
         auto tunol = dynamic_cast<Surge::Overlays::TuningOverlay *>(getOverlayIfOpen(tag));
+
         if (tunol)
         {
             tunol->setTuning(synth->storage.currentTuning);
@@ -792,16 +843,48 @@ bool SurgeGUIEditor::updateOverlayContentIfPresent(OverlayTags tag)
         }
         break;
     }
-    case WAVESHAPER_ANALYZER:
+    case MSEG_EDITOR:
     {
-        updateWaveshaperOverlay();
+        auto mseol = dynamic_cast<Surge::Overlays::MSEGEditor *>(getOverlayIfOpen(tag));
+
+        if (mseol)
+        {
+            mseol->forceRefresh();
+        }
+        break;
+    }
+    case FORMULA_EDITOR:
+    {
+        auto feol = dynamic_cast<Surge::Overlays::FormulaModulatorEditor *>(getOverlayIfOpen(tag));
+
+        if (feol)
+        {
+            feol->forceRefresh();
+        }
+        break;
+    }
+    case WTS_EDITOR:
+    {
+        auto wtsol = dynamic_cast<Surge::Overlays::WavetableScriptEditor *>(getOverlayIfOpen(tag));
+
+        if (wtsol)
+        {
+            wtsol->forceRefresh();
+        }
         break;
     }
     case FILTER_ANALYZER:
     {
         auto f = getOverlayIfOpen(tag);
         if (f)
+        {
             f->repaint();
+        }
+        break;
+    }
+    case WAVESHAPER_ANALYZER:
+    {
+        updateWaveshaperOverlay();
         break;
     }
     default:

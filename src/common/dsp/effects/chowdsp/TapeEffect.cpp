@@ -4,7 +4,7 @@
  *
  * Learn more at https://surge-synthesizer.github.io/
  *
- * Copyright 2018-2023, various authors, as described in the GitHub
+ * Copyright 2018-2024, various authors, as described in the GitHub
  * transaction log.
  *
  * Surge XT is released under the GNU General Public Licence v3
@@ -40,21 +40,25 @@ TapeEffect::~TapeEffect() {}
 
 void TapeEffect::init()
 {
-    hysteresis.reset(storage->samplerate);
-    toneControl.prepare(storage->samplerate);
-    lossFilter.prepare(storage->samplerate, BLOCK_SIZE);
+    TapeEffect::sampleRateReset();
 
     mech::clear_block<BLOCK_SIZE>(L);
     mech::clear_block<BLOCK_SIZE>(R);
-
-    degrade.prepareToPlay((float)storage->samplerate, BLOCK_SIZE);
-    chew.prepare((float)storage->samplerate, BLOCK_SIZE);
 
     mix.set_target(1.f);
     mix.instantize();
 
     makeup.set_target(std::pow(10.0f, 9.0f / 20.0f));
     makeup.instantize();
+}
+
+void TapeEffect::sampleRateReset()
+{
+    hysteresis.reset(storage->samplerate);
+    toneControl.prepare(storage->samplerate);
+    lossFilter.prepare(storage->samplerate, BLOCK_SIZE);
+    degrade.prepareToPlay((float)storage->samplerate, BLOCK_SIZE);
+    chew.prepare((float)storage->samplerate, BLOCK_SIZE);
 }
 
 void TapeEffect::process(float *dataL, float *dataR)

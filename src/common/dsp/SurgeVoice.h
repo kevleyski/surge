@@ -4,7 +4,7 @@
  *
  * Learn more at https://surge-synthesizer.github.io/
  *
- * Copyright 2018-2023, various authors, as described in the GitHub
+ * Copyright 2018-2024, various authors, as described in the GitHub
  * transaction log.
  *
  * Surge XT is released under the GNU General Public Licence v3
@@ -25,13 +25,27 @@
 #include "SurgeStorage.h"
 #include "Oscillator.h"
 #include "SurgeVoiceState.h"
+#include "TiltNoiseAdapter.h"
 #include "ADSRModulationSource.h"
 #include "LFOModulationSource.h"
+#include <sst/voice-effects/generator/TiltNoise.h>
 #include <vembertech/lipol.h>
 #include "QuadFilterChain.h"
 #include <array>
+#include <optional>
 
 struct QuadFilterChainState;
+
+enum lag_entries
+{
+    le_osc1,
+    le_osc2,
+    le_osc3,
+    le_noise,
+    le_ring12,
+    le_ring23,
+    le_pfg,
+};
 
 class alignas(16) SurgeVoice
 {
@@ -39,17 +53,18 @@ class alignas(16) SurgeVoice
     float output alignas(16)[2][BLOCK_SIZE_OS];
     lipol_ps osclevels alignas(16)[7];
     pdata localcopy alignas(16)[n_scene_params];
+    pdata localcopy2 alignas(16)[n_scene_params];
     float fmbuffer alignas(16)[BLOCK_SIZE_OS];
 
     // used for the 2>1<3 FM-mode (Needs the pointer earlier)
 
     SurgeVoice();
-    SurgeVoice(SurgeStorage *storage, SurgeSceneStorage *scene, pdata *params, int key,
-               int velocity, int channel, int scene_id, float detune, MidiKeyState *keyState,
-               MidiChannelState *mainChannelState, MidiChannelState *voiceChannelState,
-               bool mpeEnabled, int64_t voiceOrder, int32_t host_note_id,
-               int16_t originating_host_key, int16_t originating_host_channel, float aegStart,
-               float fegStart);
+    SurgeVoice(SurgeStorage *storage, SurgeSceneStorage *scene, pdata *params, pdata *paramsUnmod,
+               int key, int velocity, int channel, int scene_id, float detune,
+               MidiKeyState *keyState, MidiChannelState *mainChannelState,
+               MidiChannelState *voiceChannelState, bool mpeEnabled, int64_t voiceOrder,
+               int32_t host_note_id, int16_t originating_host_key, int16_t originating_host_channel,
+               float aegStart, float fegStart);
     ~SurgeVoice();
 
     void release();
@@ -208,8 +223,8 @@ class alignas(16) SurgeVoice
     void retriggerOSCWithIndependentAttacks();
     void resetPortamentoFrom(int key, int channel);
 
-    static float channelKeyEquvialent(float key, int channel, bool isMpeEnabled,
-                                      SurgeStorage *storage, bool remapKeyForTuning = true);
+    static float channelKeyEquivalent(float key, int channel, SurgeStorage *storage,
+                                      bool remapKeyForTuning = true);
 
   private:
     template <bool first> void calc_ctrldata(QuadFilterChainState *, int);
@@ -261,9 +276,9 @@ class alignas(16) SurgeVoice
 
     // data
     int lag_id[8], pitch_id, octave_id, volume_id, pan_id, width_id;
-    SurgeStorage *storage;
-    SurgeSceneStorage *scene, *origscene;
+    SurgeSceneStorage *scene;
     pdata *paramptr;
+    pdata *paramptrUnmod;
     int route[6];
 
     float octaveSize = 12.0f;
@@ -277,8 +292,9 @@ class alignas(16) SurgeVoice
 
   public: // this is public, but only for the regtests
     std::array<ModulationSource *, n_modsources> modsources;
+    SurgeStorage *storage;
 
-  private:
+  public:
     ControllerModulationSource velocitySource;
     ModulationSource releaseVelocitySource;
     ModulationSource keytrackSource;
@@ -295,6 +311,14 @@ class alignas(16) SurgeVoice
 
     // MPE special cases
     bool mpeEnabled;
+
+  private:
+    friend class VoiceTiltNoiseAdapter;
+    // Single per-voice instance.
+    std::optional<sst::voice_effects::generator::TiltNoise<VoiceTiltNoiseAdapter>> tilt_noise;
+    // Helper functions for doing noise generations.
+    void generate_legacy_noise(bool wide, bool stereo, float *blockL, float *blockR);
+    void generate_tilt_noise(bool wide, bool stereo, float *blockL, float *blockR);
 };
 
 void all_ring_modes_block(float *__restrict src1_l, float *__restrict src2_l,

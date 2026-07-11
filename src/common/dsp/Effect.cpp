@@ -4,7 +4,7 @@
  *
  * Learn more at https://surge-synthesizer.github.io/
  *
- * Copyright 2018-2023, various authors, as described in the GitHub
+ * Copyright 2018-2024, various authors, as described in the GitHub
  * transaction log.
  *
  * Surge XT is released under the GNU General Public Licence v3
@@ -19,11 +19,16 @@
  * All source for Surge XT is available at
  * https://github.com/surge-synthesizer/surge
  */
+
+#if !defined(_M_ARM64EC)
 #include "BBDEnsembleEffect.h"
+#endif
+
 #include "BonsaiEffect.h"
 #include "ChorusEffectImpl.h"
 #include "CombulatorEffect.h"
 #include "ConditionerEffect.h"
+#include "ConvolutionEffect.h"
 #include "DistortionEffect.h"
 #include "DelayEffect.h"
 #include "FlangerEffect.h"
@@ -49,6 +54,7 @@
 #include "chowdsp/TapeEffect.h"
 #include "DebugHelpers.h"
 #include "AudioInputEffect.h"
+#include "FloatyDelayEffect.h"
 
 using namespace std;
 
@@ -103,7 +109,11 @@ Effect *spawn_effect(int id, SurgeStorage *storage, FxStorage *fxdata, pdata *pd
     case fxt_tape:
         return new chowdsp::TapeEffect(storage, fxdata, pd);
     case fxt_ensemble:
+#if defined(_M_ARM64EC)
+        return nullptr;
+#else
         return new BBDEnsembleEffect(storage, fxdata, pd);
+#endif
     case fxt_treemonster:
         return new TreemonsterEffect(storage, fxdata, pd);
     case fxt_waveshaper:
@@ -116,6 +126,11 @@ Effect *spawn_effect(int id, SurgeStorage *storage, FxStorage *fxdata, pdata *pd
         return new BonsaiEffect(storage, fxdata, pd);
     case fxt_audio_input:
         return new AudioInputEffect(storage, fxdata, pd);
+    case fxt_floaty_delay:
+        return new FloatyDelayEffect(storage, fxdata, pd);
+    case fxt_convolution:
+        return new ConvolutionEffect(storage, fxdata, pd);
+
     default:
         return 0;
     };

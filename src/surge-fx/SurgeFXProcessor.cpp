@@ -4,7 +4,7 @@
  *
  * Learn more at https://surge-synthesizer.github.io/
  *
- * Copyright 2018-2023, various authors, as described in the GitHub
+ * Copyright 2018-2024, various authors, as described in the GitHub
  * transaction log.
  *
  * Surge XT is released under the GNU General Public Licence v3
@@ -21,6 +21,7 @@
  */
 
 #include "SurgeFXProcessor.h"
+#include "FXOpenSoundControl.h"
 #include "SurgeFXEditor.h"
 #include "DebugHelpers.h"
 #include "UserDefaults.h"
@@ -83,7 +84,13 @@ SurgefxAudioProcessor::SurgefxAudioProcessor()
     fxType->getTextHandler = [this](float f, int len) -> juce::String {
         auto i = 1 + (int)round(f * (n_fx_types - 2));
         if (i >= 1 && i < n_fx_types)
+        {
+            if (i == fxt_convolution)
+            {
+                return "Convolution (Unimplemented)";
+            }
             return fx_type_names[i];
+        }
         return "";
     };
 
@@ -114,6 +121,8 @@ SurgefxAudioProcessor::SurgefxAudioProcessor()
 
     paramChangeListener = []() {};
     resettingFx = false;
+
+    oscHandler.initOSC(this, storage);
 }
 
 SurgefxAudioProcessor::~SurgefxAudioProcessor() {}
@@ -143,6 +152,56 @@ const juce::String SurgefxAudioProcessor::getProgramName(int index) { return "De
 
 void SurgefxAudioProcessor::changeProgramName(int index, const juce::String &newName) {}
 
+void SurgefxAudioProcessor::tryLazyOscStartupFromStreamedState()
+{
+    if ((!oscHandler.listening && oscStartIn && oscPortIn > 0))
+    {
+        oscHandler.tryOSCStartup();
+    }
+    oscCheckStartup = false;
+}
+
+//==============================================================================
+/* OSC (Open Sound Control) */
+bool SurgefxAudioProcessor::initOSCIn(int port)
+{
+    if (port <= 0)
+    {
+        return false;
+    }
+
+    auto state = oscHandler.initOSCIn(port);
+
+    oscReceiving.store(state);
+    oscStartIn = true;
+
+    return state;
+}
+
+bool SurgefxAudioProcessor::changeOSCInPort(int new_port)
+{
+    oscReceiving.store(false);
+    oscHandler.stopListening();
+    return initOSCIn(new_port);
+}
+
+void SurgefxAudioProcessor::initOSCError(int port, std::string outIP)
+{
+    std::ostringstream msg;
+
+    msg << "Surge XT was unable to connect to OSC port " << port;
+    if (!outIP.empty())
+    {
+        msg << " at IP Address " << outIP;
+    }
+
+    msg << ".\n"
+        << "Either it is not a valid port, or it is already used by Surge XT or another "
+           "application.";
+
+    storage->reportError(msg.str(), "OSC Initialization Error");
+};
+
 //==============================================================================
 void SurgefxAudioProcessor::prepareToPlay(double sr, int samplesPerBlock)
 {
@@ -161,6 +220,14 @@ void SurgefxAudioProcessor::releaseResources()
 {
     // When playback stops, you can use this as an opportunity to free up any
     // spare memory, etc.
+}
+
+void SurgefxAudioProcessor::reset()
+{
+    if (surge_effect)
+    {
+        surge_effect->init();
+    }
 }
 
 bool SurgefxAudioProcessor::isBusesLayoutSupported(const BusesLayout &layouts) const
@@ -185,6 +252,11 @@ void SurgefxAudioProcessor::processBlock(juce::AudioBuffer<float> &buffer,
     audioRunning = true;
     if (resettingFx || !surge_effect)
         return;
+
+    if (oscCheckStartup)
+    {
+        tryLazyOscStartupFromStreamedState();
+    }
 
     juce::ScopedNoDenormals noDenormals;
 
@@ -267,7 +339,7 @@ void SurgefxAudioProcessor::processBlock(juce::AudioBuffer<float> &buffer,
     // FIXME: Check: has type changed?
     int pt = *fxType;
 
-    if (effectNum != pt)
+    if (effectNum != pt && pt != fxt_convolution)
     {
         effectNum = pt;
         resetFxType(effectNum);
@@ -411,6 +483,33 @@ void SurgefxAudioProcessor::processBlock(juce::AudioBuffer<float> &buffer,
             outR[i] = std::clamp(outR[i], -2.f, 2.f);
         }
     }
+
+    if (oscReceiving.load())
+        processBlockOSC();
+}
+
+// Pull incoming OSC events from ring buffer
+void SurgefxAudioProcessor::processBlockOSC()
+{
+    while (true)
+    {
+        auto om = oscRingBuf.pop();
+        if (!om.has_value())
+            break;
+        switch (om->type)
+        {
+        case SurgefxAudioProcessor::FX_PARAM:
+        {
+            prepareParametersAbsentAudio();
+            setFXParamValue01(om->p_index, om->fval);
+            // this order does matter
+            changedParamsValue[om->p_index] = om->fval;
+            changedParams[om->p_index] = true;
+            triggerAsyncUpdate();
+        }
+        break;
+        }
+    }
 }
 
 //==============================================================================
@@ -472,6 +571,9 @@ void SurgefxAudioProcessor::getStateInformation(juce::MemoryBlock &destData)
     }
 
     xml->setAttribute("fxt", effectNum);
+    xml->setAttribute("oscpin", oscPortIn);
+    xml->setAttribute("oscin", oscStartIn);
+    xml->setAttribute("currentPresetName", juce::String(currentPresetName));
 
     copyXmlToBinary(*xml, destData);
 }
@@ -491,6 +593,11 @@ void SurgefxAudioProcessor::setStateInformation(const void *data, int sizeInByte
 
             effectNum = xmlState->getIntAttribute("fxt", fxt_delay);
             resetFxType(effectNum, false);
+
+            oscPortIn = xmlState->getIntAttribute("oscpin", 0);
+            oscStartIn = xmlState->getBoolAttribute("oscin", false);
+            // start OSC, if variables merit it
+            oscCheckStartup = true;
 
             for (int i = 0; i < n_fx_params; ++i)
             {
@@ -555,6 +662,10 @@ void SurgefxAudioProcessor::setStateInformation(const void *data, int sizeInByte
             }
 
             updateJuceParamsFromStorage();
+
+            auto nm = xmlState->getStringAttribute("currentPresetName", "").toStdString();
+            currentPresetName = nm;
+            pendingPresetName = nm;
         }
     }
 }
@@ -645,6 +756,61 @@ void SurgefxAudioProcessor::resetFxType(int type, bool updateJuceParams)
     resetFxParams(updateJuceParams);
 }
 
+void SurgefxAudioProcessor::loadFxPreset(const Surge::Storage::FxUserPreset::Preset &p)
+{
+    // The preset picker only ever lists presets for the FX type that is
+    // currently loaded (see SurgefxAudioProcessorEditor::rebuildCurrentPresets,
+    // which calls getPresetsForSingleType(getEffectType())). Loading a preset
+    // therefore never changes the effect type - the FX type picker is the
+    // only thing that does that, via resetFxType(). This is a hard invariant,
+    // not a runtime branch: if it's ever violated, that's a bug upstream of
+    // this call, not something to silently "handle" here by respawning.
+    jassert(p.type == effectNum);
+
+    // loadPresetOnto() writes ~12 params' worth of fields (val, temposync,
+    // extend_range, deactivated, deform_type) into fxstorage one at a time,
+    // non-atomically. The audio thread reads this same fxstorage on every
+    // process() call, so we still need the same resettingFx guard
+    // resetFxType() uses - just without any of the respawn/ct_none-reset
+    // machinery, since the effect type and instance aren't changing here.
+    resettingFx = true;
+
+    // loadPresetOnto() spawns its own short-lived Effect internally purely to
+    // run init_ctrltypes()/handleStreamingMismatches() against fxstorage (so
+    // valtype/ranges/deform options are correct before/after the value
+    // write), then deletes it - it never touches surge_effect, the live
+    // effect instance actually used for audio.
+    //
+    // Since surge_effect already holds a pointer into this same fxstorage
+    // (see resetFxType()), it picks up the new values on its very next
+    // process() call once resettingFx is cleared below. No respawn, no
+    // init()/init_default_values(), no DSP state reset (delay lines, filter
+    // histories, LFO phase, etc).
+    Surge::Storage::FxUserPreset loader;
+    loader.loadPresetOnto(p, storage.get(), fxstorage);
+
+    // We deliberately do NOT call resetFxParams() here, even though it does
+    // most of what we need (reorder params, push to JUCE, notify host). The
+    // problem is its feature-flag-wipe loop:
+    //
+    //     for (int i = 0; i < n_fx_params; ++i)
+    //         paramFeatureOntoParam(&(fxstorage->p[i]), 0);
+    //
+    // That loop exists for resetFxType()'s benefit: fxstorage->p[] is a
+    // fixed-size array reused across different effect types, so after
+    // spawning a *different* effect, any temposync/extend/absolute/
+    // deactivated flags left over from the *previous* effect's params need
+    // to be force-cleared. But loadPresetOnto() just wrote the preset's own
+    // (correct) values into these exact flags - calling that loop right
+    // after would immediately zero them all back out, which is exactly the
+    // tempo-sync/deactivate/extend bug this function exists to avoid. Since
+    // we never change the effect type here, there's nothing stale to clear.
+    reorderSurgeParams();
+    updateJuceParamsFromStorage(); // also triggers the async UI update
+    updateHostDisplay();
+    resettingFx = false;
+}
+
 void SurgefxAudioProcessor::resetFxParams(bool updateJuceParams)
 {
     reorderSurgeParams();
@@ -696,8 +862,15 @@ float SurgefxAudioProcessor::getParameterValueForString(int i, const std::string
     pdata v;
     // TODO: range error reporting
     std::string errMsg;
-    p->set_value_from_string_onto(s, v, errMsg);
-    return v.f;
+    auto res = p->set_value_from_string_onto(s, v, errMsg);
+    if (res)
+    {
+        return p->value_to_normalized(v.f);
+    }
+    else
+    {
+        return 0;
+    }
 }
 void SurgefxAudioProcessor::setParameterByString(int i, const std::string &s)
 {

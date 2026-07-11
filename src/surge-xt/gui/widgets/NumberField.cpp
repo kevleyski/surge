@@ -4,7 +4,7 @@
  *
  * Learn more at https://surge-synthesizer.github.io/
  *
- * Copyright 2018-2023, various authors, as described in the GitHub
+ * Copyright 2018-2024, various authors, as described in the GitHub
  * transaction log.
  *
  * Surge XT is released under the GNU General Public Licence v3
@@ -62,6 +62,14 @@ std::string NumberField::valueToDisplay() const
     case Skin::Parameters::POLY_COUNT:
         oss << poly << " / " << iValue;
         break;
+    case Skin::Parameters::WTSE_RESOLUTION:
+    {
+        auto respt = 32;
+        for (int i = 1; i < iValue; ++i)
+            respt *= 2;
+        oss << respt;
+    }
+    break;
     default:
         if (extended)
             return fmt::format("{:.2f}", (float)(iValue / 100.0));
@@ -71,6 +79,7 @@ std::string NumberField::valueToDisplay() const
     }
     return oss.str();
 }
+
 void NumberField::paint(juce::Graphics &g)
 {
     jassert(skin);
@@ -104,6 +113,7 @@ void NumberField::setControlMode(Surge::Skin::Parameters::NumberfieldControlMode
 {
     controlMode = n;
     extended = isExtended;
+
     switch (controlMode)
     {
     case Skin::Parameters::NONE:
@@ -131,9 +141,18 @@ void NumberField::setControlMode(Surge::Skin::Parameters::NumberfieldControlMode
         iMin = 1;
         iMax = 100;
         break;
+    case Skin::Parameters::WTSE_RESOLUTION:
+        iMin = 1;
+        iMax = 8;
+        break;
+    case Skin::Parameters::WTSE_FRAMES:
+        iMin = 1;
+        iMax = 256;
+        break;
     }
     bounceToInt();
 }
+
 void NumberField::mouseDown(const juce::MouseEvent &event)
 {
     if (forwardedMainFrameMouseDowns(event))
@@ -186,6 +205,7 @@ void NumberField::mouseDrag(const juce::MouseEvent &event)
         lastDistanceChecked = d;
     }
 }
+
 void NumberField::mouseUp(const juce::MouseEvent &event)
 {
     mouseUpLongHold(event);
@@ -230,7 +250,23 @@ bool NumberField::keyPressed(const juce::KeyPress &key)
     auto [action, mod] = Surge::Widgets::accessibleEditAction(key, storage);
 
     if (action == None)
+    {
         return false;
+    }
+
+    if (action == Return)
+    {
+        auto sge = firstListenerOfType<SurgeGUIEditor>();
+
+        if (sge && sge->promptForUserValueEntry(getTag(), this))
+        {
+            return true;
+        }
+        else if (onReturnPressed)
+        {
+            return onReturnPressed(getTag(), this);
+        }
+    }
 
     if (action == OpenMenu)
     {
@@ -239,9 +275,12 @@ bool NumberField::keyPressed(const juce::KeyPress &key)
     }
 
     if (action != Increase && action != Decrease)
+    {
         return false;
+    }
 
     int amt = 1;
+
     if (action == Decrease)
     {
         amt = -1;
@@ -256,6 +295,7 @@ bool NumberField::keyPressed(const juce::KeyPress &key)
     changeBy(amt);
     notifyEndEdit();
     repaint();
+
     return true;
 }
 

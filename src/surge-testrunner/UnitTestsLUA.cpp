@@ -4,7 +4,7 @@
  *
  * Learn more at https://surge-synthesizer.github.io/
  *
- * Copyright 2018-2023, various authors, as described in the GitHub
+ * Copyright 2018-2024, various authors, as described in the GitHub
  * transaction log.
  *
  * Surge XT is released under the GNU General Public Licence v3
@@ -35,15 +35,15 @@
 #include "WavetableScriptEvaluator.h"
 #include "LuaSupport.h"
 
-#include "SurgeSharedBinary.h"
-
 #include "lua/LuaSources.h"
+
+#if HAS_LUA
 
 TEST_CASE("Lua Hello World", "[lua]")
 {
     SECTION("Hello World")
     {
-        lua_State *L = lua_open();
+        lua_State *L = luaL_newstate();
         REQUIRE(L);
         luaL_openlibs(L);
 
@@ -59,7 +59,7 @@ TEST_CASE("Lua Sample Operations", "[lua]")
 {
     SECTION("Math")
     {
-        lua_State *L = lua_open();
+        lua_State *L = luaL_newstate();
         REQUIRE(L);
         luaL_openlibs(L);
 
@@ -108,7 +108,7 @@ end
                 return -1.0;
         };
 
-        lua_State *L = lua_open();
+        lua_State *L = luaL_newstate();
         REQUIRE(L);
         luaL_openlibs(L);
 
@@ -153,22 +153,24 @@ TEST_CASE("Surge Prelude", "[lua]")
 {
     SECTION("Test The Prelude")
     {
-        lua_State *L = lua_open();
+        lua_State *L = luaL_newstate();
         REQUIRE(L);
         luaL_openlibs(L);
 
-        REQUIRE(Surge::LuaSupport::loadSurgePrelude(L));
+        REQUIRE(Surge::LuaSupport::loadSurgePrelude(L, Surge::LuaSources::formula_prelude));
 
         std::string emsg;
         REQUIRE(Surge::LuaSupport::parseStringDefiningFunction(
-            L, Surge::LuaSources::surge_prelude_test, "test", emsg));
-        Surge::LuaSupport::setSurgeFunctionEnvironment(L);
+            L, Surge::LuaSources::formula_prelude_test, "test", emsg));
+
+        static constexpr uint64_t formulafeatures = Surge::LuaSupport::EnvironmentFeatures::BASE;
+        Surge::LuaSupport::setSurgeFunctionEnvironment(L, formulafeatures);
 
         auto pcall = lua_pcall(L, 0, 1, 0);
         if (pcall != 0)
         {
-            std::cout << "Lua Error[" << pcall << "] " << lua_tostring(L, -1) << std::endl;
-            INFO("Lua Error " << pcall << " " << lua_tostring(L, -1));
+            std::cout << "Lua error [" << pcall << "] " << lua_tostring(L, -1) << std::endl;
+            INFO("Lua error " << pcall << " " << lua_tostring(L, -1));
         }
 
         REQUIRE(lua_isnumber(L, -1));
@@ -182,7 +184,7 @@ TEST_CASE("Lua Table API", "[lua]")
 {
     SECTION("Push And Get Element")
     {
-        lua_State *L = lua_open();
+        lua_State *L = luaL_newstate();
         REQUIRE(L);
         luaL_openlibs(L);
 
@@ -200,13 +202,11 @@ end
         {
             lua_createtable(L, 0, 4);
 
-            lua_pushstring(L, "a");
             lua_pushnumber(L, 13);
-            lua_settable(L, -3); /* 3rd element from the stack top */
+            lua_setfield(L, -2, "a"); /* 2nd element from the stack top */
 
-            lua_pushstring(L, "b");
             lua_pushnumber(L, 27);
-            lua_settable(L, -3);
+            lua_setfield(L, -2, "b");
 
             // So now the table is the top of the stack so
             lua_pcall(L, 1, 1, 0);
@@ -239,7 +239,7 @@ function plus_one(x)
     return x + 1
 end
 )FN";
-        lua_State *L = lua_open();
+        lua_State *L = luaL_newstate();
         REQUIRE(L);
         REQUIRE(lua_gettop(L) == 0);
         luaL_openlibs(L);
@@ -264,7 +264,7 @@ end
         auto fn = R"FN(
 shazbot = 13
 )FN";
-        lua_State *L = lua_open();
+        lua_State *L = luaL_newstate();
         REQUIRE(L);
         REQUIRE(lua_gettop(L) == 0);
         luaL_openlibs(L);
@@ -285,7 +285,7 @@ function double(x)
     return x * 2
 end
 )FN";
-        lua_State *L = lua_open();
+        lua_State *L = luaL_newstate();
         REQUIRE(L);
         REQUIRE(lua_gettop(L) == 0);
         luaL_openlibs(L);
@@ -308,7 +308,7 @@ function double(x)
     else
 end
 )FN";
-        lua_State *L = lua_open();
+        lua_State *L = luaL_newstate();
         REQUIRE(L);
         REQUIRE(lua_gettop(L) == 0);
         luaL_openlibs(L);
@@ -318,8 +318,10 @@ end
         REQUIRE(!res);
         REQUIRE(lua_gettop(L) == 1);
         REQUIRE(lua_isnil(L, -1));
-        REQUIRE(err == "Lua Syntax Error: [string \"lua-script\"]:7: 'end' expected (to close "
-                       "'function' at line 2) near '<eof>'");
+        // clang-format off
+        REQUIRE(err == 
+            "Lua syntax error: [string \"lua-script\"]:7: 'end' expected (to close 'function' at line 2) near '<eof>'");
+        // clang-format on
         lua_pop(L, 1);
         lua_close(L);
     }
@@ -330,7 +332,7 @@ end
 -- A bit of a contrived case but that's OK
 error("I will parse but will not run")
 )FN";
-        lua_State *L = lua_open();
+        lua_State *L = luaL_newstate();
         REQUIRE(L);
         REQUIRE(lua_gettop(L) == 0);
         luaL_openlibs(L);
@@ -341,7 +343,7 @@ error("I will parse but will not run")
         REQUIRE(lua_gettop(L) == 1);
         REQUIRE(lua_isnil(L, -1));
         REQUIRE(err ==
-                "Lua Evaluation Error: [string \"lua-script\"]:3: I will parse but will not run");
+                "Lua evaluation error: [string \"lua-script\"]:3: I will parse but will not run");
         lua_pop(L, 1);
         lua_close(L);
     }
@@ -360,7 +362,7 @@ function plus_two(x)
     return x + 2
 end
 )FN";
-        lua_State *L = lua_open();
+        lua_State *L = luaL_newstate();
         REQUIRE(L);
         REQUIRE(lua_gettop(L) == 0);
         luaL_openlibs(L);
@@ -396,7 +398,7 @@ function plus_two(x)
     return x + 2
 end
 )FN";
-        lua_State *L = lua_open();
+        lua_State *L = luaL_newstate();
         REQUIRE(L);
         REQUIRE(lua_gettop(L) == 0);
         luaL_openlibs(L);
@@ -448,7 +450,7 @@ std::vector<formulaObservation> runFormula(SurgeStorage *storage, FormulaModulat
 
         float r[Surge::Formula::max_formula_outputs];
         Surge::Formula::valueAt(iphase, phase, storage, fs, &es, r);
-        res.push_back(formulaObservation(iphase, phase, r[0]));
+        res.emplace_back(formulaObservation(iphase, phase, r[0]));
         for (int i = 0; i < Surge::Formula::max_formula_outputs; ++i)
             res.back().vVec[i] = r[i];
 
@@ -659,33 +661,6 @@ end)FN");
         REQUIRE(outOfBounds > 0);
     }
 }
-TEST_CASE("Wavetable Script", "[formula]")
-{
-    SECTION("Just The Sines")
-    {
-        const std::string s = R"FN(
-function generate(config)
-    res = config.xs
-    for i,x in ipairs(config.xs) do
-        res[i] = math.sin(x * (config.n+1) * 2 * math.pi)
-    end
-    return res
-end
-        )FN";
-        for (int fno = 0; fno < 4; ++fno)
-        {
-            auto fr = Surge::WavetableScript::evaluateScriptAtFrame(s, 512, fno, 4);
-            REQUIRE(fr.size() == 512);
-            auto dp = 1.0 / (512 - 1);
-            for (int i = 0; i < 512; ++i)
-            {
-                auto x = i * dp;
-                auto r = sin(x * (fno + 1) * 2 * M_PI);
-                REQUIRE(r == Approx(fr[i]));
-            }
-        }
-    }
-}
 
 TEST_CASE("Simple Used Formula Modulator", "[formula]")
 {
@@ -740,11 +715,6 @@ TEST_CASE("Voice Features And Flags", "[formula]")
         surge->setModDepth01(pitchId, ms_slfo1, 0, 0, 0.1);
 
         surge->storage.getPatch().formulamods[0][0].setFormula(R"FN(
-function init(state)
-   state.subscriptions["voice"] = true
-   return state
-end
-
 function process(state)
     state.output = (state.phase * 2 - 1)
     return state
@@ -773,7 +743,7 @@ end)FN");
 
         auto cs = Surge::Formula::extractModStateKeyForTesting("is_voice", sms->formulastate);
         auto sval = std::get_if<float>(&cs);
-        REQUIRE(sval); // a change - we don't even set is_voice if not voice subscribed
+        REQUIRE(sval); // Since 1.3.0 we no longer need to subscribe for is_voice to be set
         REQUIRE((bool)(*sval) == false);
     }
 
@@ -788,11 +758,6 @@ end)FN");
         surge->setModDepth01(pitchId, ms_slfo1, 0, 0, 0.1);
 
         surge->storage.getPatch().formulamods[0][0].setFormula(R"FN(
-function init(state)
-   state.subscriptions["voice"] = true
-   return state
-end
-
 function process(state)
     state.output = (state.phase * 2 - 1)
     return state
@@ -968,3 +933,369 @@ TEST_CASE("Two Surge XTs", "[formula]")
         }
     }
 }
+
+TEST_CASE("Bitops Module", "[formula]")
+{
+    SECTION("Bit Operation")
+    {
+        SurgeStorage storage;
+        FormulaModulatorStorage fs;
+        fs.setFormula(R"FN(
+function process(state)
+    state.output = bit.tobit(0xffffffff)
+    return state
+end)FN");
+        auto runIt = runFormula(&storage, &fs, 0.0321, 5);
+        for (auto c : runIt)
+        {
+            REQUIRE(c.v == -1);
+        }
+    }
+}
+
+TEST_CASE("Shared Table", "[formula]")
+{
+    SECTION("Shared Table Persists Across Multiple Runs")
+    {
+        SurgeStorage storage;
+        FormulaModulatorStorage fs;
+
+        fs.setFormula(R"FN(
+function init(state)
+    state.clamp_output = false
+    if shared.count == nil then
+        shared.count = 0
+    end
+    return state
+end
+
+function process(state)
+    state.output = shared.count
+    shared.count = shared.count + 1
+    return state
+end)FN");
+
+        auto firstRun = runFormula(&storage, &fs, 0.0321, 5);
+        REQUIRE(!firstRun.empty());
+        auto secondRun = runFormula(&storage, &fs, 0.0321, 5);
+        REQUIRE(!secondRun.empty());
+
+        for (size_t i = 0; i < secondRun.size(); ++i)
+        {
+            REQUIRE(secondRun[i].v == firstRun.size() + i);
+        }
+    }
+
+    SECTION("Namespaced Shared Tables Do Not Collide")
+    {
+        SurgeStorage storage;
+        auto &fs0 = storage.getPatch().formulamods[0][0];
+        auto &fs1 = storage.getPatch().formulamods[0][1];
+
+        fs0.setFormula(R"FN(
+function init(state)
+    shared[state.lfo_id] = shared[state.lfo_id] or {}
+    shared[state.lfo_id].val = 0.25
+    return state
+end
+
+function process(state)
+    state.output = shared[state.lfo_id].val
+    return state
+end)FN");
+        fs1.setFormula(R"FN(
+function init(state)
+    shared[state.lfo_id] = shared[state.lfo_id] or {}
+    if shared[state.lfo_id].val == nil then
+        shared[state.lfo_id].val = 0.75
+    end
+    return state
+end
+
+function process(state)
+    state.output = shared[state.lfo_id].val
+    return state
+end)FN");
+        auto firstRun = runFormula(&storage, &fs0, 0.0321, 5);
+        REQUIRE(!firstRun.empty());
+        for (auto c : firstRun)
+        {
+            REQUIRE(c.v == 0.25);
+        }
+        auto secondRun = runFormula(&storage, &fs1, 0.0321, 5);
+        REQUIRE(!secondRun.empty());
+        for (auto c : secondRun)
+        {
+            REQUIRE(c.v == 0.75);
+        }
+    }
+
+    SECTION("Shared Table Is Wiped By requestSharedDataWipe")
+    {
+        SurgeStorage storage;
+        FormulaModulatorStorage fs;
+
+        auto scriptA = R"FN(
+-- Script A
+function init(state)
+    shared.val = 0.25
+    return state
+end
+
+function process(state)
+    state.output = shared.val
+    return state
+end)FN";
+        auto scriptB = R"FN(
+-- Script B (different hash from A)
+function init(state)
+    if shared.val == nil then
+        shared.val = 0.75
+    end
+    return state
+end
+
+function process(state)
+    state.output = shared.val
+    return state
+end)FN";
+        fs.setFormula(scriptA);
+        auto firstRun = runFormula(&storage, &fs, 0.0321, 5);
+        REQUIRE(!firstRun.empty());
+        for (auto c : firstRun)
+        {
+            REQUIRE(c.v == 0.25);
+        }
+        fs.setFormula(scriptB);
+        Surge::Formula::requestSharedDataWipe(&storage);
+        auto secondRun = runFormula(&storage, &fs, 0.0321, 5);
+        REQUIRE(!secondRun.empty());
+        for (auto c : secondRun)
+        {
+            REQUIRE(c.v == 0.75);
+        }
+    }
+}
+
+TEST_CASE("Wavetable Script", "[wts]")
+{
+    SECTION("Just the Sines")
+    {
+        SurgeStorage storage;
+        const std::string s = R"FN(
+
+function init(wt)
+    -- wt will have frame_count and sample_count defined
+    wt.name = "Sine Series"
+    wt.phase = math.linspace(0.0, 1.0, wt.sample_count)
+    return wt
+end
+
+function generate(wt)
+    local res = {}
+
+    for i,x in ipairs(wt.phase) do
+        local lv = 0
+        lv = sin(2 * pi * wt.frame * x)
+        res[i] = lv
+    end
+    return res
+end
+        )FN";
+        auto la = std::make_unique<Surge::WavetableScript::LuaWTEvaluator>();
+        la->setResolution(512);
+        la->setStorage(nullptr);
+        la->setFrameCount(4);
+        la->setScript(s);
+
+        for (int fno = 0; fno < 4; ++fno)
+        {
+            auto fr = la->getFrame(fno);
+            REQUIRE(fr.has_value());
+            REQUIRE(fr->size() == 512);
+            auto dp = 1.0 / (512 - 1);
+            for (int i = 0; i < 512; ++i)
+            {
+                auto x = i * dp;
+                auto r = sin(2 * M_PI * x * (fno + 1));
+                REQUIRE(r == Approx((*fr)[i]));
+            }
+        }
+    }
+}
+
+TEST_CASE("Wavetable Script Snapshots", "[wts]")
+{
+    SECTION("Script Can Read Snapshot Data")
+    {
+        SurgeStorage storage;
+        auto &osc = storage.getPatch().scene[0].osc[0];
+
+        // Populate snapshot slot 0 with a known 2-frame, 64-sample ramp
+        osc.wtSnapshots[0] = std::make_unique<Wavetable>();
+        auto &snap = *osc.wtSnapshots[0];
+
+        constexpr int nframes = 2;
+        constexpr int nsamples = 64;
+        std::vector<float> flat(nframes * nsamples);
+        for (int t = 0; t < nframes; ++t)
+        {
+            for (int i = 0; i < nsamples; ++i)
+            {
+                flat[t * nsamples + i] = (float)(t + 1) * (float)i / 63.0f;
+            }
+        }
+
+        wt_header wh{};
+        wh.n_samples = nsamples;
+        wh.n_tables = nframes;
+        wh.flags = 0;
+        snap.BuildWT(flat.data(), wh, false);
+
+        // Script that copies snapshot slot 1 (Lua 1-indexed), frame matching wt.frame
+        const std::string s = R"FN(
+function init(wt)
+    wt.name = "Snapshot Test"
+    return wt
+end
+
+function generate(wt)
+    local res = {}
+    local slot = wt.snapshot[1]
+    if slot and slot[wt.frame] then
+        for i = 1, wt.sample_count do
+            if slot[wt.frame][i] then
+                res[i] = slot[wt.frame][i]
+            else
+                res[i] = 0
+            end
+        end
+    else
+        for i = 1, wt.sample_count do
+            res[i] = 0
+        end
+    end
+    return res
+end
+        )FN";
+
+        auto la = std::make_unique<Surge::WavetableScript::LuaWTEvaluator>();
+        la->setResolution(64);
+        la->setStorage(&storage);
+        la->setOscillatorStorage(0, 0);
+        la->setFrameCount(2);
+        la->setScript(s);
+
+        auto fr0 = la->getFrame(0);
+        REQUIRE(fr0.has_value());
+        REQUIRE(fr0->size() == 64);
+        for (int i = 0; i < 64; ++i)
+        {
+            float expected = 1.0f * (float)i / 63.0f;
+            REQUIRE((*fr0)[i] == Approx(expected).margin(1e-6));
+        }
+
+        auto fr1 = la->getFrame(1);
+        REQUIRE(fr1.has_value());
+        REQUIRE(fr1->size() == 64);
+        for (int i = 0; i < 64; ++i)
+        {
+            float expected = 2.0f * (float)i / 63.0f;
+            REQUIRE((*fr1)[i] == Approx(expected).margin(1e-6));
+        }
+    }
+
+    SECTION("Empty Snapshot Slot Returns Empty Table")
+    {
+        SurgeStorage storage;
+
+        // All snapshots disabled by default, script should still run
+        const std::string s = R"FN(
+function init(wt)
+    wt.name = "Empty Snapshot Test"
+    return wt
+end
+
+function generate(wt)
+    local res = {}
+    local slot = wt.snapshot[1]
+    local hasData = false
+    if slot then
+        for k, v in pairs(slot) do
+            hasData = true
+            break
+        end
+    end
+    for i = 1, wt.sample_count do
+        res[i] = hasData and 1.0 or 0.0
+    end
+    return res
+end
+        )FN";
+
+        auto la = std::make_unique<Surge::WavetableScript::LuaWTEvaluator>();
+        la->setResolution(64);
+        la->setStorage(&storage);
+        la->setOscillatorStorage(0, 0);
+        la->setFrameCount(1);
+        la->setScript(s);
+
+        auto fr = la->getFrame(0);
+        REQUIRE(fr.has_value());
+        REQUIRE(fr->size() == 64);
+        for (int i = 0; i < 64; ++i)
+        {
+            REQUIRE((*fr)[i] == Approx(0.0).margin(1e-6));
+        }
+    }
+}
+
+TEST_CASE("PFFFT Wrapper", "[wts]")
+{
+    SECTION("Round-Trip FFT")
+    {
+        SurgeStorage storage;
+        const std::string s = R"FN(
+
+function init(wt)
+    -- wt will have frame_count and sample_count defined
+    wt.name = "Sine"
+    wt.phase = math.linspace(0.0, 1.0, wt.sample_count)
+    return wt
+end
+
+function generate(wt)
+    local res = {}
+    local fft = {}
+
+    for i,x in ipairs(wt.phase) do
+        local lv = 0
+        lv = sin(2 * pi * x)
+        res[i] = lv
+    end
+    fft = real_fft(res)
+    fft = real_ifft(fft)
+    fft = scale_real(fft)
+    return fft
+end
+        )FN";
+        auto la = std::make_unique<Surge::WavetableScript::LuaWTEvaluator>();
+        la->setResolution(512);
+        la->setStorage(nullptr);
+        la->setFrameCount(1);
+        la->setScript(s);
+
+        auto fr = la->getFrame(0);
+        REQUIRE(fr.has_value());
+        REQUIRE(fr->size() == 512);
+        auto dp = 1.0 / (512 - 1);
+        for (int i = 0; i < 512; ++i)
+        {
+            auto x = i * dp;
+            auto r = sin(2 * M_PI * x);
+            REQUIRE(r == Approx((*fr)[i]).margin(1e-6));
+        }
+    }
+}
+
+#endif

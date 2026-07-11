@@ -4,7 +4,7 @@
  *
  * Learn more at https://surge-synthesizer.github.io/
  *
- * Copyright 2018-2023, various authors, as described in the GitHub
+ * Copyright 2018-2024, various authors, as described in the GitHub
  * transaction log.
  *
  * Surge XT is released under the GNU General Public Licence v3
@@ -36,6 +36,7 @@
 #include "globals.h"
 
 #include "juce_graphics/juce_graphics.h"
+#include "juce/JuceAPICope.h"
 
 #include "SkinModel.h"
 #include "SkinColors.h"

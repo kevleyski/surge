@@ -4,7 +4,7 @@
  *
  * Learn more at https://surge-synthesizer.github.io/
  *
- * Copyright 2018-2023, various authors, as described in the GitHub
+ * Copyright 2018-2024, various authors, as described in the GitHub
  * transaction log.
  *
  * Surge XT is released under the GNU General Public Licence v3
@@ -25,10 +25,14 @@
 #include "HeadlessUtils.h"
 #include "BiquadFilter.h"
 #include "MemoryPool.h"
+#include "SurgeStorage.h"
 
 #include "sst/plugininfra/strnatcmp.h"
 
 #include "catch2/catch_amalgamated.hpp"
+
+#include <fstream>
+#include <vector>
 
 inline size_t align_diff(const void *ptr, std::uintptr_t alignment) noexcept
 {
@@ -102,7 +106,6 @@ TEST_CASE("QuadFilterUnit Is SIMD Aligned", "[infra]")
     SECTION("Array of QuadFilterUnits")
     {
         int nqfus = 5;
-        std::vector<sst::filters::QuadFilterUnitState *> pointers;
         for (int i = 0; i < 5000; ++i)
         {
             auto *f = new sst::filters::QuadFilterUnitState[nqfus]();
@@ -233,4 +236,166 @@ TEST_CASE("strnatcmp With Spaces", "[infra]")
     }
 
     SECTION("Doubled Spaces") { REQUIRE(strnatcmp("Spa  Day", "Spa Day") == 0); }
+}
+
+TEST_CASE("Template Patches are Rational", "[infra]")
+{
+    auto surge = Surge::Headless::createSurge(48000, true);
+
+    int tempCat{-1};
+    for (const auto &c : surge->storage.patch_category)
+    {
+        if (c.name == "Templates" && c.isFactory)
+        {
+            tempCat = c.internalid;
+        }
+    }
+    REQUIRE(tempCat >= 0);
+
+    int tested{0};
+    int idx{0};
+    for (auto &p : surge->storage.patch_list)
+    {
+        if (p.category == tempCat)
+        {
+            INFO("Testing " << p.name);
+
+            surge->loadPatch(idx);
+
+            for (int i = 0; i < 5; ++i)
+                surge->process();
+
+            auto &patch = surge->storage.getPatch();
+
+            REQUIRE(patch.name == p.name);
+
+            for (int sc = 0; sc < n_scenes; ++sc)
+            {
+                auto &scene = patch.scene[sc];
+                // Make sure the filters and waveshapers aren't off in each scene
+                REQUIRE(!scene.filterunit[0].type.deactivated);
+                REQUIRE(!scene.filterunit[1].type.deactivated);
+                REQUIRE(!scene.wsunit.type.deactivated);
+
+                // Make sure at least one oscillator is not muted in each
+                bool somethingOn = !scene.mute_o1.val.b || !scene.mute_o2.val.b ||
+                                   !scene.mute_o3.val.b || !scene.mute_noise.val.b;
+                REQUIRE(somethingOn);
+            }
+            tested++;
+        }
+        ++idx;
+    }
+    REQUIRE(tested);
+}
+
+TEST_CASE("User Data Path Override", "[infra]")
+{
+    SECTION("Set and Get User Data Path Override")
+    {
+        auto surge = Surge::Headless::createSurge(48000, false);
+        REQUIRE(surge);
+
+        // Get the original user data path
+        auto originalPath = surge->storage.userDataPath;
+
+        // Test setting a custom path
+        fs::path testPath = surge->storage.localAppDataPath / "test_user_data";
+        surge->storage.setOverridenUserPath(&testPath);
+
+        // Verify the override file was created
+        auto overrideFile = surge->storage.localAppDataPath / "surgeUserDirectoryLocation.xml";
+        REQUIRE(fs::exists(overrideFile));
+
+        // Read back the overridden path
+        auto overriddenPath = surge->storage.getOverridenUserPath();
+
+        // Note: getOverridenUserPath returns empty if the path doesn't exist
+        // So we just verify the file was written
+        INFO("Override file created at: " << overrideFile.u8string());
+
+        // Test clearing the override
+        surge->storage.setOverridenUserPath(nullptr);
+        REQUIRE(!fs::exists(overrideFile));
+
+        // Verify getting override returns empty when file is removed
+        auto clearedPath = surge->storage.getOverridenUserPath();
+        REQUIRE(clearedPath.empty());
+    }
+
+    SECTION("Override Path With Existing Directory")
+    {
+        auto surge = Surge::Headless::createSurge(48000, false);
+        REQUIRE(surge);
+
+        // Use a path that exists (the local app data path itself)
+        fs::path existingPath = surge->storage.localAppDataPath;
+        surge->storage.setOverridenUserPath(&existingPath);
+
+        // Read it back - should return the path since it exists
+        auto retrievedPath = surge->storage.getOverridenUserPath();
+        REQUIRE(retrievedPath == existingPath);
+
+        // Clean up
+        surge->storage.setOverridenUserPath(nullptr);
+    }
+}
+
+TEST_CASE("Surge Common Binary Resources", "[infra]")
+{
+    // Files bundled into the surge-common-binary CMakeRC archive. The leaf
+    // names must match cmrc_add_resource_library() in src/common/CMakeLists.txt.
+    static const std::vector<std::string> bundled = {
+        "configuration.xml",      "memoryWavetable.wt",  "oscspecification.html",
+        "paramdocumentation.xml", "README_UserArea.txt", "windows.wt",
+    };
+
+    SECTION("Each bundled resource loads non-empty")
+    {
+        for (const auto &name : bundled)
+        {
+            INFO("resource: " << name);
+            auto res = Surge::Storage::getSurgeCommonBinaryResource(name);
+            REQUIRE(res.has_value());
+            REQUIRE(!res->empty());
+        }
+    }
+
+    SECTION("Bundled bytes match the on-disk source file when reachable")
+    {
+        // Tests run with WORKING_DIRECTORY=${SURGE_SOURCE_DIR} under ctest, so
+        // resources/surge-shared/<name> is reachable. If invoked from another
+        // cwd, skip the byte-compare for that file rather than fail.
+        for (const auto &name : bundled)
+        {
+            INFO("resource: " << name);
+            fs::path onDisk = fs::path("resources") / "surge-shared" / name;
+            if (!fs::exists(onDisk))
+            {
+                WARN("Skipping byte-compare; source file not reachable from cwd: "
+                     << onDisk.u8string());
+                continue;
+            }
+            std::ifstream ifs(onDisk, std::ios::binary);
+            REQUIRE(ifs.good());
+            std::vector<char> diskBytes((std::istreambuf_iterator<char>(ifs)),
+                                        std::istreambuf_iterator<char>());
+
+            auto res = Surge::Storage::getSurgeCommonBinaryResource(name);
+            REQUIRE(res.has_value());
+            REQUIRE(res->size() == diskBytes.size());
+            REQUIRE(*res == diskBytes);
+        }
+    }
+
+    SECTION("Missing resource returns nullopt and does not throw")
+    {
+        std::optional<std::vector<char>> res;
+        REQUIRE_NOTHROW(res = Surge::Storage::getSurgeCommonBinaryResource(
+                            "definitely_not_a_real_resource.xyz"));
+        REQUIRE(!res.has_value());
+
+        REQUIRE_NOTHROW(res = Surge::Storage::getSurgeCommonBinaryResource(""));
+        REQUIRE(!res.has_value());
+    }
 }

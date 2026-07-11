@@ -4,7 +4,7 @@
  *
  * Learn more at https://surge-synthesizer.github.io/
  *
- * Copyright 2018-2023, various authors, as described in the GitHub
+ * Copyright 2018-2024, various authors, as described in the GitHub
  * transaction log.
  *
  * Surge XT is released under the GNU General Public Licence v3
@@ -214,9 +214,9 @@ class Oscilloscope : public OverlayComponent,
     void resized() override;
     void updateDrawing();
     void visibilityChanged() override;
-    bool wantsInitialKeyboardFocus() override;
+    bool wantsInitialKeyboardFocus() const override { return false; }
 
-    void valueChanged(GUI::IComponentTagValue *p) override{};
+    void valueChanged(GUI::IComponentTagValue *p) override {};
     int32_t controlModifierClicked(Surge::GUI::IComponentTagValue *pControl,
                                    const juce::ModifierKeys &button,
                                    bool isDoubleClickEvent) override;
@@ -300,7 +300,7 @@ class Oscilloscope : public OverlayComponent,
         void onSkinChanged() override;
         void paint(juce::Graphics &g) override;
         void resized() override;
-        void valueChanged(GUI::IComponentTagValue *p) override{};
+        void valueChanged(GUI::IComponentTagValue *p) override {};
         int32_t controlModifierClicked(Surge::GUI::IComponentTagValue *pControl,
                                        const juce::ModifierKeys &button,
                                        bool isDoubleClickEvent) override
@@ -340,7 +340,7 @@ class Oscilloscope : public OverlayComponent,
         void onSkinChanged() override;
         void paint(juce::Graphics &g) override;
         void resized() override;
-        void valueChanged(GUI::IComponentTagValue *p) override{};
+        void valueChanged(GUI::IComponentTagValue *p) override {};
         int32_t controlModifierClicked(Surge::GUI::IComponentTagValue *pControl,
                                        const juce::ModifierKeys &button,
                                        bool isDoubleClickEvent) override

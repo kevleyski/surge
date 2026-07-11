@@ -4,7 +4,7 @@
  *
  * Learn more at https://surge-synthesizer.github.io/
  *
- * Copyright 2018-2023, various authors, as described in the GitHub
+ * Copyright 2018-2024, various authors, as described in the GitHub
  * transaction log.
  *
  * Surge XT is released under the GNU General Public Licence v3
@@ -20,11 +20,15 @@
  * https://github.com/surge-synthesizer/surge
  */
 
+#include <iostream>
+#include <list>
+#include <locale>
+#include <regex>
+
 #include "SurgeStorage.h"
 #include "Oscillator.h"
 #include "SurgeParamConfig.h"
 #include "Effect.h"
-#include <list>
 #include "MSEGModulationHelper.h"
 #include "FormulaModulationHelper.h"
 #include "DebugHelpers.h"
@@ -33,11 +37,14 @@
 #include "UserDefaults.h"
 #include "version.h"
 #include "fmt/core.h"
-#include <locale>
 #include <fmt/format.h>
 #include "UnitConversions.h"
 
+#include "binn/binn.h"
 #include "sst/basic-blocks/mechanics/endian-ops.h"
+#include "PatchFileHeaderStructs.h"
+#include "zstd.h"
+
 namespace mech = sst::basic_blocks::mechanics;
 
 using namespace std;
@@ -101,6 +108,7 @@ SurgePatch::SurgePatch(SurgeStorage *storage)
         param_ptr.push_back(this->fx[fx].type.assign(
             p_id.next(), 0, "type", "FX Type", fmt::format("{}/type", fxslot_shortoscname[fx]),
             ct_fxtype, Surge::Skin::FX::fx_type, 0, cg_FX, fx, false, kHorizontal));
+
         for (int p = 0; p < n_fx_params; p++)
         {
             auto conn = Surge::Skin::Connector::connectorByID("fx.param_" + std::to_string(p + 1));
@@ -151,9 +159,9 @@ SurgePatch::SurgePatch(SurgeStorage *storage)
         {
             // Initialize the display name here
             scene[sc].osc[osc].wavetable_display_name = "";
-            scene[sc].osc[osc].wavetable_formula = "";
-            scene[sc].osc[osc].wavetable_formula_nframes = 10;
-            scene[sc].osc[osc].wavetable_formula_res_base = 5;
+            scene[sc].osc[osc].wavetable_script = "";
+            scene[sc].osc[osc].wavetable_script_nframes = 10;
+            scene[sc].osc[osc].wavetable_script_res_base = 5;
 
             a->push_back(scene[sc].osc[osc].type.assign(
                 p_id.next(), id_s++, "type", "Type",
@@ -487,7 +495,6 @@ SurgePatch::SurgePatch(SurgeStorage *storage)
                 sc_id, cg_FILTER, f, true));
         }
 
-        // scene[sc].filterunit[0].type.val.i = 1;
         for (int e = 0; e < 2; e++) // 2 = we have two envelopes, filter and amplifier
         {
             std::string et = (e == 1) ? "feg" : "aeg";
@@ -527,9 +534,12 @@ SurgePatch::SurgePatch(SurgeStorage *storage)
                 fmt::format("{:c}/{}/sustain", 'a' + sc, et), ct_percent, getCon("sustain"), sc_id,
                 cg_ENV, e, true, int(kVertical) | int(kWhite) | int(sceasy)));
 
+            // only show Freeze at sustain level option for amplifier envelope
+            const auto ctype = (e == 0) ? ct_envtime_deformable : ct_envtime;
+
             a->push_back(scene[sc].adsr[e].r.assign(
                 p_id.next(), id_s++, "release", "Release",
-                fmt::format("{:c}/{}/release", 'a' + sc, et), ct_envtime, getCon("release"), sc_id,
+                fmt::format("{:c}/{}/release", 'a' + sc, et), ctype, getCon("release"), sc_id,
                 cg_ENV, e, true, int(kVertical) | int(kWhite) | int(sceasy)));
 
             a->push_back(scene[sc].adsr[e].r_s.assign(
@@ -893,6 +903,13 @@ void SurgePatch::init_default_values()
         scene[sc].lowcut.deactivated = false;
         scene[sc].lowcut.per_voice_processing = false;
 
+        for (int i = 0; i < n_filterunits_per_scene; i++)
+        {
+            scene[sc].filterunit[i].type.deactivated = false;
+        }
+
+        scene[sc].wsunit.type.deactivated = false;
+
         for (int i = 0; i < n_egs; i++)
         {
             scene[sc].adsr[i].a.val.f = scene[sc].adsr[i].a.val_min.f;
@@ -974,14 +991,18 @@ void SurgePatch::init_default_values()
 
 SurgePatch::~SurgePatch() { free(patchptr); }
 
-void SurgePatch::copy_scenedata(pdata *d, int scene)
+void SurgePatch::copy_scenedata(pdata *d, pdata *dUnmod, int scene)
 {
+
     int s = scene_start[scene];
     for (int i = 0; i < n_scene_params; i++)
     {
         // if (param_ptr[i+s]->valtype == vt_float)
         // d[i].f = param_ptr[i+s]->val.f;
         d[i].i = param_ptr[i + s]->val.i;
+
+        if (param_ptr[i + s]->ctrlgroup == cg_OSC)
+            dUnmod[i].f = d[i].f;
     }
 
     for (int i = 0; i < paramModulationCount; ++i)
@@ -1064,7 +1085,7 @@ void SurgePatch::update_controls(
 
             unsigned char mbuf alignas(16)[oscillator_buffer_size];
             Oscillator *t_osc =
-                spawn_osc(sc.osc[osc].type.val.i, storage, &sc.osc[osc], nullptr, mbuf);
+                spawn_osc(sc.osc[osc].type.val.i, storage, &sc.osc[osc], nullptr, nullptr, mbuf);
             if (t_osc)
             {
                 t_osc->init_ctrltypes(sn, osc);
@@ -1102,112 +1123,10 @@ void SurgePatch::update_controls(
     }
 }
 
-#pragma pack(push, 1)
-struct patch_header
-{
-    char tag[4];
-    // TODO: FIX SCENE AND OSC COUNT ASSUMPTION for wtsize
-    // (but also since it's used in streaming, do it with care!)
-    unsigned int xmlsize, wtsize[2][3];
-};
-#pragma pack(pop)
-
-// BASE 64 SUPPORT, THANKS TO:
-// https://renenyffenegger.ch/notes/development/Base64/Encoding-and-decoding-base-64-with-cpp
-static const std::string base64_chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-                                        "abcdefghijklmnopqrstuvwxyz"
-                                        "0123456789+/";
-
-static inline bool is_base64(unsigned char c) { return (isalnum(c) || (c == '+') || (c == '/')); }
-
-std::string base64_encode(unsigned char const *bytes_to_encode, unsigned int in_len)
-{
-    std::string ret;
-    int i = 0;
-    int j = 0;
-    unsigned char char_array_3[3];
-    unsigned char char_array_4[4];
-
-    while (in_len--)
-    {
-        char_array_3[i++] = *(bytes_to_encode++);
-        if (i == 3)
-        {
-            char_array_4[0] = (char_array_3[0] & 0xfc) >> 2;
-            char_array_4[1] = ((char_array_3[0] & 0x03) << 4) + ((char_array_3[1] & 0xf0) >> 4);
-            char_array_4[2] = ((char_array_3[1] & 0x0f) << 2) + ((char_array_3[2] & 0xc0) >> 6);
-            char_array_4[3] = char_array_3[2] & 0x3f;
-
-            for (i = 0; (i < 4); i++)
-                ret += base64_chars[char_array_4[i]];
-            i = 0;
-        }
-    }
-
-    if (i)
-    {
-        for (j = i; j < 3; j++)
-            char_array_3[j] = '\0';
-
-        char_array_4[0] = (char_array_3[0] & 0xfc) >> 2;
-        char_array_4[1] = ((char_array_3[0] & 0x03) << 4) + ((char_array_3[1] & 0xf0) >> 4);
-        char_array_4[2] = ((char_array_3[1] & 0x0f) << 2) + ((char_array_3[2] & 0xc0) >> 6);
-
-        for (j = 0; (j < i + 1); j++)
-            ret += base64_chars[char_array_4[j]];
-
-        while ((i++ < 3))
-            ret += '=';
-    }
-
-    return ret;
-}
-
-std::string base64_decode(std::string const &encoded_string)
-{
-    int in_len = encoded_string.size();
-    int i = 0;
-    int j = 0;
-    int in_ = 0;
-    unsigned char char_array_4[4], char_array_3[3];
-    std::string ret;
-
-    while (in_len-- && (encoded_string[in_] != '=') && is_base64(encoded_string[in_]))
-    {
-        char_array_4[i++] = encoded_string[in_];
-        in_++;
-        if (i == 4)
-        {
-            for (i = 0; i < 4; i++)
-                char_array_4[i] = base64_chars.find(char_array_4[i]);
-
-            char_array_3[0] = (char_array_4[0] << 2) + ((char_array_4[1] & 0x30) >> 4);
-            char_array_3[1] = ((char_array_4[1] & 0xf) << 4) + ((char_array_4[2] & 0x3c) >> 2);
-            char_array_3[2] = ((char_array_4[2] & 0x3) << 6) + char_array_4[3];
-
-            for (i = 0; (i < 3); i++)
-                ret += char_array_3[i];
-            i = 0;
-        }
-    }
-
-    if (i)
-    {
-        for (j = 0; j < i; j++)
-            char_array_4[j] = base64_chars.find(char_array_4[j]);
-
-        char_array_3[0] = (char_array_4[0] << 2) + ((char_array_4[1] & 0x30) >> 4);
-        char_array_3[1] = ((char_array_4[1] & 0xf) << 4) + ((char_array_4[2] & 0x3c) >> 2);
-
-        for (j = 0; (j < i - 1); j++)
-            ret += char_array_3[j];
-    }
-
-    return ret;
-}
-
 void SurgePatch::load_patch(const void *data, int datasize, bool preset)
 {
+    using namespace sst::io;
+
     if (datasize <= 4)
         return;
     assert(datasize);
@@ -1279,6 +1198,31 @@ void SurgePatch::load_patch(const void *data, int datasize, bool preset)
                 }
             }
         }
+        for (auto &i : fx)
+        {
+            i.user_data.clear();
+        }
+        if (dr < end)
+        {
+            if (streamingRevision <= 28)
+            {
+                dr += load_arbitrary_block_storage(dr, (char *)end - dr);
+            }
+            else
+            {
+                // Started putting the size in the xml so that we could tack more on to the end.
+                if (static_cast<std::size_t>((char *)end - dr) < claimedArbitraryBlockStorageSize)
+                {
+                    std::cerr << "Missing arbitrary block storage data at the end of the patch, "
+                                 "possible patch corruption."
+                              << std::endl;
+                }
+                else
+                {
+                    dr += load_arbitrary_block_storage(dr, claimedArbitraryBlockStorageSize);
+                }
+            }
+        }
     }
     else
     {
@@ -1288,10 +1232,24 @@ void SurgePatch::load_patch(const void *data, int datasize, bool preset)
 
 unsigned int SurgePatch::save_patch(void **data)
 {
+    using namespace sst::io;
+
     size_t psize = 0;
     // void **xmldata = new void*();
     void *xmldata = 0;
     patch_header header;
+    std::vector<std::uint8_t> arbdata;
+
+    arbdata = save_arbitrary_block_storage();
+    if (arbdata.size() > std::numeric_limits<int32_t>::max())
+    {
+        claimedArbitraryBlockStorageSize = 0;
+        arbdata.clear();
+    }
+    else
+    {
+        claimedArbitraryBlockStorageSize = arbdata.size();
+    }
 
     memcpy(header.tag, "sub3", 4);
     size_t xmlsize = save_xml(&xmldata);
@@ -1319,6 +1277,7 @@ unsigned int SurgePatch::save_patch(void **data)
         }
     }
     psize += xmlsize + sizeof(patch_header);
+    psize += arbdata.size();
     if (patchptr)
         free(patchptr);
     patchptr = malloc(psize);
@@ -1358,7 +1317,290 @@ unsigned int SurgePatch::save_patch(void **data)
             }
         }
     }
+    // Append the arbitrary data.
+    memcpy(dw, arbdata.data(), arbdata.size());
+
     return psize;
+}
+
+bool SurgePatch::writeOscSnapshotsToBinn(binn *oscmap, const OscillatorStorage &osc)
+{
+    bool any = false;
+    for (int slot = 0; slot < n_wt_snapshots; ++slot)
+    {
+        const auto &snap = osc.wtSnapshots[slot];
+        if (!snap || !snap->everBuilt)
+            continue;
+
+        binn *frames = binn_list();
+        for (std::uint32_t t = 0; t < snap->n_tables; ++t)
+        {
+            binn_list_add_blob(frames, snap->TableF32WeakPointers[0][t],
+                               snap->size * sizeof(float));
+        }
+        binn_object_set_list(oscmap, fmt::format("snap_{}", slot).c_str(), frames);
+        binn_free(frames);
+        any = true;
+    }
+    return any;
+}
+
+bool SurgePatch::readOscSnapshotsFromBinn(binn *oscmap, OscillatorStorage &osc)
+{
+    bool any = false;
+    for (int slot = 0; slot < n_wt_snapshots; ++slot)
+    {
+        binn frames;
+        if (!binn_object_get_value(oscmap, fmt::format("snap_{}", slot).c_str(), &frames))
+            continue;
+        if (frames.type != BINN_LIST)
+        {
+            std::cerr << "Snapshot frames list missing or malformed; possibly corrupted patch."
+                      << std::endl;
+            continue;
+        }
+
+        int ntables = binn_count(&frames);
+        if (ntables <= 0 || ntables > max_subtables)
+        {
+            std::cerr << "Snapshot table count out of range; possibly corrupted patch."
+                      << std::endl;
+            continue;
+        }
+
+        binn first;
+        if (!binn_list_get_value(&frames, 1, &first) || first.type != BINN_BLOB)
+        {
+            std::cerr << "Snapshot frame blob missing or malformed; possibly corrupted patch."
+                      << std::endl;
+            continue;
+        }
+        int nsamples = binn_size(&first) / sizeof(float);
+        if (nsamples <= 0 || nsamples > max_wtable_size)
+        {
+            std::cerr << "Snapshot sample count out of range; possibly corrupted patch."
+                      << std::endl;
+            continue;
+        }
+
+        std::vector<float> data(static_cast<size_t>(ntables) * nsamples);
+        binn_iter fiter;
+        binn frame;
+        binn_iter_init(&fiter, &frames, BINN_LIST);
+        int t = 0;
+        while (binn_list_next(&fiter, &frame))
+        {
+            if (frame.type != BINN_BLOB ||
+                binn_size(&frame) != nsamples * static_cast<int>(sizeof(float)))
+                break;
+            std::memcpy(data.data() + static_cast<size_t>(t) * nsamples, frame.ptr,
+                        nsamples * sizeof(float));
+            t++;
+        }
+        if (t != ntables)
+        {
+            std::cerr << "Snapshot frame count mismatch; possibly corrupted patch." << std::endl;
+            continue;
+        }
+
+        wt_header wh{};
+        wh.n_samples = nsamples;
+        wh.n_tables = ntables;
+        wh.flags = 0;
+
+        auto &snap = osc.wtSnapshots[slot];
+        snap = std::make_unique<Wavetable>();
+
+        snap->BuildWT(data.data(), wh, false);
+
+        if (!snap->everBuilt)
+        {
+            snap.reset();
+        }
+        else
+        {
+            any = true;
+        }
+    }
+    return any;
+}
+
+std::vector<std::uint8_t> SurgePatch::save_arbitrary_block_storage()
+{
+    binn *map = binn_object();
+    for (int fx = 0; fx < n_fx_slots; fx++)
+    {
+        binn *fxmap = binn_object();
+        for (auto &kv : this->fx[fx].user_data)
+        {
+            binn_object_set_blob(fxmap, kv.first.c_str(), kv.second->data(), kv.second->size());
+        }
+        std::string key = fmt::format("fx{}", fx);
+        binn_object_set_object(map, key.c_str(), fxmap);
+        binn_free(fxmap);
+    }
+
+    // User opt-in for patch files, always include for DAW state saves.
+    if (snapshotsStoredInPatch || (dawExtraState.isPopulated && hasAnySnapshots()))
+    {
+        for (int sc = 0; sc < n_scenes; sc++)
+        {
+            for (int osc = 0; osc < n_oscs; osc++)
+            {
+                binn *oscmap = binn_object();
+                writeOscSnapshotsToBinn(oscmap, scene[sc].osc[osc]);
+                std::string key = fmt::format("osc_{}_{}", sc, osc);
+                binn_object_set_object(map, key.c_str(), oscmap);
+                binn_free(oscmap);
+            }
+        }
+    }
+
+    // Now compress it with zstd
+    auto size = binn_size(map);
+    void *ptr = binn_ptr(map);
+    auto compressedSize = ZSTD_compressBound(size);
+    std::vector<std::uint8_t> buf(compressedSize);
+    compressedSize = ZSTD_compress(buf.data(), compressedSize, ptr, size, 3);
+    if (ZSTD_isError(compressedSize))
+    {
+        compressedSize = 0;
+    }
+    buf.resize(compressedSize);
+    binn_free(map);
+    return buf;
+}
+
+unsigned int SurgePatch::load_arbitrary_block_storage(const void *data, std::size_t remainder)
+{
+    // This should be a zstd compressed block.
+    auto decompressedSize = ZSTD_getFrameContentSize(data, remainder);
+    if (decompressedSize == ZSTD_CONTENTSIZE_UNKNOWN || decompressedSize == ZSTD_CONTENTSIZE_ERROR)
+    {
+        // Possibly old patch, possibly corrupted data, either way we can't.
+        // Same for the rest of these "return 0"s.
+        return 0;
+    }
+    sst::cpputils::DynArray<std::uint8_t> decompressed(decompressedSize);
+    decompressedSize = ZSTD_decompress(decompressed.data(), decompressedSize, data, remainder);
+    if (ZSTD_isError(decompressedSize))
+    {
+        std::cerr << "Failed to decompress arbdata; possibly corrupted patch." << std::endl;
+        return 0;
+    }
+
+    if (decompressedSize < sizeof(binn_struct))
+    {
+        std::cerr << "Failed to create binn; possibly corrupted patch." << std::endl;
+        return 0;
+    }
+
+    data = decompressed.data();
+
+    int sz = static_cast<int>(decompressedSize);
+    if (!binn_is_valid_ex(data, NULL, NULL, &sz))
+    {
+        std::cerr
+            << "Failed to find binn or it was not the reported size; possibly corrupted patch."
+            << std::endl;
+        return 0;
+    }
+    binn *b = binn_open_ex(data, sz);
+
+    std::regex fx_regex("fx([0-9]+)");
+    std::regex osc_regex("osc_([0-9]+)_([0-9]+)");
+    binn_iter outer;
+    binn obj;
+    char key[256];
+    binn_iter_init(&outer, b, BINN_OBJECT);
+    while (binn_object_next(&outer, key, &obj))
+    {
+        if (obj.type != BINN_OBJECT)
+        {
+            std::cerr << "Binn value not an object, possible patch corruption." << std::endl;
+            continue;
+        }
+
+        std::cmatch m;
+        // Try deserializing FX.
+        if (std::regex_match(key, m, fx_regex))
+        {
+            int id = -1;
+            try
+            {
+                id = std::stoi(m[1].str());
+            }
+            catch (std::invalid_argument const &ex)
+            {
+                std::cerr << "Error deserializing " << key << "; possible patch corruption."
+                          << std::endl;
+                continue;
+            }
+
+            if (id < 0 || id >= n_fx_slots)
+            {
+                std::cerr << "FX index out of range in " << key << "; skipping." << std::endl;
+                continue;
+            }
+
+            // Deserialize the FX data.
+            std::unordered_map<std::string, std::shared_ptr<std::vector<std::uint8_t>>> &arb =
+                this->fx[id].user_data;
+            binn_iter inner;
+            binn data;
+            char fxkey[256];
+            binn_iter_init(&inner, &obj, BINN_OBJECT);
+            while (binn_object_next(&inner, fxkey, &data))
+            {
+                if (data.type != BINN_BLOB)
+                {
+                    std::cerr << "Binn value for " << fxkey
+                              << " is not a blob, possible patch corruption." << std::endl;
+                    continue;
+                }
+
+                std::string converted = std::string(fxkey);
+                std::shared_ptr<std::vector<std::uint8_t>> &vdata = arb[converted];
+                if (!vdata)
+                    vdata = std::make_shared<std::vector<std::uint8_t>>(binn_size(&data));
+                else
+                    vdata->resize(binn_size(&data));
+                std::memcpy(vdata->data(), data.ptr, binn_size(&data));
+            }
+        }
+
+        // Try deserializing oscillator snapshot data.
+        else if (std::regex_match(key, m, osc_regex))
+        {
+            int sc = -1, osc = -1;
+            try
+            {
+                sc = std::stoi(m[1].str());
+                osc = std::stoi(m[2].str());
+            }
+            catch (std::invalid_argument const &ex)
+            {
+                std::cerr << "Error deserializing " << key << "; possible patch corruption."
+                          << std::endl;
+                continue;
+            }
+
+            if (sc < 0 || sc >= n_scenes || osc < 0 || osc >= n_oscs)
+            {
+                std::cerr << "Osc index out of range in " << key << "; skipping." << std::endl;
+                continue;
+            }
+
+            // Rebuild wavetable snapshots from the stored frame lists.
+            if (readOscSnapshotsFromBinn(&obj, scene[sc].osc[osc]))
+            {
+                snapshotsStoredInPatch = true;
+            }
+        }
+    }
+
+    binn_free(b);
+    return sz;
 }
 
 Parameter *SurgePatch::parameterFromOSCName(std::string oscName)
@@ -1390,14 +1632,12 @@ void SurgePatch::load_xml(const void *data, int datasize, bool is_preset)
 
     if (datasize >= (1 << 22))
     {
-        auto msg = fmt::format(
-            "The patch that we attempted to load has a very large header ({:d} bytes), "
-            "which is larger than our safety threshold of 4 megabytes. This almost definitely "
-            "means that the patch header is corrupted, so Surge XT will not "
-            "proceed with loading!",
-            datasize);
+        auto msg = fmt::format("The patch has a header larger than 4 MB. This almost definitely "
+                               "means that the header is corrupted, so as a safety measure, the "
+                               "patch won't be loaded!",
+                               datasize);
 
-        storage->reportError(msg, "Patch Load Error");
+        storage->reportError(msg, "Load Error");
 
         return;
     }
@@ -1513,8 +1753,17 @@ void SurgePatch::load_xml(const void *data, int datasize, bool is_preset)
         }
     }
 
+    TiXmlElement *serialization = TINYXML_SAFE_TO_ELEMENT(patch->FirstChild("serialization"));
+    if (serialization)
+    {
+        serialization->QueryIntAttribute("absSize", &claimedArbitraryBlockStorageSize);
+    }
+
     TiXmlElement *parameters = TINYXML_SAFE_TO_ELEMENT(patch->FirstChild("parameters"));
-    assert(parameters);
+    if (!parameters)
+    {
+        return;
+    }
     int n = param_ptr.size();
 
     // delete volume (below streaming version 17) & fx_bypass if it's a preset
@@ -1581,6 +1830,8 @@ void SurgePatch::load_xml(const void *data, int datasize, bool is_preset)
                 {
                     param_ptr[i]->val.f = param_ptr[i]->val_default.f;
                 }
+
+                param_ptr[i]->miditakeover_status = sts_waiting_for_first_look;
             }
             else
             {
@@ -1881,6 +2132,7 @@ void SurgePatch::load_xml(const void *data, int datasize, bool is_preset)
 
     // Default hardclip value
     storage->hardclipMode = SurgeStorage::HARDCLIP_TO_18DBFS;
+    storage->useSustainAsModulatorOnly = false;
 
     for (int sc = 0; sc < n_scenes; ++sc)
     {
@@ -1955,6 +2207,19 @@ void SurgePatch::load_xml(const void *data, int datasize, bool is_preset)
             if (tam->QueryIntAttribute("v", &tv) == TIXML_SUCCESS)
             {
                 storage->setTuningApplicationMode((SurgeStorage::TuningApplicationMode)(tv));
+            }
+        }
+
+        auto *dspv =
+            TINYXML_SAFE_TO_ELEMENT(nonparamconfig->FirstChild("detachSustainPedalFromVoicing"));
+
+        if (dspv)
+        {
+            bool tv;
+
+            if (dspv->QueryBoolAttribute("v", &tv) == TIXML_SUCCESS)
+            {
+                storage->useSustainAsModulatorOnly.store(tv);
             }
         }
 
@@ -2260,6 +2525,140 @@ void SurgePatch::load_xml(const void *data, int datasize, bool is_preset)
         }
     }
 
+    if (revision <= 22)
+    {
+        for (auto sc = 0; sc < n_scenes; ++sc)
+        {
+            scene[sc].adsr[0].r.deform_type = 0;
+            scene[sc].adsr[1].r.deform_type = 0;
+        }
+    }
+
+    if (revision <= 23)
+    {
+        for (auto sc = 0; sc < n_scenes; ++sc)
+        {
+            // adds corrected 3 and 4 modes in middle of deform type
+            if (scene[sc].level_ring_12.deform_type > 4)
+            {
+                scene[sc].level_ring_12.deform_type += 2;
+            }
+            if (scene[sc].level_ring_23.deform_type > 4)
+            {
+                scene[sc].level_ring_23.deform_type += 2;
+            }
+        }
+    }
+
+    if (revision <= 25)
+    {
+        for (auto &sc : scene)
+        {
+            for (auto &lfo : sc.lfo)
+            {
+                if (lfo.magnitude.extend_range)
+                {
+                    lfo.magnitude.val.f *= 2.f;
+                    lfo.magnitude.val.f -= 1.f;
+                }
+            }
+        }
+    }
+
+    if (revision <= 26)
+    {
+        for (auto &sc : scene)
+        {
+            for (auto &u : sc.filterunit)
+            {
+                if (u.type.val.i == sst::filters::FilterType::fut_obxd_4pole &&
+                    u.subtype.val.i == sst::filters::FilterSubType::st_obxd4pole_24dB)
+                {
+                    u.subtype.val.i = sst::filters::FilterSubType::st_obxd4pole_broken24dB;
+                }
+                if (u.type.val.i == sst::filters::FilterType::fut_bp12 &&
+                    u.subtype.val.i == sst::filters::FilterSubType::st_Clean)
+                {
+                    u.subtype.val.i = sst::filters::FilterSubType::st_bp12_LegacyClean;
+                }
+                if (u.type.val.i == sst::filters::FilterType::fut_bp12 &&
+                    u.subtype.val.i == sst::filters::FilterSubType::st_Driven)
+                {
+                    u.subtype.val.i = sst::filters::FilterSubType::st_bp12_LegacyDriven;
+                }
+            }
+        }
+    }
+
+    if (revision <= 27)
+    {
+        // Sine Osc adds waveforms
+        for (auto &sc : scene)
+        {
+            for (auto &o : sc.osc)
+            {
+                if (o.type.val.i == ot_sine)
+                {
+                    auto shp = o.p[0].val.i;
+                    if (shp >= 1 && shp <= 7)
+                    {
+                        if (shp % 2 == 1)
+                        {
+                            auto q = (shp - 1) / 2 + 28;
+                            o.p[0].val.i = q;
+                        }
+                    }
+                }
+
+                // adjust tuning by 4.61048 cents
+                // see GitHub issue #8049
+                // TODO: This won't be necessary in XT2.0, so can be removed then!
+                if (o.type.val.i == ot_twist)
+                {
+                    if (o.pitch.absolute)
+                    {
+                        if (o.pitch.extend_range)
+                        {
+                            o.pitch.val.f *= 1.00022222222222222166f;
+                        }
+                        else
+                        {
+                            o.pitch.val.f *= 1.00266666666666666f;
+                        }
+                    }
+                    else
+                    {
+                        if (o.pitch.extend_range)
+                        {
+                            o.pitch.val.f += 0.0038420666666666666f;
+                        }
+                        else
+                        {
+                            o.pitch.val.f += 0.0461048f;
+                        }
+                    }
+                }
+            }
+        }
+
+        for (auto &f : fx)
+        {
+            if (f.type.val.i == fxt_ringmod)
+            {
+                auto sh = f.p[0].val.i;
+                if (sh == 28)
+                {
+                    sh = 33;
+                }
+                if (sh == 1 || sh == 3 || sh == 5 || sh == 7)
+                {
+                    sh = (sh - 1) / 2 + 28;
+                }
+                f.p[0].val.i = sh;
+            }
+        }
+    }
+
     // ensure that filter subtype is a valid value
     for (auto &sc : scene)
     {
@@ -2284,9 +2683,9 @@ void SurgePatch::load_xml(const void *data, int datasize, bool is_preset)
         for (int osc = 0; osc < n_oscs; osc++)
         {
             scene[sc].osc[osc].wavetable_display_name = "";
-            scene[sc].osc[osc].wavetable_formula = "";
-            scene[sc].osc[osc].wavetable_formula_nframes = 10;
-            scene[sc].osc[osc].wavetable_formula_res_base = 5;
+            scene[sc].osc[osc].wavetable_script = "";
+            scene[sc].osc[osc].wavetable_script_nframes = 10;
+            scene[sc].osc[osc].wavetable_script_res_base = 5;
         }
     }
 
@@ -2309,22 +2708,41 @@ void SurgePatch::load_xml(const void *data, int datasize, bool is_preset)
                         lkid->Attribute("wavetable_display_name");
                 }
 
+                if (lkid->Attribute("wavetable_script"))
+                {
+                    int wfi;
+
+                    scene[ssc].osc[sos].wavetable_script =
+                        Surge::Storage::base64_decode(lkid->Attribute("wavetable_script"));
+
+                    if (lkid->QueryIntAttribute("wavetable_script_nframes", &wfi) == TIXML_SUCCESS)
+                    {
+                        scene[ssc].osc[sos].wavetable_script_nframes = wfi;
+                    }
+
+                    if (lkid->QueryIntAttribute("wavetable_script_res_base", &wfi) == TIXML_SUCCESS)
+                    {
+                        scene[ssc].osc[sos].wavetable_script_res_base = wfi;
+                    }
+                }
+
+                // TODO: Deprecated, remove later
                 if (lkid->Attribute("wavetable_formula"))
                 {
                     int wfi;
 
-                    scene[ssc].osc[sos].wavetable_formula =
-                        base64_decode(lkid->Attribute("wavetable_formula"));
+                    scene[ssc].osc[sos].wavetable_script =
+                        Surge::Storage::base64_decode(lkid->Attribute("wavetable_formula"));
 
                     if (lkid->QueryIntAttribute("wavetable_formula_nframes", &wfi) == TIXML_SUCCESS)
                     {
-                        scene[ssc].osc[sos].wavetable_formula_nframes = wfi;
+                        scene[ssc].osc[sos].wavetable_script_nframes = wfi;
                     }
 
                     if (lkid->QueryIntAttribute("wavetable_formula_res_base", &wfi) ==
                         TIXML_SUCCESS)
                     {
-                        scene[ssc].osc[sos].wavetable_formula_res_base = wfi;
+                        scene[ssc].osc[sos].wavetable_script_res_base = wfi;
                     }
                 }
 
@@ -2626,7 +3044,7 @@ void SurgePatch::load_xml(const void *data, int datasize, bool is_preset)
 
         if (pt && (td = pt->Attribute("v")))
         {
-            auto tc = base64_decode(td);
+            auto tc = Surge::Storage::base64_decode(td);
 
             patchTuning.tuningStoredInPatch = true;
             patchTuning.scaleContents = tc;
@@ -2634,7 +3052,7 @@ void SurgePatch::load_xml(const void *data, int datasize, bool is_preset)
 
         if (pt && (td = pt->Attribute("m")))
         {
-            auto tc = base64_decode(td);
+            auto tc = Surge::Storage::base64_decode(td);
 
             patchTuning.tuningStoredInPatch = true;
             patchTuning.mappingContents = tc;
@@ -2644,6 +3062,39 @@ void SurgePatch::load_xml(const void *data, int datasize, bool is_preset)
         {
             patchTuning.mappingName = td;
         }
+    }
+
+    // Clear all snapshots before potentially restoring from arbitrary_block_storage
+    snapshotsStoredInPatch = false;
+    for (int sc = 0; sc < n_scenes; sc++)
+        for (int osc = 0; osc < n_oscs; osc++)
+            for (int slot = 0; slot < n_wt_snapshots; slot++)
+                scene[sc].osc[osc].wtSnapshots[slot].reset();
+
+    bool userPrefOverrideTempoOnPatchLoad = Surge::Storage::getUserDefaultValue(
+        storage, Surge::Storage::OverrideTempoOnPatchLoad, true);
+
+    TiXmlElement *tos = TINYXML_SAFE_TO_ELEMENT(patch->FirstChild("tempoOnSave"));
+
+    if (revision < 23)
+    {
+        d = -1.0;
+    }
+    else
+    {
+        if (tos->QueryDoubleAttribute("v", &d) != TIXML_SUCCESS)
+        {
+            d = 120.0;
+        }
+    }
+
+    if (userPrefOverrideTempoOnPatchLoad)
+    {
+        storage->unstreamedTempo = (float)d;
+    }
+    else
+    {
+        storage->unstreamedTempo = -1.f;
     }
 
     dawExtraState.isPopulated = false;
@@ -2801,6 +3252,71 @@ void SurgePatch::load_xml(const void *data, int datasize, bool is_preset)
                         }
                     }
 
+                    auto loadCodeEditorState =
+                        [this](TiXmlElement *fss,
+                               DAWExtraStateStorage::EditorState::CodeEditorState &q) {
+                            int i;
+                            bool b;
+                            std::string s;
+
+                            if (fss->QueryIntAttribute("scroll", &i) == TIXML_SUCCESS)
+                            {
+                                q.scroll = i;
+                            }
+
+                            if (fss->QueryIntAttribute("caretPosition", &i) == TIXML_SUCCESS)
+                            {
+                                q.caretPosition = i;
+                            }
+
+                            if (fss->QueryIntAttribute("selectStart", &i) == TIXML_SUCCESS)
+                            {
+                                q.selectStart = i;
+                            }
+
+                            if (fss->QueryIntAttribute("selectEnd", &i) == TIXML_SUCCESS)
+                            {
+                                q.selectEnd = i;
+                            }
+
+                            // popup ( find&replace,goto line etc )
+
+                            if (fss->QueryBoolAttribute("popupOpen", &b) == TIXML_SUCCESS)
+                            {
+                                q.popupOpen = b;
+                            }
+
+                            if (fss->QueryIntAttribute("popupType", &i) == TIXML_SUCCESS)
+                            {
+                                q.popupType = i;
+                            }
+
+                            if (fss->QueryBoolAttribute("popupCaseSensitive", &b) == TIXML_SUCCESS)
+                            {
+                                q.popupCaseSensitive = b;
+                            }
+
+                            if (fss->QueryBoolAttribute("popupWholeWord", &b) == TIXML_SUCCESS)
+                            {
+                                q.popupWholeWord = b;
+                            }
+
+                            if (fss->QueryStringAttribute("popupText1", &s) == TIXML_SUCCESS)
+                            {
+                                q.popupText1 = s;
+                            }
+
+                            if (fss->QueryStringAttribute("popupText2", &s) == TIXML_SUCCESS)
+                            {
+                                q.popupText2 = s;
+                            }
+
+                            if (fss->QueryIntAttribute("popupCurrentResult", &i) == TIXML_SUCCESS)
+                            {
+                                q.popupCurrentResult = i;
+                            }
+                        };
+
                     for (int lf = 0; lf < n_lfos; ++lf)
                     {
                         std::string fsns =
@@ -2810,20 +3326,79 @@ void SurgePatch::load_xml(const void *data, int datasize, bool is_preset)
                         if (fss)
                         {
                             auto q = &(dawExtraState.editor.formulaEditState[sc][lf]);
-                            int vv;
+
+                            int i;
+                            bool b;
+                            std::string s;
 
                             q->codeOrPrelude = 0;
                             q->debuggerOpen = false;
 
-                            if (fss->QueryIntAttribute("codeOrPrelude", &vv) == TIXML_SUCCESS)
+                            // debugger
+
+                            if (fss->QueryIntAttribute("codeOrPrelude", &i) == TIXML_SUCCESS)
                             {
-                                q->codeOrPrelude = vv;
+                                q->codeOrPrelude = i;
                             }
 
-                            if (fss->QueryIntAttribute("debuggerOpen", &vv) == TIXML_SUCCESS)
+                            if (fss->QueryIntAttribute("debuggerOpen", &i) == TIXML_SUCCESS)
                             {
-                                q->debuggerOpen = vv;
+                                q->debuggerOpen = i;
                             }
+
+                            if (fss->QueryBoolAttribute("debuggerBuiltInVariablesOpen", &b) ==
+                                TIXML_SUCCESS)
+                            {
+                                q->debuggerBuiltInVariablesOpen = b;
+                            }
+
+                            if (fss->QueryBoolAttribute("debuggerUserVariablesOpen", &b) ==
+                                TIXML_SUCCESS)
+                            {
+                                q->debuggerUserVariablesOpen = b;
+                            }
+
+                            if (fss->QueryStringAttribute("debuggerFilterText", &s) ==
+                                TIXML_SUCCESS)
+                            {
+                                q->debuggerFilterText = s;
+                            }
+
+                            if (fss->QueryIntAttribute("debuggerGroupState", &i) == TIXML_SUCCESS)
+                            {
+                                for (int c = 0; c < 8; c++)
+                                {
+                                    q->debuggerGroupState[c] = (i & (1 << c)) > 0;
+                                }
+                            }
+
+                            // code editor
+
+                            loadCodeEditorState(fss, q->codeEditor);
+                        }
+                    }
+
+                    for (int osc = 0; osc < n_oscs; osc++)
+                    {
+                        std::string wsns =
+                            "wtse_state_" + std::to_string(sc) + "_" + std::to_string(osc);
+                        auto wss = TINYXML_SAFE_TO_ELEMENT(p->FirstChild(wsns));
+
+                        if (wss)
+                        {
+                            auto q = &(dawExtraState.editor.wavetableScriptEditState[sc][osc]);
+                            int i;
+                            bool b;
+                            std::string s;
+
+                            q->codeOrPrelude = 0;
+
+                            if (wss->QueryIntAttribute("codeOrPrelude", &i) == TIXML_SUCCESS)
+                            {
+                                q->codeOrPrelude = i;
+                            }
+
+                            loadCodeEditorState(wss, q->codeEditor);
                         }
                     }
                 } // end of scene loop
@@ -2908,12 +3483,27 @@ void SurgePatch::load_xml(const void *data, int datasize, bool is_preset)
                 dawExtraState.mpeEnabled = ival;
             }
 
+            p = TINYXML_SAFE_TO_ELEMENT(de->FirstChild("mpeTimbreIsUnipolar"));
+
+            if (p && p->QueryIntAttribute("v", &ival) == TIXML_SUCCESS)
+            {
+                dawExtraState.mpeTimbreIsUnipolar = ival;
+            }
+
             p = TINYXML_SAFE_TO_ELEMENT(de->FirstChild("oscPortIn"));
 
             if (p && p->QueryIntAttribute("v", &ival) == TIXML_SUCCESS)
             {
                 dawExtraState.oscPortIn = ival;
                 storage->oscPortIn = ival;
+            }
+
+            p = TINYXML_SAFE_TO_ELEMENT(de->FirstChild("oscPortInLastBound"));
+
+            if (p && p->QueryIntAttribute("v", &ival) == TIXML_SUCCESS)
+            {
+                dawExtraState.oscPortInLastBound = ival;
+                storage->oscPortInLastBound = ival;
             }
 
             p = TINYXML_SAFE_TO_ELEMENT(de->FirstChild("oscPortOut"));
@@ -2956,6 +3546,12 @@ void SurgePatch::load_xml(const void *data, int datasize, bool is_preset)
                 dawExtraState.isDirty = ival;
             }
 
+            p = TINYXML_SAFE_TO_ELEMENT(de->FirstChild("lastLoadedPath"));
+            if (p && p->Attribute("v"))
+            {
+                dawExtraState.lastLoadedPatch = string_to_path(p->Attribute("v"));
+            }
+
             p = TINYXML_SAFE_TO_ELEMENT(de->FirstChild("disconnectFromOddSoundMTS"));
             dawExtraState.disconnectFromOddSoundMTS = false;
 
@@ -2987,6 +3583,17 @@ void SurgePatch::load_xml(const void *data, int datasize, bool is_preset)
             else
             {
                 dawExtraState.oddsoundRetuneMode = SurgeStorage::RETUNE_CONSTANT;
+            }
+
+            p = TINYXML_SAFE_TO_ELEMENT(de->FirstChild("tuningApplicationMode"));
+
+            if (p && p->QueryIntAttribute("v", &ival) == TIXML_SUCCESS)
+            {
+                dawExtraState.tuningApplicationMode = ival;
+            }
+            else
+            {
+                dawExtraState.tuningApplicationMode = 1; // RETUNE_MIDI_ONLY
             }
 
             auto mts_main = TINYXML_SAFE_TO_ELEMENT(de->FirstChild("oddsound_mts_active_as_main"));
@@ -3025,7 +3632,7 @@ void SurgePatch::load_xml(const void *data, int datasize, bool is_preset)
 
                 if (p && (td = p->Attribute("v")))
                 {
-                    auto tc = base64_decode(td);
+                    auto tc = Surge::Storage::base64_decode(td);
 
                     dawExtraState.scaleContents = tc;
                 }
@@ -3044,7 +3651,7 @@ void SurgePatch::load_xml(const void *data, int datasize, bool is_preset)
 
                 if (p && (td = p->Attribute("v")))
                 {
-                    auto tc = base64_decode(td);
+                    auto tc = Surge::Storage::base64_decode(td);
 
                     dawExtraState.mappingContents = tc;
                 }
@@ -3066,6 +3673,13 @@ void SurgePatch::load_xml(const void *data, int datasize, bool is_preset)
             if (p && p->QueryIntAttribute("v", &ival) == TIXML_SUCCESS)
             {
                 dawExtraState.mapChannelToOctave = (ival != 0);
+            }
+
+            p = TINYXML_SAFE_TO_ELEMENT(de->FirstChild("transposeByTuningPeriod"));
+
+            if (p && p->QueryIntAttribute("v", &ival) == TIXML_SUCCESS)
+            {
+                dawExtraState.transposeByTuningPeriod = (ival != 0);
             }
 
             p = TINYXML_SAFE_TO_ELEMENT(de->FirstChild("midictrl_map"));
@@ -3239,6 +3853,10 @@ unsigned int SurgePatch::save_xml(void **data) // allocates mem, must be freed b
     meta.InsertEndChild(tagsX);
     patch.InsertEndChild(meta);
 
+    TiXmlElement serialization("serialization");
+    serialization.SetAttribute("absSize", claimedArbitraryBlockStorageSize);
+    patch.InsertEndChild(serialization);
+
     TiXmlElement parameters("parameters");
 
     for (int i = 0; i < n; i++)
@@ -3271,8 +3889,8 @@ unsigned int SurgePatch::save_xml(void **data) // allocates mem, must be freed b
                     {
                         if (r->at(b).destination_id == p_id)
                         {
-                            // if you add something here make sure to replicated it in the global
-                            // below
+                            // if you add something here make sure to replicated it in the
+                            // global below
                             TiXmlElement mr("modrouting");
                             mr.SetAttribute("source", r->at(b).source_id);
                             mr.SetAttribute("depth", float_to_clocalestr(r->at(b).depth));
@@ -3387,6 +4005,11 @@ unsigned int SurgePatch::save_xml(void **data) // allocates mem, must be freed b
     }
     nonparamconfig.InsertEndChild(tam);
 
+    TiXmlElement dspv("detachSustainPedalFromVoicing");
+    dspv.SetAttribute("v", (int)(storage->useSustainAsModulatorOnly));
+
+    nonparamconfig.InsertEndChild(dspv);
+
     patch.InsertEndChild(nonparamconfig);
 
     TiXmlElement eod("extraoscdata");
@@ -3405,15 +4028,16 @@ unsigned int SurgePatch::save_xml(void **data) // allocates mem, must be freed b
             {
                 on.SetAttribute("wavetable_display_name", scene[sc].osc[os].wavetable_display_name);
 
-                auto wtfo = scene[sc].osc[os].wavetable_formula;
+                auto wtfo = scene[sc].osc[os].wavetable_script;
                 auto wtfol = wtfo.length();
 
-                on.SetAttribute("wavetable_formula",
-                                base64_encode((unsigned const char *)wtfo.c_str(), wtfol));
-                on.SetAttribute("wavetable_formula_nframes",
-                                scene[sc].osc[os].wavetable_formula_nframes);
-                on.SetAttribute("wavetable_formula_res_base",
-                                scene[sc].osc[os].wavetable_formula_res_base);
+                on.SetAttribute(
+                    "wavetable_script",
+                    Surge::Storage::base64_encode((unsigned const char *)wtfo.c_str(), wtfol));
+                on.SetAttribute("wavetable_script_nframes",
+                                scene[sc].osc[os].wavetable_script_nframes);
+                on.SetAttribute("wavetable_script_res_base",
+                                scene[sc].osc[os].wavetable_script_res_base);
             }
 
             auto ec = &(scene[sc].osc[os].extraConfig);
@@ -3558,7 +4182,7 @@ unsigned int SurgePatch::save_xml(void **data) // allocates mem, must be freed b
     }
 
     {
-        TiXmlElement compat("compatability");
+        TiXmlElement compat("compatability"); // TODO: Fix typo for XT2, LOL!
 
         TiXmlElement comb("correctlyTunedCombFilter");
         comb.SetAttribute("v", correctlyTuneCombFilter ? 1 : 0);
@@ -3570,18 +4194,23 @@ unsigned int SurgePatch::save_xml(void **data) // allocates mem, must be freed b
     if (patchTuning.tuningStoredInPatch)
     {
         TiXmlElement pt("patchTuning");
-        pt.SetAttribute("v", base64_encode((unsigned const char *)patchTuning.scaleContents.c_str(),
-                                           patchTuning.scaleContents.size()));
+        pt.SetAttribute("v", Surge::Storage::base64_encode(
+                                 (unsigned const char *)patchTuning.scaleContents.c_str(),
+                                 patchTuning.scaleContents.size()));
         if (patchTuning.mappingContents.size() > 0)
         {
-            pt.SetAttribute(
-                "m", base64_encode((unsigned const char *)patchTuning.mappingContents.c_str(),
-                                   patchTuning.mappingContents.size()));
+            pt.SetAttribute("m", Surge::Storage::base64_encode(
+                                     (unsigned const char *)patchTuning.mappingContents.c_str(),
+                                     patchTuning.mappingContents.size()));
             pt.SetAttribute("mname", patchTuning.mappingName);
         }
 
         patch.InsertEndChild(pt);
     }
+
+    TiXmlElement tempoOnSave("tempoOnSave");
+    tempoOnSave.SetDoubleAttribute("v", storage->temposyncratio * 120.0);
+    patch.InsertEndChild(tempoOnSave);
 
     TiXmlElement dawExtraXML("dawExtraState");
     dawExtraXML.SetAttribute("populated", dawExtraState.isPopulated ? 1 : 0);
@@ -3609,6 +4238,24 @@ unsigned int SurgePatch::save_xml(void **data) // allocates mem, must be freed b
             over.InsertEndChild(ox);
         }
         eds.InsertEndChild(over);
+
+        auto saveCodeEditorState = [this](TiXmlElement *fss,
+                                          DAWExtraStateStorage::EditorState::CodeEditorState &q) {
+            // document editor
+            fss->SetAttribute("scroll", q.scroll);
+            fss->SetAttribute("caretPosition", q.caretPosition);
+            fss->SetAttribute("selectStart", q.selectStart);
+            fss->SetAttribute("selectEnd", q.selectEnd);
+
+            // popup
+            fss->SetAttribute("popupOpen", q.popupOpen);
+            fss->SetAttribute("popupType", q.popupType);
+            fss->SetAttribute("popupCaseSensitive", q.popupCaseSensitive);
+            fss->SetAttribute("popupWholeWord", q.popupWholeWord);
+            fss->SetAttribute("popupText1", q.popupText1);
+            fss->SetAttribute("popupText2", q.popupText2);
+            fss->SetAttribute("popupCurrentResult", q.popupCurrentResult);
+        };
 
         for (int sc = 0; sc < n_scenes; sc++)
         {
@@ -3642,10 +4289,38 @@ unsigned int SurgePatch::save_xml(void **data) // allocates mem, must be freed b
                 std::string fsns = "formula_state_" + std::to_string(sc) + "_" + std::to_string(lf);
                 TiXmlElement fss(fsns);
 
+                // debugger
                 fss.SetAttribute("codeOrPrelude", q->codeOrPrelude);
                 fss.SetAttribute("debuggerOpen", q->debuggerOpen);
+                fss.SetAttribute("debuggerBuiltInVariablesOpen", q->debuggerBuiltInVariablesOpen);
+                fss.SetAttribute("debuggerUserVariablesOpen", q->debuggerUserVariablesOpen);
+
+                int groupStates = 0;
+                for (int i = 0; i < 8; i++)
+                {
+                    groupStates += ((q->debuggerGroupState[i] ? 1 : 0) << i);
+                }
+
+                fss.SetAttribute("debuggerGroupState", groupStates);
+
+                // code editor state
+                saveCodeEditorState(&fss, q->codeEditor);
 
                 eds.InsertEndChild(fss);
+            }
+
+            for (int os = 0; os < n_oscs; ++os)
+            {
+                auto q = &(dawExtraState.editor.wavetableScriptEditState[sc][os]);
+                std::string wsns = "wtse_state_" + std::to_string(sc) + "_" + std::to_string(os);
+                TiXmlElement wss(wsns);
+
+                wss.SetAttribute("codeOrPrelude", q->codeOrPrelude);
+
+                // code editor state
+                saveCodeEditorState(&wss, q->codeEditor);
+
+                eds.InsertEndChild(wss);
             }
 
             TiXmlElement modEd("modulation_editor");
@@ -3691,9 +4366,17 @@ unsigned int SurgePatch::save_xml(void **data) // allocates mem, must be freed b
         mpe.SetAttribute("v", dawExtraState.mpeEnabled ? 1 : 0);
         dawExtraXML.InsertEndChild(mpe);
 
+        TiXmlElement mpeTimbreUni("mpeTimbreIsUnipolar");
+        mpeTimbreUni.SetAttribute("v", dawExtraState.mpeTimbreIsUnipolar ? 1 : 0);
+        dawExtraXML.InsertEndChild(mpeTimbreUni);
+
         TiXmlElement oscPortIn("oscPortIn");
         oscPortIn.SetAttribute("v", dawExtraState.oscPortIn);
         dawExtraXML.InsertEndChild(oscPortIn);
+
+        TiXmlElement oscPortInLastBound("oscPortInLastBound");
+        oscPortInLastBound.SetAttribute("v", dawExtraState.oscPortInLastBound);
+        dawExtraXML.InsertEndChild(oscPortInLastBound);
 
         TiXmlElement oscPortOut("oscPortOut");
         oscPortOut.SetAttribute("v", dawExtraState.oscPortOut);
@@ -3719,6 +4402,10 @@ unsigned int SurgePatch::save_xml(void **data) // allocates mem, must be freed b
         isDi.SetAttribute("v", dawExtraState.isDirty ? 1 : 0);
         dawExtraXML.InsertEndChild(isDi);
 
+        TiXmlElement llP("lastLoadedPath");
+        llP.SetAttribute("v", dawExtraState.lastLoadedPatch.u8string().c_str());
+        dawExtraXML.InsertEndChild(llP);
+
         TiXmlElement odS("disconnectFromOddSoundMTS");
         odS.SetAttribute("v", dawExtraState.disconnectFromOddSoundMTS ? 1 : 0);
         dawExtraXML.InsertEndChild(odS);
@@ -3730,6 +4417,10 @@ unsigned int SurgePatch::save_xml(void **data) // allocates mem, must be freed b
         TiXmlElement osd("oddsoundRetuneMode");
         osd.SetAttribute("v", dawExtraState.oddsoundRetuneMode);
         dawExtraXML.InsertEndChild(osd);
+
+        TiXmlElement tam("tuningApplicationMode");
+        tam.SetAttribute("v", dawExtraState.tuningApplicationMode);
+        dawExtraXML.InsertEndChild(tam);
 
         TiXmlElement tun("hasTuning"); // see comment: Keep this name here for legacy compat
         tun.SetAttribute("v", dawExtraState.hasScale ? 1 : 0);
@@ -3746,9 +4437,9 @@ unsigned int SurgePatch::save_xml(void **data) // allocates mem, must be freed b
         ** so just protect ourselves with a base 64 encoding.
         */
         TiXmlElement tnc("tuningContents");
-        tnc.SetAttribute("v",
-                         base64_encode((unsigned const char *)dawExtraState.scaleContents.c_str(),
-                                       dawExtraState.scaleContents.size()));
+        tnc.SetAttribute("v", Surge::Storage::base64_encode(
+                                  (unsigned const char *)dawExtraState.scaleContents.c_str(),
+                                  dawExtraState.scaleContents.size()));
         dawExtraXML.InsertEndChild(tnc);
 
         TiXmlElement hmp("hasMapping");
@@ -3761,9 +4452,9 @@ unsigned int SurgePatch::save_xml(void **data) // allocates mem, must be freed b
         ** so just protect ourselves with a base 64 encoding.
         */
         TiXmlElement mpc("mappingContents");
-        mpc.SetAttribute("v",
-                         base64_encode((unsigned const char *)dawExtraState.mappingContents.c_str(),
-                                       dawExtraState.mappingContents.size()));
+        mpc.SetAttribute("v", Surge::Storage::base64_encode(
+                                  (unsigned const char *)dawExtraState.mappingContents.c_str(),
+                                  dawExtraState.mappingContents.size()));
         dawExtraXML.InsertEndChild(mpc);
 
         TiXmlElement mpn("mappingName");
@@ -3774,6 +4465,10 @@ unsigned int SurgePatch::save_xml(void **data) // allocates mem, must be freed b
         TiXmlElement mcto("mapChannelToOctave");
         mcto.SetAttribute("v", (int)(storage->mapChannelToOctave));
         dawExtraXML.InsertEndChild(mcto);
+
+        TiXmlElement tbtp("transposeByTuningPeriod");
+        tbtp.SetAttribute("v", (int)(bool)(storage->transposeByTuningPeriod));
+        dawExtraXML.InsertEndChild(tbtp);
 
         /*
         ** Add the MIDI learned controls
@@ -4068,7 +4763,8 @@ void SurgePatch::stepSeqFromXmlElement(StepSequencerStorage *ss, TiXmlElement *p
 
 void SurgePatch::formulaToXMLElement(FormulaModulatorStorage *fs, TiXmlElement &parent) const
 {
-    parent.SetAttribute("formula", base64_encode((unsigned const char *)fs->formulaString.c_str(),
+    parent.SetAttribute(
+        "formula", Surge::Storage::base64_encode((unsigned const char *)fs->formulaString.c_str(),
                                                  fs->formulaString.length()));
     parent.SetAttribute("interpreter", (int)fs->interpreter);
 }
@@ -4076,7 +4772,7 @@ void SurgePatch::formulaToXMLElement(FormulaModulatorStorage *fs, TiXmlElement &
 void SurgePatch::formulaFromXMLElement(FormulaModulatorStorage *fs, TiXmlElement *parent) const
 {
     auto fb64 = parent->Attribute("formula");
-    fs->setFormula(base64_decode(fb64));
+    fs->setFormula(Surge::Storage::base64_decode(fb64));
 
     int interp;
     fs->interpreter = FormulaModulatorStorage::LUA;
@@ -4084,4 +4780,36 @@ void SurgePatch::formulaFromXMLElement(FormulaModulatorStorage *fs, TiXmlElement
     {
         fs->interpreter = (FormulaModulatorStorage::Interpreter)(interp);
     }
+}
+
+void SurgePatch::captureWavetableSnapshot(int scene, int srcOsc, int dstOsc, int slot)
+{
+    assert(slot >= 0 && slot < n_wt_snapshots);
+    auto &snap = this->scene[scene].osc[dstOsc].wtSnapshots[slot];
+    auto &src = this->scene[scene].osc[srcOsc].wt;
+
+    if (!src.everBuilt || src.n_tables == 0 || src.size == 0)
+    {
+        return;
+    }
+
+    storage->waveTableDataMutex.lock();
+
+    if (!snap)
+    {
+        snap = std::make_unique<Wavetable>();
+    }
+    snap->Copy(&src);
+
+    storage->waveTableDataMutex.unlock();
+}
+
+bool SurgePatch::hasAnySnapshots() const
+{
+    for (int sc = 0; sc < n_scenes; sc++)
+        for (int osc = 0; osc < n_oscs; osc++)
+            for (int slot = 0; slot < n_wt_snapshots; slot++)
+                if (scene[sc].osc[osc].wtSnapshots[slot])
+                    return true;
+    return false;
 }

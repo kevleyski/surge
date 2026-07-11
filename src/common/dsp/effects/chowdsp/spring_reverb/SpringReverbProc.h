@@ -4,7 +4,7 @@
  *
  * Learn more at https://surge-synthesizer.github.io/
  *
- * Copyright 2018-2023, various authors, as described in the GitHub
+ * Copyright 2018-2024, various authors, as described in the GitHub
  * transaction log.
  *
  * Surge XT is released under the GNU General Public Licence v3
@@ -30,6 +30,9 @@
 
 #include "ReflectionNetwork.h"
 #include "SchroederAllpass.h"
+
+#include "sst/basic-blocks/simd/setup.h"
+#include "sst/basic-blocks/simd/wrap_simd_f32x4.h"
 
 namespace chowdsp
 {
@@ -60,7 +63,7 @@ class SpringReverbProc
     StateVariableFilter<float> dcBlocker;
 
     static constexpr int allpassStages = 16;
-    using VecType = juce::dsp::SIMDRegister<float>;
+    using VecType = sst::basic_blocks::simd::F32x4;
     using APFCascade = std::array<SchroederAllpass<VecType, 2>, allpassStages>;
     APFCascade vecAPFs;
 

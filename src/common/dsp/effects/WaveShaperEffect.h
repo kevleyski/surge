@@ -4,7 +4,7 @@
  *
  * Learn more at https://surge-synthesizer.github.io/
  *
- * Copyright 2018-2023, various authors, as described in the GitHub
+ * Copyright 2018-2024, various authors, as described in the GitHub
  * transaction log.
  *
  * Surge XT is released under the GNU General Public Licence v3
@@ -25,7 +25,6 @@
 #include "Effect.h"
 #include "BiquadFilter.h"
 #include "DSPUtils.h"
-#include "AllpassFilter.h"
 
 #include <vembertech/lipol.h>
 
@@ -49,6 +48,9 @@ class WaveShaperEffect : public Effect
     virtual int group_label_ypos(int id) override;
 
     virtual int get_ringout_decay() override { return -1; }
+
+    virtual void handleStreamingMismatches(int streamingRevision,
+                                           int currentSynthStreamingRevision) override;
 
     enum wsfx_params
     {

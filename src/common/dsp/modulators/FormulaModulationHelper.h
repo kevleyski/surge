@@ -4,7 +4,7 @@
  *
  * Learn more at https://surge-synthesizer.github.io/
  *
- * Copyright 2018-2023, various authors, as described in the GitHub
+ * Copyright 2018-2024, various authors, as described in the GitHub
  * transaction log.
  *
  * Surge XT is released under the GNU General Public Licence v3
@@ -26,7 +26,13 @@
 #include "SurgeStorage.h"
 #include "StringOps.h"
 #include "LuaSupport.h"
+
+#include <atomic>
+#include <cstdint>
+#include <memory>
+#include <string>
 #include <variant>
+#include <vector>
 
 class SurgeVoice;
 
@@ -40,9 +46,13 @@ struct GlobalData
     std::unordered_set<std::string> knownBadFunctions; // these are functions which cause an error
     std::unordered_map<FormulaModulatorStorage *, std::unordered_set<std::string>> functionsPerFMS;
     void *audioState{nullptr}, *displayState{nullptr};
+    std::atomic<bool> audioSharedWipeRequested{false};
+    std::atomic<bool> displaySharedWipeRequested{false};
 };
 
 static constexpr int max_formula_outputs{max_lfo_indices};
+static constexpr uint64_t formulaFeatures = Surge::LuaSupport::EnvironmentFeatures::BASE;
+using Surge::LuaSupport::sharedTableName;
 
 struct EvaluatorState
 {
@@ -52,51 +62,68 @@ struct EvaluatorState
     char stateName[TXT_SIZE];
 
     bool isvalid = false;
+    bool useAmplitude = true;
     bool useEnvelope = true;
+    bool useRate = true;
     bool isFinite = true;
-
-    bool subMacros[n_customcontrollers], subAnyMacro{false};
 
     float del, a, h, dec, s, r;
     float rate, amp, phase, deform;
-    float tempo, songpos;
+    float tempo;
+    double songpos;
 
     bool retrigger_AEG, retrigger_FEG;
 
+    bool is_display = false;
+
+    int lfo_id{0};
+
     // voice features
-    bool isVoice;
-    int key{60}, channel{0}, velocity{0};
+    bool isVoice, mpeenabled;
+    int key{60}, channel{0}, velocity{0}, releasevelocity{0}, mpebendrange{24};
+    int64_t voiceOrderAtCreate{1L};
+    float polyat{0}, mpebend{0}, mpetimbre{0}, mpepressure{0}, tunedkey{0};
 
-    // patch features
+    // scene features
+    int polylimit{1}, scenemode{0}, polymode{0}, splitpoint{0};
     float macrovalues[n_customcontrollers];
+    float pitchbend, pbrange_up, pbrange_dn, aftertouch, modwheel, breath, expression, sustain,
+        lowest_key, highest_key, latest_key;
 
-    std::string error;
+    std::unique_ptr<std::string> error;
     bool raisedError = false;
     void adderror(const std::string &msg)
     {
-        error += msg;
+        if (!error)
+            error = std::make_unique<std::string>();
+
+        *error += msg;
         raisedError = true;
     }
 
     int activeoutputs;
 
-    lua_State *L; // This is assigned by prepareForEvaluation to be one per thread
+    lua_State *L{nullptr}; // This is assigned by prepareForEvaluation to be one per thread
 };
 
 void setupStorage(SurgeStorage *s);
 
 bool initEvaluatorState(EvaluatorState &s);
 bool cleanEvaluatorState(EvaluatorState &s);
+void requestSharedDataWipe(SurgeStorage *storage);
+void wipeSharedData(SurgeStorage *storage, bool onAudioThread);
 void removeFunctionsAssociatedWith(SurgeStorage *,
                                    FormulaModulatorStorage *fs); // audio thread only please
 bool prepareForEvaluation(SurgeStorage *storage, FormulaModulatorStorage *fs, EvaluatorState &s,
                           bool is_display);
 
-void setupEvaluatorStateFrom(EvaluatorState &s, const SurgePatch &p);
-void setupEvaluatorStateFrom(EvaluatorState &s, const SurgeVoice *v);
+bool isUserDefined(std::string);
+
+void setupEvaluatorStateFrom(EvaluatorState &s, const SurgePatch &patch, int sceneIndex);
+void setupEvaluatorStateFrom(EvaluatorState &s, SurgeVoice *v);
 
 void valueAt(int phaseIntPart, float phaseFracPart, SurgeStorage *, FormulaModulatorStorage *fs,
-             EvaluatorState *state, float output[max_formula_outputs]);
+             EvaluatorState *state, float output[max_formula_outputs], bool justSetup = false);
 
 struct DebugRow
 {
@@ -113,9 +140,28 @@ struct DebugRow
     std::string label;
     bool hasValue{true};
     bool isInternal{false};
+    bool isUserDefined{false};
+    bool isHeader{false};
+    int filterFlag = -1;
+    int group = -1;
+
+    enum
+    {
+        User,
+        System
+    };
+
+    enum
+    {
+        Ignore,
+        Found,
+        Child
+    };
     std::variant<float, std::string> value;
 };
-std::vector<DebugRow> createDebugDataOfModState(const EvaluatorState &s);
+
+std::vector<DebugRow> createDebugDataOfModState(const EvaluatorState &s, std::string filter,
+                                                bool state[8]);
 std::string createDebugViewOfModState(const EvaluatorState &s);
 
 /*
@@ -132,4 +178,4 @@ void createInitFormula(FormulaModulatorStorage *fs);
 
 } // namespace Formula
 } // namespace Surge
-#endif // SURGE_XT_FORMULAMODULATIONHELPER_H
+#endif // SURGE_SRC_COMMON_DSP_MODULATORS_FORMULAMODULATIONHELPER_H

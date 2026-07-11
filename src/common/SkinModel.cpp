@@ -4,7 +4,7 @@
  *
  * Learn more at https://surge-synthesizer.github.io/
  *
- * Copyright 2018-2023, various authors, as described in the GitHub
+ * Copyright 2018-2024, various authors, as described in the GitHub
  * transaction log.
  *
  * Surge XT is released under the GNU General Public Licence v3
@@ -54,9 +54,13 @@ Component MultiSwitch =
                        "to reach to, valid values are from 0 to 'frames'"})
         .withProperty(Component::BACKGROUND, {"image", "bg_resource", "bg_id"},
                       {"Base image of the switch"})
-        .withProperty(Component::DRAGGABLE_HSWITCH, {"draggable"},
+        .withProperty(Component::DRAGGABLE_SWITCH, {"draggable"},
                       {"Is the switch draggable as a slider via mouse/touch or not. Valid values: "
                        "true, false"})
+        .withProperty(
+            Component::MOUSEWHEELABLE_SWITCH, {"mousewheelable"},
+            {"Is the switch mousewheelable as a slider via mouse/touch or not. Valid values: "
+             "true, false"})
         .withProperty(Component::ACCESSIBLE_AS_MOMENTARY_BUTTON, {"accessible_as_buttons"},
                       {"Is the accessible display buttons (true) or radio buttons (false, def)"})
         .withProperty(Component::HOVER_IMAGE, {"hover_image"},
@@ -551,7 +555,8 @@ namespace OtherControls
 Connector surge_menu = Connector("controls.surge_menu", 848, 550, 50, 15, Components::MultiSwitch,
                                  Connector::SURGE_MENU)
                            .withProperty(Component::BACKGROUND, IDB_MAIN_MENU)
-                           .withProperty(Component::DRAGGABLE_HSWITCH, false);
+                           .withProperty(Component::MOUSEWHEELABLE_SWITCH, false)
+                           .withProperty(Component::DRAGGABLE_SWITCH, false);
 
 Connector patch_browser = Connector("controls.patch_browser", 157, 12, 390, 28, Components::Custom,
                                     Connector::PATCH_BROWSER);
@@ -572,7 +577,8 @@ Connector action_redo =
 Connector patch_save = Connector("controls.patch.save", 510, 42, 37, 12, Components::MultiSwitch,
                                  Connector::SAVE_PATCH)
                            .withHSwitch2Properties(IDB_SAVE_PATCH, 1, 1, 1)
-                           .withProperty(Component::DRAGGABLE_HSWITCH, false)
+                           .withProperty(Component::MOUSEWHEELABLE_SWITCH, false)
+                           .withProperty(Component::DRAGGABLE_SWITCH, false)
                            .withProperty(Component::ACCESSIBLE_AS_MOMENTARY_BUTTON, true);
 
 Connector status_panel = Connector("controls.status.panel", 562, 12, Components::Group);
@@ -592,13 +598,16 @@ Connector status_zoom =
 Connector vu_meter =
     Connector("controls.vu_meter", 767, 15, 123, 13, Components::VuMeter, Connector::MAIN_VU_METER);
 
-Connector mseg_editor = Connector("msegeditor.window", 0, 58, 750, 365, Components::Custom,
+Connector mseg_editor = Connector("msegeditor.window", 0, 57, 750, 366, Components::Custom,
                                   Connector::MSEG_EDITOR_WINDOW);
 
-Connector formula_editor = Connector("formulaeditor.window", 0, 58, 750, 365, Components::Custom,
+Connector formula_editor = Connector("formulaeditor.window", 0, 57, 750, 366, Components::Custom,
                                      Connector::FORMULA_EDITOR_WINDOW);
 
-Connector tuning_editor = Connector("tuningeditor.window", 0, 58, 750, 511, Components::Custom,
+Connector wts_editor = Connector("wtseditor.window", 150, 57, 756, 512, Components::Custom,
+                                 Connector::WTS_EDITOR_WINDOW);
+
+Connector tuning_editor = Connector("tuningeditor.window", 0, 57, 750, 512, Components::Custom,
                                     Connector::TUNING_EDITOR_WINDOW);
 
 Connector mod_list =
@@ -607,7 +616,7 @@ Connector mod_list =
 Connector filter_analysis = Connector("filter.filter_analysis.window", 300, 263, 450, 212,
                                       Components::Custom, Connector::FILTER_ANALYSIS_WINDOW);
 
-Connector oscilloscope = Connector("oscilloscope.window", 0, 58, 750, 365, Components::Custom,
+Connector oscilloscope = Connector("oscilloscope.window", 150, 57, 600, 340, Components::Custom,
                                    Connector::OSCILLOSCOPE_WINDOW);
 
 Connector ws_analysis = Connector("filter.waveshaper_analysis.window", 450, 237, 300, 160,

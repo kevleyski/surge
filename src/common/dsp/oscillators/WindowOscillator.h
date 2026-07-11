@@ -4,7 +4,7 @@
  *
  * Learn more at https://surge-synthesizer.github.io/
  *
- * Copyright 2018-2023, various authors, as described in the GitHub
+ * Copyright 2018-2024, various authors, as described in the GitHub
  * transaction log.
  *
  * Surge XT is released under the GNU General Public Licence v3
@@ -54,6 +54,8 @@ class WindowOscillator : public Oscillator
     virtual void handleStreamingMismatches(int streamingRevision,
                                            int currentSynthStreamingRevision) override;
 
+    void processSamplesForDisplay(float *samples, int size, bool real) override;
+
   private:
     int IOutputL alignas(16)[BLOCK_SIZE_OS];
     int IOutputR alignas(16)[BLOCK_SIZE_OS];
@@ -77,7 +79,7 @@ class WindowOscillator : public Oscillator
     void applyFilter();
     template <bool is_init> void update_lagvals();
 
-    void ProcessWindowOscs(bool stereo, bool FM);
+    template <bool FM, bool Full16> void ProcessWindowOscs(bool stereo);
     lag<double> FMdepth[MAX_UNISON];
     lag<float> l_morph;
 

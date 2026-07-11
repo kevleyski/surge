@@ -4,7 +4,7 @@
  *
  * Learn more at https://surge-synthesizer.github.io/
  *
- * Copyright 2018-2023, various authors, as described in the GitHub
+ * Copyright 2018-2024, various authors, as described in the GitHub
  * transaction log.
  *
  * Surge XT is released under the GNU General Public Licence v3
@@ -27,6 +27,7 @@
 #include "OverlayComponent.h"
 #include "widgets/MainFrame.h"
 #include "SurgeJUCELookAndFeel.h"
+#include "SurgeGUIUtils.h"
 
 namespace Surge
 {
@@ -280,6 +281,17 @@ struct TearOutWindow : public juce::DocumentWindow, public Surge::GUI::SkinConsu
         repaint();
     }
 
+#if JUCE_VERSION > 0x080000
+    WindowControlKind findControlAtPoint(juce::Point<float> point) const override
+    {
+        // See issue 7805 for this temporary fix
+        auto res = DocumentWindow::findControlAtPoint(point);
+        if (res == WindowControlKind::minimise || res == WindowControlKind::close)
+            return WindowControlKind::client;
+        return res;
+    }
+#endif
+
     void mouseDoubleClick(const juce::MouseEvent &event) override
     {
         auto oc = dynamic_cast<Surge::Overlays::OverlayComponent *>(wrapping->primaryChild.get());
@@ -422,6 +434,18 @@ void OverlayWrapper::resized()
 
 void OverlayWrapper::doTearOut(const juce::Point<int> &showAt)
 {
+    if (isTornOut())
+    {
+        // Already torn out edge case: this happens when showOverlay restores the torn-out state on
+        // reopen and the caller then tears out again. Re-recording parentBeforeTearOut here would
+        // break tear-in so just reposition the existing window if a location was requested
+        if (showAt.x >= 0 && showAt.y >= 0)
+        {
+            tearOutParent->setTopLeftPosition(showAt.x, showAt.y);
+        }
+        return;
+    }
+
     auto rvs = juce::ScopedValueSetter(resizeRecordsSize, false);
     auto pt = std::make_pair(-1, -1);
 
@@ -559,6 +583,30 @@ void OverlayWrapper::doTearOut(const juce::Point<int> &showAt)
     }
 
     resizeRecordsSize = true;
+
+    // Write size and position to user defaults on first tearout if not previously saved.
+    // Without this, closing without a resize/move leaves no saved prefs, and on restart
+    // the window appears at the wrong size (extra zoom applied) and won't tear back in.
+    if (storage)
+    {
+        if (canTearOutResize && (pt.first <= 0 || pt.second <= 0))
+        {
+            Surge::Storage::updateUserDefaultValue(
+                storage, canTearOutResizePair.second,
+                std::make_pair(tearOutParent->getWidth(), tearOutParent->getHeight()));
+        }
+
+        auto savedPos = std::make_pair(-1, -1);
+        savedPos =
+            Surge::Storage::getUserDefaultValue(storage, std::get<1>(canTearOutData), savedPos);
+
+        if (savedPos.first <= 0 || savedPos.second <= 0)
+        {
+            auto pos = tearOutParent->getPosition();
+            Surge::Storage::updateUserDefaultValue(storage, std::get<1>(canTearOutData),
+                                                   std::make_pair(pos.x, pos.y));
+        }
+    }
 }
 
 juce::Point<int> OverlayWrapper::currentTearOutLocation()
@@ -728,5 +776,34 @@ void OverlayWrapper::onSkinChanged()
     repaint();
 }
 
+void OverlayWrapper::onClose()
+{
+    auto pc = getPrimaryChildAsOverlayComponent();
+    if (pc && pc->getPreCloseChickenBoxMessage().has_value())
+    {
+        auto pcm = *(pc->getPreCloseChickenBoxMessage());
+        editor->alertYesNo(
+            pcm.first, pcm.second,
+            [w = juce::Component::SafePointer(this)]() {
+                if (!w)
+                    return;
+
+                w->closeOverlay();
+                if (w->isTornOut())
+                    w->tearOutParent.reset(nullptr);
+            },
+            [w = juce::Component::SafePointer(pc)]() {
+                if (!w)
+                    return;
+                Surge::GUI::grabKeyboardFocusIfAllowed(w);
+            });
+    }
+    else
+    {
+        closeOverlay();
+        if (isTornOut())
+            tearOutParent.reset(nullptr);
+    }
+}
 } // namespace Overlays
 } // namespace Surge

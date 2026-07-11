@@ -4,7 +4,7 @@
  *
  * Learn more at https://surge-synthesizer.github.io/
  *
- * Copyright 2018-2023, various authors, as described in the GitHub
+ * Copyright 2018-2024, various authors, as described in the GitHub
  * transaction log.
  *
  * Surge XT is released under the GNU General Public Licence v3
@@ -44,7 +44,8 @@ struct PatchStoreDialogCategoryProvider;
 
 struct PatchStoreDialog : public OverlayComponent,
                           public Surge::GUI::SkinConsumingComponent,
-                          public juce::Button::Listener
+                          public juce::Button::Listener,
+                          public juce::TextEditor::Listener
 {
     PatchStoreDialog();
     ~PatchStoreDialog();
@@ -86,14 +87,20 @@ struct PatchStoreDialog : public OverlayComponent,
     void setComment(const std::string &c) { commentEd->setText(c, juce::dontSendNotification); }
     void setTags(const std::vector<SurgePatch::Tag> &t);
     void setStoreTuningInPatch(const bool value);
+    void setStoreSnapshotsInPatch(const bool value);
+    bool hasSnapshots{false};
+    void setHasSnapshots(bool s) { hasSnapshots = s; };
 
     void onSkinChanged() override;
+    void textEditorFocusLost(juce::TextEditor &) override;
     void buttonClicked(juce::Button *button) override;
     std::unique_ptr<juce::TextEditor> nameEd, authorEd, catEd, licenseEd, tagEd, commentEd;
     std::unique_ptr<juce::Label> nameEdL, authorEdL, catEdL, licenseEdL, tagEdL, commentEdL;
     std::unique_ptr<Widgets::SurgeTextButton> okButton, okOverButton, cancelButton;
     std::unique_ptr<juce::Label> storeTuningLabel;
     std::unique_ptr<juce::ToggleButton> storeTuningButton;
+    std::unique_ptr<juce::Label> storeSnapshotsLabel;
+    std::unique_ptr<juce::ToggleButton> storeSnapshotsButton;
 
     bool isRename{false};
     void setIsRename(bool b);

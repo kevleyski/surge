@@ -4,7 +4,7 @@
  *
  * Learn more at https://surge-synthesizer.github.io/
  *
- * Copyright 2018-2023, various authors, as described in the GitHub
+ * Copyright 2018-2024, various authors, as described in the GitHub
  * transaction log.
  *
  * Surge XT is released under the GNU General Public Licence v3
@@ -73,6 +73,8 @@ enum DefaultKey
 
     OverrideTuningOnPatchLoad,
     OverrideMappingOnPatchLoad,
+    OverrideTempoOnPatchLoad,
+    DefaultTransposeByTuningPeriod,
 
     RememberTabPositionsPerScene,
     RestoreMSEGSnapFromPatch,
@@ -88,14 +90,19 @@ enum DefaultKey
     UseNarratorAnnouncementsForPatchTypeahead,
     ExpandModMenusWithSubMenus,
     FocusModEditorAfterAddModulationFrom,
+    NeverMoveKeyboardFocus,
     ShowVirtualKeyboard_Plugin,
     ShowVirtualKeyboard_Standalone,
+    VirtualKeyboardClickSetsVelocity,
     VirtualKeyboardLayout,
+    UseSoftwareRenderer,
 
     MPEPitchBendRange,
+    MPETimbreIsUnipolar,
     PitchSmoothingMode,
     UseCh2Ch3ToPlayScenesIndividually,
     MenuBasedMIDILearnChannel,
+    MIDISoftTakeover,
 
     SmoothingMode,
     MonoPedalMode,
@@ -109,6 +116,7 @@ enum DefaultKey
     LastSCLPath,
     LastKBMPath,
     LastWavetablePath,
+    LastIRPath,
     LastPatchPath,
 
     PromptToActivateShortcutsOnAccKeypress,
@@ -121,6 +129,7 @@ enum DefaultKey
     ModlistOverlayLocation,
     MSEGOverlayLocation,
     FormulaOverlayLocation,
+    WTScriptOverlayLocation,
     WSAnalysisOverlayLocation,
     FilterAnalysisOverlayLocation,
     OscilloscopeOverlayLocation,
@@ -129,6 +138,7 @@ enum DefaultKey
     ModlistOverlayLocationTearOut,
     MSEGOverlayLocationTearOut,
     FormulaOverlayLocationTearOut,
+    WTScriptOverlayLocationTearOut,
     WSAnalysisOverlayLocationTearOut,
     FilterAnalysisOverlayLocationTearOut,
     OscilloscopeOverlayLocationTearOut,
@@ -137,6 +147,7 @@ enum DefaultKey
     ModlistOverlaySizeTearOut,
     MSEGOverlaySizeTearOut,
     FormulaOverlaySizeTearOut,
+    WTScriptOverlaySizeTearOut,
     WSAnalysisOverlaySizeTearOut,
     FilterAnalysisOverlaySizeTearOut,
     OscilloscopeOverlaySizeTearOut,
@@ -145,6 +156,7 @@ enum DefaultKey
     ModlistOverlayTearOutAlwaysOnTop,
     MSEGOverlayTearOutAlwaysOnTop,
     FormulaOverlayTearOutAlwaysOnTop,
+    WTScriptOverlayTearOutAlwaysOnTop,
     WSAnalysisOverlayTearOutAlwaysOnTop,
     FilterAnalysisOverlayTearOutAlwaysOnTop,
     OscilloscopeOverlayTearOutAlwaysOnTop,
@@ -153,6 +165,7 @@ enum DefaultKey
     ModlistOverlayTearOutAlwaysOnTop_Plugin,
     MSEGOverlayTearOutAlwaysOnTop_Plugin,
     FormulaOverlayTearOutAlwaysOnTop_Plugin,
+    WTScriptOverlayTearOutAlwaysOnTop_Plugin,
     WSAnalysisOverlayTearOutAlwaysOnTop_Plugin,
     FilterAnalysisOverlayTearOutAlwaysOnTop_Plugin,
     OscilloscopeOverlayTearOutAlwaysOnTop_Plugin,

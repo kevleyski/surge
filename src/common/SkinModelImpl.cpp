@@ -4,7 +4,7 @@
  *
  * Learn more at https://surge-synthesizer.github.io/
  *
- * Copyright 2018-2023, various authors, as described in the GitHub
+ * Copyright 2018-2024, various authors, as described in the GitHub
  * transaction log.
  *
  * Surge XT is released under the GNU General Public Licence v3
@@ -136,7 +136,8 @@ std::string Component::propertyEnumToString(Properties p)
         PN(FRAMES)
         PN(FRAME_OFFSET)
         PN(NUMBERFIELD_CONTROLMODE)
-        PN(DRAGGABLE_HSWITCH)
+        PN(DRAGGABLE_SWITCH)
+        PN(MOUSEWHEELABLE_SWITCH)
         PN(ACCESSIBLE_AS_MOMENTARY_BUTTON)
         PN(BACKGROUND_COLOR)
         PN(FRAME_COLOR)
@@ -253,7 +254,7 @@ Connector &Connector::asJogPlusMinus() noexcept
     payload->w = 32;
     payload->h = 12;
     return withHSwitch2Properties(IDB_PREVNEXT_JOG, 2, 1, 2)
-        .withProperty(Component::DRAGGABLE_HSWITCH, false)
+        .withProperty(Component::DRAGGABLE_SWITCH, false)
         .withProperty(Component::ACCESSIBLE_AS_MOMENTARY_BUTTON, true);
 }
 
@@ -285,7 +286,7 @@ std::vector<Connector> Connector::connectorsByComponentType(const Component &c)
     for (auto it : *idmap)
     {
         if (it.second->defaultComponent == c)
-            res.push_back(Connector(it.second));
+            res.emplace_back(Connector(it.second));
     }
     return res;
 }

@@ -4,7 +4,7 @@
  *
  * Learn more at https://surge-synthesizer.github.io/
  *
- * Copyright 2018-2023, various authors, as described in the GitHub
+ * Copyright 2018-2024, various authors, as described in the GitHub
  * transaction log.
  *
  * Surge XT is released under the GNU General Public Licence v3
@@ -24,6 +24,7 @@
 #define SURGE_SRC_SURGE_XT_GUI_OVERLAYS_ABOUTSCREEN_H
 
 #include "SkinSupport.h"
+#include "version.h"
 
 #include "juce_gui_basics/juce_gui_basics.h"
 
@@ -77,6 +78,26 @@ struct AboutScreen : public juce::Component,
     std::unique_ptr<ClipboardCopyButton> copyButton;
 
     juce::Colour fillColour{juce::Colour(0, 0, 0).withAlpha(0.85f)};
+
+    static constexpr int NUM_ICONS = 8;
+
+    std::array<int, NUM_ICONS> iconOrder = {0, 4, 3, 6, 2, 1, 7, 5};
+
+    std::array<std::string, NUM_ICONS> urls = {
+        stringRepository,
+        "https://www.steinberg.net/en/company/technologies/vst3.html",
+        "https://developer.apple.com/documentation/audiounit",
+        "https://www.gnu.org/licenses/gpl-3.0-standalone.html",
+        "https://discord.gg/aFQDdMV",
+        "https://juce.com",
+        "https://cleveraudio.org",
+        "https://www.steinberg.net/technology/"};
+
+    std::array<std::string, NUM_ICONS> iconLabels = {
+        "GitHub Repository", "VST3", "Audio Units", "GPL v3",
+        "Our Discord",       "JUCE", "CLAP",        "ASIO"};
+
+    std::array<std::unique_ptr<juce::Label>, NUM_ICONS> iconTooltips;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(AboutScreen);
 };

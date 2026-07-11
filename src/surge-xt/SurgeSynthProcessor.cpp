@@ -4,7 +4,7 @@
  *
  * Learn more at https://surge-synthesizer.github.io/
  *
- * Copyright 2018-2023, various authors, as described in the GitHub
+ * Copyright 2018-2024, various authors, as described in the GitHub
  * transaction log.
  *
  * Surge XT is released under the GNU General Public Licence v3
@@ -29,6 +29,7 @@
 #include "UserDefaults.h"
 #include "UnitConversions.h"
 #include <any>
+#include <vector>
 
 #if LINUX
 // getCurrentPosition is deprecated in J7
@@ -40,6 +41,38 @@
  * This is a bit odd but - this is an editor concept with the lifetime of the processor
  */
 #include "gui/UndoManager.h"
+
+namespace
+{
+
+// DI'd file loader.
+SurgeStorage::AudioFileInput loadAudioFile(std::string file)
+{
+    juce::AudioFormatManager manager;
+    manager.registerBasicFormats();
+
+    std::unique_ptr<juce::AudioFormatReader> reader{manager.createReaderFor(juce::File(file))};
+    if (!reader)
+        return {};
+
+    juce::AudioBuffer<float> buf(reader->numChannels, reader->lengthInSamples);
+    if (!reader->read(&buf, 0, reader->lengthInSamples, 0, true, true))
+        return {};
+
+    std::uint64_t sr = reader->sampleRate;
+    std::vector<std::vector<float>> channels(reader->numChannels);
+
+    for (int i = 0; i < reader->numChannels; i++)
+    {
+        channels[i].resize(reader->lengthInSamples);
+        std::copy(buf.getReadPointer(i), buf.getReadPointer(i) + reader->lengthInSamples,
+                  channels[i].begin());
+    }
+
+    return std::make_tuple(sr, std::move(channels));
+}
+
+} // namespace
 
 //==============================================================================
 SurgeSynthProcessor::SurgeSynthProcessor()
@@ -83,12 +116,14 @@ SurgeSynthProcessor::SurgeSynthProcessor()
     DBG(oss.str());
 #endif
 
-    auto parent = std::make_unique<juce::AudioProcessorParameterGroup>("Root", "Root", "|");
+    setupSurgeSynthesizerDI();
+
+    auto parent = std::make_unique<juce::AudioProcessorParameterGroup>("", "", "");
     auto macroG = std::make_unique<juce::AudioProcessorParameterGroup>("macros", "Macros", "|");
 
     for (int mn = 0; mn < n_customcontrollers; ++mn)
     {
-        auto nm = std::make_unique<SurgeMacroToJuceParamAdapter>(surge.get(), mn);
+        auto nm = std::make_unique<SurgeMacroToJuceParamAdapter>(this, mn);
 
         macrosById.push_back(nm.get());
         macroG->addChild(std::move(nm));
@@ -104,7 +139,7 @@ SurgeSynthProcessor::SurgeSynthProcessor()
         {
             parametermeta pm;
             surge->getParameterMeta(surge->idForParameter(par), pm);
-            auto sja = std::make_unique<SurgeParamToJuceParamAdapter>(surge.get(), par);
+            auto sja = std::make_unique<SurgeParamToJuceParamAdapter>(this, par);
             paramsByID[surge->idForParameter(par)] = sja.get();
             parByGroup[pm.clump].push_back(std::move(sja));
         }
@@ -134,7 +169,7 @@ SurgeSynthProcessor::SurgeSynthProcessor()
 
     presetOrderToPatchList.clear();
 
-    for (int i = 0; i < surge->storage.firstThirdPartyCategory; i++)
+    for (int i = 0; i < surge->storage.firstUserCategory; i++)
     {
         // Remap index to the corresponding category in alphabetical order.
         int c = surge->storage.patchCategoryOrdering[i];
@@ -154,10 +189,7 @@ SurgeSynthProcessor::SurgeSynthProcessor()
     surge->juceWrapperType = wrapperTypeString;
 
     midiKeyboardState.addListener(this);
-
-#if SURGE_HAS_OSC
     oscHandler.initOSC(this, surge);
-#endif
 }
 
 SurgeSynthProcessor::~SurgeSynthProcessor()
@@ -187,12 +219,10 @@ bool SurgeSynthProcessor::isMidiEffect() const { return false; }
 
 double SurgeSynthProcessor::getTailLengthSeconds() const { return 2.0; }
 
-#undef SURGE_JUCE_PRESETS
-
 int SurgeSynthProcessor::getNumPrograms()
 {
-#ifdef SURGE_JUCE_PRESETS
-    return surge->storage.patch_list.size() + 1;
+#ifdef SURGE_EXPOSE_PRESETS
+    return presetOrderToPatchList.size() + 1;
 #else
     return 1;
 #endif
@@ -200,7 +230,7 @@ int SurgeSynthProcessor::getNumPrograms()
 
 int SurgeSynthProcessor::getCurrentProgram()
 {
-#ifdef SURGE_JUCE_PRESETS
+#ifdef SURGE_EXPOSE_PRESETS
     return juceSidePresetId;
 #else
     return 0;
@@ -209,7 +239,7 @@ int SurgeSynthProcessor::getCurrentProgram()
 
 void SurgeSynthProcessor::setCurrentProgram(int index)
 {
-#ifdef SURGE_JUCE_PRESETS
+#ifdef SURGE_EXPOSE_PRESETS
     if (index > 0 && index <= presetOrderToPatchList.size())
     {
         juceSidePresetId = index;
@@ -220,16 +250,16 @@ void SurgeSynthProcessor::setCurrentProgram(int index)
 
 const juce::String SurgeSynthProcessor::getProgramName(int index)
 {
-#ifdef SURGE_JUCE_PRESETS
+#ifdef SURGE_EXPOSE_PRESETS
     if (index == 0)
-        return "INIT OR DROPPED";
+        return "INIT";
     index--;
     if (index < 0 || index >= presetOrderToPatchList.size())
     {
         return "RANGE ERROR";
     }
     auto patch = surge->storage.patch_list[presetOrderToPatchList[index]];
-    auto res = surge->storage.patch_category[patch.category].name + " / " + patch.name;
+    auto res = surge->storage.patch_category[patch.category].name + "/" + patch.name;
     return res;
 #else
     return "";
@@ -241,14 +271,14 @@ void SurgeSynthProcessor::changeProgramName(int index, const juce::String &newNa
 /* OSC (Open Sound Control) */
 bool SurgeSynthProcessor::initOSCIn(int port)
 {
-    if (port <= 0)
+    if (port < 1 || port > 65535)
     {
         return false;
     }
 
     auto state = oscHandler.initOSCIn(port);
 
-    surge->storage.oscListenerRunning = state;
+    surge->storage.oscReceiving = state;
     surge->storage.oscStartIn = true;
 
     return state;
@@ -256,13 +286,20 @@ bool SurgeSynthProcessor::initOSCIn(int port)
 
 bool SurgeSynthProcessor::changeOSCInPort(int new_port)
 {
-    if (oscHandler.listening)
+    if (new_port < 1 || new_port > 65535)
     {
-        surge->storage.oscListenerRunning = false;
-        oscHandler.stopListening();
+        return false;
     }
 
-    return initOSCIn(new_port);
+    surge->storage.oscPortInLastBound = 0;
+    oscHandler.stopListening();
+
+    bool status = oscHandler.initOSCInRange(new_port, new_port + OSC_IN_PORT_SCAN_RANGE);
+
+    surge->storage.oscReceiving = status;
+    surge->storage.oscStartIn = true;
+
+    return status;
 }
 
 bool SurgeSynthProcessor::initOSCOut(int port, std::string ipaddr)
@@ -290,13 +327,14 @@ void SurgeSynthProcessor::initOSCError(int port, std::string outIP)
     std::ostringstream msg;
 
     msg << "Surge XT was unable to connect to OSC port " << port;
-    if (outIP != "")
+    if (!outIP.empty())
     {
-        msg << "; at IP Address " << outIP;
+        msg << " at IP Address " << outIP;
     }
 
-    msg << "\n"
-        << "Either it is not a valid port, or it may be in use by another application.";
+    msg << ".\n"
+        << "Either it is not a valid port, or it is already used by Surge XT or another "
+           "application.";
 
     surge->storage.reportError(msg.str(), "OSC Initialization Error");
 };
@@ -306,31 +344,40 @@ bool SurgeSynthProcessor::changeOSCOut(int new_port, std::string ipaddr)
     return initOSCOut(new_port, ipaddr);
 }
 
-// Called as 'patch loaded' listener; runs on the juce::MessageManager thread
+// Called as 'patch loaded' listener; will run on the juce::MessageManager thread
 void SurgeSynthProcessor::patch_load_to_OSC(fs::path fullPath)
 {
     std::string pathStr = path_to_string(fullPath);
     if (surge->storage.oscSending && !pathStr.empty())
     {
-        oscHandler.send("/patch/load", pathStr);
+        juce::OSCMessage om =
+            juce::OSCMessage(juce::OSCAddressPattern(juce::String("/patch/load")));
+        om.addString(pathStr);
+        oscHandler.send(om, true);
     }
 }
 
-// Called as 'param changed' listener; runs on the juce::MessageManager thread
-void SurgeSynthProcessor::param_change_to_OSC(std::string paramPath, bool hasFloat, float value,
-                                              std::string valStr)
+// Called as 'param changed' listener; will run on the juce::MessageManager thread
+void SurgeSynthProcessor::param_change_to_OSC(std::string paramPath, int numval, float val0 = 0.0,
+                                              float val1 = 0.0, float val2 = 0.0,
+                                              std::string valStr = "")
 {
     if (surge->storage.oscSending && !paramPath.empty())
     {
-        if (hasFloat)
-            oscHandler.send(paramPath, value, valStr);
-        else
-            oscHandler.send(paramPath, valStr);
+        juce::OSCMessage om = juce::OSCMessage(juce::OSCAddressPattern(juce::String(paramPath)));
+        if (numval > 0)
+            om.addFloat32(val0);
+        if (numval > 1)
+            om.addFloat32(val1);
+        if (numval > 2)
+            om.addFloat32(val2);
+        om.addString(valStr);
+        oscHandler.send(om, true);
     }
 }
 
 void SurgeSynthProcessor::paramChangeToListeners(Parameter *p, bool isSpecialCase,
-                                                 int specialCaseType, int macroNum, float fval,
+                                                 int specialCaseType, float f0, float f1, float f2,
                                                  std::string newValue)
 {
     std::string valStr = "";
@@ -343,17 +390,104 @@ void SurgeSynthProcessor::paramChangeToListeners(Parameter *p, bool isSpecialCas
             case SCT_MACRO:
             {
                 std::ostringstream oss;
-                oss << "/param/macro/" << macroNum + 1;
-                (it.second)(oss.str(), true, fval, "");
+                oss << "/param/macro/" << f0 + 1;
+                (it.second)(oss.str(), 1, f0, f1, .0, "");
             }
             break;
 
             case SCT_FX_DEACT:
             {
-                std::ostringstream oss, oss2;
-                oss << "/param/fx/<s>/<n>/deactivate";
-                oss2 << newValue << "(new mask)";
-                (it.second)(oss.str(), true, fval, oss2.str());
+                int diff = (int)f0 ^ (int)f1;
+                if (diff != 0) // should always be true
+                {
+                    unsigned i = 1, pos = 0;
+                    while (pos <= n_fx_slots)
+                    {
+                        if (i & diff)
+                        {
+                            std::string addr = "/param/" + fxslot_shortoscname[pos] + "/deactivate";
+                            int newVal = ((int)f1 & i) == 0 ? 0 : 1;
+                            (it.second)(addr, 1, (float)newVal, .0, .0, "");
+                        }
+                        i = i << 1;
+                        ++pos;
+                    }
+                }
+            }
+            break;
+
+            case SCT_EX_ABSOLUTE:
+                (it.second)(p->oscName + "/abs+", 1, f0, .0, .0, "");
+                break;
+
+            case SCT_EX_EXTENDRANGE:
+                (it.second)(p->oscName + "/extend+", 1, f0, .0, .0, "");
+                break;
+
+            case SCT_EX_ENABLE:
+                (it.second)(p->oscName + "/enable+", 1, f0, .0, .0, "");
+                break;
+
+            case SCT_EX_TEMPOSYNC:
+                (it.second)(p->oscName + "/tempo_sync+", 1, f0, .0, .0, "");
+                break;
+
+            case SCT_EX_DEFORM:
+                (it.second)(p->oscName + "/deform+", 1, f0, .0, .0, "");
+                break;
+
+            case SCT_EX_PORTA_CONRATE:
+                (it.second)(p->oscName + "/const_rate+", 1, f0, .0, .0, "");
+                break;
+
+            case SCT_EX_PORTA_GLISS:
+                (it.second)(p->oscName + "/gliss+", 1, f0, .0, .0, "");
+                break;
+
+            case SCT_EX_PORTA_RETRIG:
+                (it.second)(p->oscName + "/retrig+", 1, f0, .0, .0, "");
+                break;
+
+            case SCT_EX_PORTA_CURVE:
+                (it.second)(p->oscName + "/curve+", 1, f0, .0, .0, "");
+                break;
+
+            case SCT_PITCHBEND:
+                (it.second)("/pbend", 2, f0, f1, .0, "");
+                break;
+
+            case SCT_CC:
+                (it.second)("/cc", 3, f0, f1, f2, "");
+                break;
+
+            case SCT_POLY_ATOUCH:
+                (it.second)("/poly_at", 3, f0, f1, f2, "");
+                break;
+
+            case SCT_CHAN_ATOUCH:
+                (it.second)("/chan_at", 2, f0, f1, .0, "");
+                break;
+
+            case SCT_WAVETABLE:
+            {
+                std::stringstream s;
+                std::string scene = f0 > 0.0 ? "b" : "a";
+                s << "/wavetable/" << scene << "/osc/" << ((int)f1) + 1 << "/id";
+                (it.second)(s.str(), 1, f2, .0, .0, newValue);
+            }
+            break;
+
+            case SCT_TUNING_SCL:
+            {
+                std::string s = "/tuning/scl";
+                (it.second)(s, 0, .0, .0, .0, newValue);
+            }
+            break;
+
+            case SCT_TUNING_KBM:
+            {
+                std::string s = "/tuning/kbm";
+                (it.second)(s, 0, .0, .0, .0, newValue);
             }
             break;
 
@@ -385,7 +519,7 @@ void SurgeSynthProcessor::paramChangeToListeners(Parameter *p, bool isSpecialCas
             default:
                 break;
             }
-            (it.second)(p->oscName, true, val, valStr);
+            (it.second)(p->oscName, 1, val, .0, .0, valStr);
         }
     }
 }
@@ -440,13 +574,10 @@ void SurgeSynthProcessor::processBlock(juce::AudioBuffer<float> &buffer,
         return;
     }
 
-#if SURGE_HAS_OSC
     if (oscCheckStartup)
     {
         tryLazyOscStartupFromStreamedState();
     }
-
-#endif
 
     priorCallWasProcessBlockNotBypassed = true;
 
@@ -548,7 +679,7 @@ void SurgeSynthProcessor::processBlock(juce::AudioBuffer<float> &buffer,
                         "This can be avoided by setting the DAW to use fixed buffer sizes, if "
                         "possible.",
                         fmt::arg("sz", BLOCK_SIZE)),
-            "Audio Input Latency Activated", SurgeStorage::AUDIO_INPUT_LATENCY_WARNING, false);
+            "Audio Input Latency", SurgeStorage::AUDIO_INPUT_LATENCY_WARNING, false);
         inputIsLatent = true;
     }
 
@@ -673,6 +804,18 @@ void SurgeSynthProcessor::processBlockPlayhead()
     }
     else
     {
+        // only if we want to change tempo on patch load
+        if (surge->storage.unstreamedTempo > -1.f)
+        {
+            // and only if it's different from current one
+            if (surge->storage.unstreamedTempo != standaloneTempo)
+            {
+                standaloneTempo = surge->storage.unstreamedTempo;
+                surge->refresh_editor = true;
+                surge->refresh_vkb = true;
+            }
+        }
+
         surge->time_data.tempo = standaloneTempo;
         surge->time_data.timeSigNumerator = 4;
         surge->time_data.timeSigDenominator = 4;
@@ -710,73 +853,93 @@ void SurgeSynthProcessor::processBlockMidiFromGUI()
 
 void SurgeSynthProcessor::processBlockOSC()
 {
-    auto messages = oscRingBuf.popall();
-    for (const auto &om : messages)
+    while (true)
     {
-        switch (om.type)
+        auto om = oscRingBuf.pop();
+        if (!om.has_value())
+            break; // no data waiting; return
+        switch (om->type)
         {
-        case SurgeSynthProcessor::NOTEX_PITCH:
-            surge->setNoteExpression(SurgeVoice::PITCH, om.noteid, -1, -1, om.fval);
-            break;
-
-        case SurgeSynthProcessor::NOTEX_VOL:
-            surge->setNoteExpression(SurgeVoice::VOLUME, om.noteid, -1, -1, om.fval);
-            break;
-
-        case SurgeSynthProcessor::NOTEX_PAN:
-            surge->setNoteExpression(SurgeVoice::PAN, om.noteid, -1, -1, om.fval);
-            break;
-
-        case SurgeSynthProcessor::NOTEX_PRES:
-            surge->setNoteExpression(SurgeVoice::PRESSURE, om.noteid, -1, -1, om.fval);
-            break;
-
-        case SurgeSynthProcessor::NOTEX_TIMB:
-            surge->setNoteExpression(SurgeVoice::TIMBRE, om.noteid, -1, -1, om.fval);
-            break;
-
-        case SurgeSynthProcessor::PARAMETER:
-        {
-            float pval = om.fval;
-            if (om.param->valtype == vt_int)
-                pval = Parameter::intScaledToFloat(pval, om.param->val_max.i, om.param->val_min.i);
-            surge->setParameter01(surge->idForParameter(om.param), pval, true);
-            surge->storage.getPatch().isDirty = true;
-
-            // Special cases: A few control types require a rebuild and
-            // SGE Value Callbacks would do it as would the VST3 param handler
-            // so put them here for now. Bit of a hack...
-            auto ct = om.param->ctrltype;
-            if (ct == ct_bool_solo || ct == ct_bool_mute || ct == ct_scenesel)
-            {
-                surge->refresh_editor = true;
-            }
-        }
-        break;
-
-        case SurgeSynthProcessor::MACRO:
-        {
-            surge->setMacroParameter01(om.ival, om.fval);
-        }
-        break;
-
         case SurgeSynthProcessor::MNOTE:
         {
-            if (om.on)
-                surge->playNote(0, om.mnote, om.vel, 0, om.noteid);
+            if (om->on)
+                surge->playNote(0, om->char0, om->char1, 0, om->noteid);
             else
-                surge->releaseNoteByHostNoteID(om.noteid, om.vel);
+                surge->releaseNoteByHostNoteID(om->noteid, om->char1);
         }
         break;
 
         case SurgeSynthProcessor::FREQNOTE:
         {
-            if (om.on)
-                surge->playNoteByFrequency(om.fval, om.vel, om.noteid);
+            if (om->on)
+                surge->playNoteByFrequency(om->fval, om->char1, om->noteid);
             else
             {
-                surge->releaseNoteByHostNoteID(om.noteid, om.vel);
+                surge->releaseNoteByHostNoteID(om->noteid, om->char1);
             }
+        }
+        break;
+
+        case SurgeSynthProcessor::NOTEX_PITCH:
+            surge->setNoteExpression(SurgeVoice::PITCH, om->noteid, -1, -1, om->fval);
+            break;
+
+        case SurgeSynthProcessor::NOTEX_VOL:
+            surge->setNoteExpression(SurgeVoice::VOLUME, om->noteid, -1, -1, om->fval);
+            break;
+
+        case SurgeSynthProcessor::NOTEX_PAN:
+            surge->setNoteExpression(SurgeVoice::PAN, om->noteid, -1, -1, om->fval);
+            break;
+
+        case SurgeSynthProcessor::NOTEX_PRES:
+            surge->setNoteExpression(SurgeVoice::PRESSURE, om->noteid, -1, -1, om->fval);
+            break;
+
+        case SurgeSynthProcessor::NOTEX_TIMB:
+            surge->setNoteExpression(SurgeVoice::TIMBRE, om->noteid, -1, -1, om->fval);
+            break;
+
+        case SurgeSynthProcessor::PITCHBEND:
+            surge->pitchBend(om->char0, om->ival);
+            break;
+
+        case SurgeSynthProcessor::CC:
+            surge->channelController(om->char0, om->char1, om->ival);
+            break;
+
+        case SurgeSynthProcessor::CHAN_ATOUCH:
+            surge->channelAftertouch(om->char0, om->ival);
+            break;
+
+        case SurgeSynthProcessor::POLY_ATOUCH:
+            surge->polyAftertouch(om->char0, (int)om->char1, om->ival);
+            break;
+
+        case SurgeSynthProcessor::PARAMETER:
+        {
+            float pval = om->fval;
+            if (om->param->valtype == vt_int)
+                pval = Parameter::intScaledToFloat(om->fval, om->param->val_max.i,
+                                                   om->param->val_min.i);
+
+            surge->setParameter01(surge->idForParameter(om->param), pval, true);
+            surge->storage.getPatch().isDirty = true;
+
+            // Special cases: A few control types require a rebuild and
+            // SGE Value Callbacks would do it as would the VST3 param handler
+            // so put them here for now. Bit of a hack...
+            auto ct = om->param->ctrltype;
+            if (ct == ct_bool_solo || ct == ct_bool_mute || ct == ct_scenesel)
+                surge->refresh_editor = true;
+            else
+                surge->queueForRefresh(om->param->id);
+        }
+        break;
+
+        case SurgeSynthProcessor::MACRO:
+        {
+            surge->setMacroParameter01(om->ival, om->fval);
         }
         break;
 
@@ -794,32 +957,124 @@ void SurgeSynthProcessor::processBlockOSC()
 
         case SurgeSynthProcessor::MOD:
         {
-            surge->setModDepth01(om.param->id, (modsources)om.ival, om.scene, om.index, om.fval);
+            surge->setModDepth01(om->param->id, (modsources)om->ival, om->scene, om->index,
+                                 om->fval);
+        }
+        break;
+
+        case SurgeSynthProcessor::MOD_MUTE:
+        {
+            bool mute = om->fval > 0.0;
+            surge->muteModulation(om->param->id, (modsources)om->ival, om->scene, om->index, mute);
         }
         break;
 
         case SurgeSynthProcessor::FX_DISABLE:
         {
-            int selected_mask = om.ival;
+            int selected_mask = om->ival;
             int curmask = surge->storage.getPatch().fx_disable.val.i;
             int msk = selected_mask;
             int newDisabledMask = 0;
-            if (om.on == 0) // set selected bit to zero
+            if (om->on == 0) // set selected bit to zero
             {
                 msk = ~(msk & 0) ^ selected_mask; // all bits to 1 except selected bit
                 newDisabledMask = curmask & msk;
             }
             else // set selected bit to one
-            {
                 newDisabledMask = curmask | msk;
-            }
+
             surge->storage.getPatch().fx_disable.val.i = newDisabledMask;
             surge->fx_suspend_bitmask = newDisabledMask;
             surge->storage.getPatch().isDirty = true;
             surge->refresh_editor = true;
-            // std::cout << "newDisabledMask: " << std::bitset<16>(newDisabledMask) << std::endl;
         }
         break;
+
+        case SurgeSynthProcessor::ABSOLUTE_X:
+            if (om->param->absolute != (bool)om->on)
+            {
+                om->param->absolute = om->on;
+                surge->storage.getPatch().isDirty = true;
+                surge->queueForRefresh(om->param->id);
+            }
+            break;
+
+        case SurgeSynthProcessor::TEMPOSYNC_X:
+            if (om->param->temposync != (bool)om->on)
+            {
+                om->param->temposync = om->on;
+                surge->storage.getPatch().isDirty = true;
+                surge->queueForRefresh(om->param->id);
+            }
+            break;
+
+        case SurgeSynthProcessor::ENABLE_X:
+        {
+            // This parameter is stored as 'disabled', but UI uses 'enabled',
+            //  so logic is flipped here:
+            bool disabled = !om->on;
+            if (om->param->deactivated != disabled)
+            {
+                om->param->deactivated = disabled;
+                surge->storage.getPatch().isDirty = true;
+                surge->queueForRefresh(om->param->id);
+            }
+        }
+        break;
+
+        case SurgeSynthProcessor::EXTEND_X:
+            if (om->param->extend_range != om->on)
+            {
+                om->param->extend_range = om->on;
+                surge->storage.getPatch().isDirty = true;
+                surge->queueForRefresh(om->param->id);
+            }
+            break;
+
+        case SurgeSynthProcessor::DEFORM_X:
+            if (om->param->deform_type != om->ival)
+            {
+                om->param->deform_type = om->ival;
+                surge->storage.getPatch().isDirty = true;
+                surge->queueForRefresh(om->param->id);
+            }
+            break;
+
+        case SurgeSynthProcessor::PORTA_CONSTRATE_X:
+            if (om->param->porta_constrate != om->on)
+            {
+                om->param->porta_constrate = om->on;
+                surge->storage.getPatch().isDirty = true;
+                surge->queueForRefresh(om->param->id);
+            }
+            break;
+
+        case SurgeSynthProcessor::PORTA_GLISS_X:
+            if (om->param->porta_gliss != om->on)
+            {
+                om->param->porta_gliss = om->on;
+                surge->storage.getPatch().isDirty = true;
+                surge->queueForRefresh(om->param->id);
+            }
+            break;
+
+        case SurgeSynthProcessor::PORTA_RETRIGGER_X:
+            if (om->param->porta_retrigger != om->on)
+            {
+                om->param->porta_retrigger = om->on;
+                surge->storage.getPatch().isDirty = true;
+                surge->queueForRefresh(om->param->id);
+            }
+            break;
+
+        case SurgeSynthProcessor::PORTA_CURVE_X:
+            if (om->param->porta_curve != om->ival)
+            {
+                om->param->porta_curve = om->ival;
+                surge->storage.getPatch().isDirty = true;
+                surge->queueForRefresh(om->param->id);
+            }
+            break;
 
         default:
             break;
@@ -1191,19 +1446,32 @@ void SurgeSynthProcessor::applyMidi(const juce::MidiMessage &m)
     }
     else if (m.isChannelPressure())
     {
-        surge->channelAftertouch(ch, m.getChannelPressureValue());
+        int atval = m.getChannelPressureValue();
+        surge->channelAftertouch(ch, atval);
+        if (surge->storage.echoMIDIctrlToOSC)
+            paramChangeToListeners(nullptr, true, SCT_CHAN_ATOUCH, (float)ch, (float)atval, .0, "");
     }
     else if (m.isAftertouch())
     {
-        surge->polyAftertouch(ch, m.getNoteNumber(), m.getAfterTouchValue());
+        int atval = m.getAfterTouchValue();
+        surge->polyAftertouch(ch, m.getNoteNumber(), atval);
+        if (surge->storage.echoMIDIctrlToOSC)
+            paramChangeToListeners(nullptr, true, SCT_POLY_ATOUCH, (float)ch,
+                                   (float)m.getNoteNumber(), (float)atval, "");
     }
     else if (m.isPitchWheel())
     {
-        surge->pitchBend(ch, m.getPitchWheelValue() - 8192);
+        int pwval = m.getPitchWheelValue() - 8192;
+        surge->pitchBend(ch, pwval);
+        if (surge->storage.echoMIDIctrlToOSC)
+            paramChangeToListeners(nullptr, true, SCT_PITCHBEND, (float)ch, pwval / 8192., .0, "");
     }
     else if (m.isController())
     {
         surge->channelController(ch, m.getControllerNumber(), m.getControllerValue());
+        if (surge->storage.echoMIDIctrlToOSC)
+            paramChangeToListeners(nullptr, true, SCT_CC, (float)ch, (float)m.getControllerNumber(),
+                                   (float)m.getControllerValue(), "");
     }
     else if (m.isProgramChange())
     {
@@ -1215,6 +1483,13 @@ void SurgeSynthProcessor::applyMidi(const juce::MidiMessage &m)
     {
         // std::cout << "Ignoring message " << std::endl;
     }
+}
+
+void SurgeSynthProcessor::setupSurgeSynthesizerDI()
+{
+    // Not everything injected into SurgeStorage is done here, but the stuff
+    // that requires JUCE is.
+    surge->storage.load_audio_file = loadAudioFile;
 }
 
 //==============================================================================
@@ -1248,7 +1523,7 @@ void SurgeSynthProcessor::getStateInformation(juce::MemoryBlock &destData)
         sse->populateForStreaming(surge.get());
     }
 
-    void *data = nullptr; // surgeInstance owns this on return
+    void *data = nullptr; // Surge instance owns this on return
     unsigned int stateSize = surge->saveRaw(&data);
     destData.setSize(stateSize);
     destData.copyFrom(data, 0, stateSize);
@@ -1430,8 +1705,75 @@ bool SurgeSynthProcessor::remoteControlsPageFill(
     }
     return true;
 }
+
 #endif
 
+#if HAS_CLAP_JUCE_EXTENSIONS
+
+bool SurgeSynthProcessor::presetLoadFromLocation(uint32_t location_kind, const char *location,
+                                                 const char * /*load_key*/) noexcept
+{
+    if (location_kind != CLAP_PRESET_DISCOVERY_LOCATION_FILE)
+        return false;
+
+    {
+        std::lock_guard<std::mutex> mg(surge->patchLoadSpawnMutex);
+        strncpy(surge->patchid_file, location, sizeof(surge->patchid_file));
+        surge->has_patchid_file = true;
+    }
+    surge->processAudioThreadOpsWhenAudioEngineUnavailable();
+    return true;
+}
+
+const void *JUCE_CALLTYPE clapJuceExtensionCustomFactory(const char *f)
+{
+    if (strcmp(f, CLAP_PRESET_DISCOVERY_FACTORY_ID) == 0 ||
+        strcmp(f, CLAP_PRESET_DISCOVERY_FACTORY_ID_COMPAT) == 0)
+    {
+        return SurgeSynthProcessor::getSurgePresetDiscoveryFactory();
+    }
+
+    return nullptr;
+}
+#endif
+
+SurgeParamToJuceParamAdapter::SurgeParamToJuceParamAdapter(SurgeSynthProcessor *jp, Parameter *p)
+    : ssp(jp), s(jp->surge.get()), p(p), range(0.f, 1.f, 0.001f),
+      SurgeBaseParam(juce::ParameterID(p->get_storage_name(),
+                                       1), // This "1" needs thought if we add params
+                     SurgeParamToJuceInfo::getParameterName(jp->surge.get(), p),
+                     juce::AudioProcessorParameterWithIDAttributes())
+{
+    setValueNotifyingHost(getValue());
+}
+
+void SurgeParamToJuceParamAdapter::setValue(float f)
+{
+    auto matches = (f == getValue());
+    if (!matches && !inEditGesture)
+    {
+        s->setParameter01(s->idForParameter(p), f, true);
+        ssp->paramChangeToListeners(p);
+    }
+}
+
+SurgeMacroToJuceParamAdapter::SurgeMacroToJuceParamAdapter(SurgeSynthProcessor *jp, long macroNum)
+    : ssp(jp), s(jp->surge.get()), macroNum(macroNum), range(0.f, 1.f, 0.001f),
+      SurgeBaseParam(juce::ParameterID(std::string("macro_") + std::to_string(macroNum), 1),
+                     std::string("M") + std::to_string(macroNum + 1),
+                     juce::AudioProcessorParameterWithIDAttributes())
+{
+    setValueNotifyingHost(getValue());
+}
+
+void SurgeMacroToJuceParamAdapter::setValue(float f)
+{
+    if (f != getValue())
+    {
+        s->setMacroParameter01(macroNum, f);
+        // Do whatever macros do
+    }
+}
 //==============================================================================
 // This creates new instances of the plugin..
 juce::AudioProcessor *JUCE_CALLTYPE createPluginFilter() { return new SurgeSynthProcessor(); }

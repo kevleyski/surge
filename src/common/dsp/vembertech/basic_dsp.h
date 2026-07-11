@@ -4,7 +4,7 @@
  *
  * Learn more at https://surge-synthesizer.github.io/
  *
- * Copyright 2018-2023, various authors, as described in the GitHub
+ * Copyright 2018-2024, various authors, as described in the GitHub
  * transaction log.
  *
  * Surge XT is released under the GNU General Public Licence v3
@@ -48,6 +48,15 @@ inline void float2i15_block(float *f, short *s, int n)
 inline void i152float_block(short *s, float *f, int n)
 {
     const float scale = 1.f / 16384.f;
+    for (int i = 0; i < n; i++)
+    {
+        f[i] = (float)s[i] * scale;
+    }
+}
+
+inline void i162float_block(short *s, float *f, int n)
+{
+    const float scale = 1.f / (16384.f * 2);
     for (int i = 0; i < n; i++)
     {
         f[i] = (float)s[i] * scale;

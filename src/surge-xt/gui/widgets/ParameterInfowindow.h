@@ -4,7 +4,7 @@
  *
  * Learn more at https://surge-synthesizer.github.io/
  *
- * Copyright 2018-2023, various authors, as described in the GitHub
+ * Copyright 2018-2024, various authors, as described in the GitHub
  * transaction log.
  *
  * Surge XT is released under the GNU General Public Licence v3
@@ -37,7 +37,7 @@ struct ParameterInfowindow : public juce::Component, public Surge::GUI::SkinCons
     ParameterInfowindow();
     ~ParameterInfowindow();
 
-    juce::Font font;
+    juce::Font font{SST_JUCE_EMPTY_FONT};
     void setFont(const juce::Font &f)
     {
         font = f;

@@ -4,7 +4,7 @@
  *
  * Learn more at https://surge-synthesizer.github.io/
  *
- * Copyright 2018-2023, various authors, as described in the GitHub
+ * Copyright 2018-2024, various authors, as described in the GitHub
  * transaction log.
  *
  * Surge XT is released under the GNU General Public Licence v3
@@ -19,6 +19,9 @@
  * All source for Surge XT is available at
  * https://github.com/surge-synthesizer/surge
  */
+
+#include <juce_gui_extra/juce_gui_extra.h>
+
 #include "TuningOverlays.h"
 #include "RuntimeFont.h"
 #include "SurgeStorage.h"
@@ -29,7 +32,6 @@
 #include "widgets/MultiSwitch.h"
 #include "fmt/core.h"
 #include <chrono>
-#include "juce_gui_extra/juce_gui_extra.h"
 #include "UnitConversions.h"
 #include "libMTSClient.h"
 
@@ -551,19 +553,19 @@ class RadialScaleGraph : public juce::Component,
                     toneInterior->addAndMakeVisible(*tk);
                     toneKnobs.push_back(std::move(tk));
 
-                    showHideKnob = std::make_unique<Surge::Widgets::MultiSwitchSelfDraw>();
-                    showHideKnob->setSkin(skin, associatedBitmapStore);
-                    showHideKnob->setStorage(storage);
-                    showHideKnob->setRows(1);
-                    showHideKnob->setColumns(1);
-                    showHideKnob->setTag(12345);
-                    showHideKnob->setLabels({"Hide"});
-                    showHideKnob->addListener(this);
+                    hideBtn = std::make_unique<Surge::Widgets::MultiSwitchSelfDraw>();
+                    hideBtn->setSkin(skin, associatedBitmapStore);
+                    hideBtn->setStorage(storage);
+                    hideBtn->setRows(1);
+                    hideBtn->setColumns(1);
+                    hideBtn->setTag(12345);
+                    hideBtn->setLabels({"Hide"});
+                    hideBtn->addListener(this);
 
-                    showHideKnob->setBounds(
+                    hideBtn->setBounds(
                         totalR.withTrimmedLeft(labw + m).withTrimmedRight(h + m).reduced(3));
 
-                    toneInterior->addAndMakeVisible(*showHideKnob);
+                    toneInterior->addAndMakeVisible(*hideBtn);
                 }
                 else
                 {
@@ -578,6 +580,7 @@ class RadialScaleGraph : public juce::Component,
                     te->setText(std::to_string(i), juce::NotificationType::dontSendNotification);
                     te->setEnabled(i != 0);
                     te->addListener(this);
+                    te->setSelectAllWhenFocused(true);
 
                     te->onEscapeKey = [this]() { giveAwayKeyboardFocus(); };
                     toneInterior->addAndMakeVisible(*te);
@@ -650,14 +653,14 @@ class RadialScaleGraph : public juce::Component,
 
     void valueChanged(GUI::IComponentTagValue *p) override
     {
-        if (p == showHideKnob.get())
+        if (p == hideBtn.get())
         {
             centsShowing = !centsShowing;
             for (const auto &t : toneEditors)
             {
                 t->setPasswordCharacter(centsShowing ? 0 : 0x2022);
             }
-            showHideKnob->setLabels({centsShowing ? "Hide" : "Show"});
+            hideBtn->setLabels({centsShowing ? "Hide" : "Show"});
         }
         if (p == radialModeKnob.get())
         {
@@ -680,9 +683,9 @@ class RadialScaleGraph : public juce::Component,
 
     void onSkinChanged() override
     {
-        if (showHideKnob)
+        if (hideBtn)
         {
-            showHideKnob->setSkin(skin, associatedBitmapStore);
+            hideBtn->setSkin(skin, associatedBitmapStore);
         }
 
         for (const auto &k : toneKnobs)
@@ -711,6 +714,7 @@ class RadialScaleGraph : public juce::Component,
 
   private:
     void textEditorReturnKeyPressed(juce::TextEditor &editor) override;
+    void textEditorFocusLost(juce::TextEditor &editor) override;
 
   public:
     virtual void paint(juce::Graphics &g) override;
@@ -728,14 +732,14 @@ class RadialScaleGraph : public juce::Component,
         [](int, const std::string &) {};
     std::function<void(double)> onScaleRescaled = [](double) {};
     std::function<void(double)> onScaleRescaledAbsolute = [](double) {};
-    static constexpr int usedForSidebar = 160;
+    static constexpr int usedForSidebar = 185;
 
     std::unique_ptr<juce::Viewport> toneList;
     std::unique_ptr<juce::Component> toneInterior;
     std::vector<std::unique_ptr<juce::TextEditor>> toneEditors;
     std::vector<std::unique_ptr<juce::Label>> toneLabels;
     std::vector<std::unique_ptr<InfiniteKnob>> toneKnobs;
-    std::unique_ptr<Surge::Widgets::MultiSwitchSelfDraw> showHideKnob, radialModeKnob;
+    std::unique_ptr<Surge::Widgets::MultiSwitchSelfDraw> hideBtn, radialModeKnob;
 
     void resized() override
     {
@@ -859,7 +863,7 @@ void RadialScaleGraph::paint(juce::Graphics &g)
 
     g.fillAll(skin->getColor(clr::Background));
 
-    int w = getWidth() - usedForSidebar;
+    int w = getWidth() - usedForSidebar - 25;
     int h = getHeight();
     float r = std::min(w, h) / 2.1;
     float xo = (w - 2 * r) / 2.0;
@@ -1295,7 +1299,7 @@ void RadialScaleGraph::paint(juce::Graphics &g)
                 auto irsf = 1.0 / rsf;
                 g.addTransform(juce::AffineTransform::scale(rsf, rsf));
 
-                if (notesOn[i])
+                if (i < notesOn.size() && notesOn[i])
                 {
                     g.setColour(juce::Colour(255, 255, 255));
                 }
@@ -1676,7 +1680,7 @@ struct IntervalMatrix : public juce::Component, public Surge::GUI::SkinConsuming
             namespace clr = Colors::TuningOverlay::Interval;
             g.fillAll(skin->getColor(clr::Background));
             auto ic = matrix->tuning.scale.count;
-            int mt = ic + (mode == ROTATION ? 1 : 2);
+            int mt = ic + 2;
             g.setFont(skin->fontManager->getLatoAtSize(9));
             for (int i = 0; i < mt; ++i)
             {
@@ -1793,9 +1797,10 @@ struct IntervalMatrix : public juce::Component, public Surge::GUI::SkinConsuming
                         auto evenStep = lastTone / matrix->tuning.scale.count;
                         auto desCents = disNote * evenStep;
 
+                        juce::Colour bg;
                         if (fabs(cdiff - desCents) < 0.1)
                         {
-                            g.setColour(skin->getColor(clr::HeatmapZero));
+                            bg = (skin->getColor(clr::HeatmapZero));
                         }
                         else if (cdiff < desCents)
                         {
@@ -1804,7 +1809,7 @@ struct IntervalMatrix : public juce::Component, public Surge::GUI::SkinConsuming
                             auto r = (1.0 - dist);
                             auto c1 = skin->getColor(clr::HeatmapNegFar);
                             auto c2 = skin->getColor(clr::HeatmapNegNear);
-                            g.setColour(c1.interpolatedWith(c2, r));
+                            bg = (c1.interpolatedWith(c2, r));
                         }
                         else
                         {
@@ -1812,15 +1817,23 @@ struct IntervalMatrix : public juce::Component, public Surge::GUI::SkinConsuming
                             auto b = 1.0 - dist;
                             auto c1 = skin->getColor(clr::HeatmapPosFar);
                             auto c2 = skin->getColor(clr::HeatmapPosNear);
-                            g.setColour(c1.interpolatedWith(c2, b));
+                            bg = (c1.interpolatedWith(c2, b));
                         }
+                        if (i == mt - 1 || i == 1)
+                            bg = skin->getColor(clr::HeatmapZero).withAlpha(0.9f);
+
+                        g.setColour(bg);
                         g.fillRect(bx);
 
+                        juce::Colour fg;
                         if (isHovered)
-                            g.setColour(skin->getColor(clr::IntervalTextHover));
+                            fg = skin->getColor(clr::IntervalTextHover);
                         else
-                            g.setColour(skin->getColor(clr::IntervalText));
+                            fg = skin->getColor(clr::IntervalText);
+                        if (i == mt - 1 || i == 1)
+                            fg = fg.withAlpha(0.7f);
 
+                        g.setColour(fg);
                         g.drawText(fmt::format("{:.1f}", cdiff), bx, juce::Justification::centred);
                     }
                 }
@@ -1877,8 +1890,14 @@ struct IntervalMatrix : public juce::Component, public Surge::GUI::SkinConsuming
 
             if (mode == ROTATION)
             {
-                int tonI = (hoverI - 1 + hoverJ - 2) % matrix->tuning.scale.count;
-                matrix->overlay->onToneChanged(tonI, matrix->tuning.scale.tones[tonI].cents + dPos);
+                if (hoverI > 1 && hoverI <= matrix->tuning.scale.count)
+                {
+                    int tonI = (hoverI - 1 + hoverJ - 2);
+
+                    tonI = tonI % matrix->tuning.scale.count;
+                    matrix->overlay->onToneChanged(tonI,
+                                                   matrix->tuning.scale.tones[tonI].cents + dPos);
+                }
             }
             else
             {
@@ -2214,6 +2233,11 @@ void RadialScaleGraph::textEditorReturnKeyPressed(juce::TextEditor &editor)
     }
 }
 
+void RadialScaleGraph::textEditorFocusLost(juce::TextEditor &editor)
+{
+    editor.setHighlightedRegion(juce::Range(-1, -1));
+}
+
 struct SCLKBMDisplay : public juce::Component,
                        Surge::GUI::SkinConsumingComponent,
                        juce::TextEditor::Listener,
@@ -2254,12 +2278,16 @@ struct SCLKBMDisplay : public juce::Component,
         teProps(evenDivOf);
         evenDivOf->setText("2", juce::dontSendNotification);
         addAndMakeVisible(*evenDivOf);
+        evenDivOf->addListener(this);
+        evenDivOf->setSelectAllWhenFocused(true);
 
         evenDivIntoL = newL("into");
         evenDivInto = std::make_unique<juce::TextEditor>();
         teProps(evenDivInto);
         evenDivInto->setText("12", juce::dontSendNotification);
         addAndMakeVisible(*evenDivInto);
+        evenDivInto->addListener(this);
+        evenDivInto->setSelectAllWhenFocused(true);
 
         evenDivStepsL = newL("steps");
 
@@ -2311,18 +2339,24 @@ struct SCLKBMDisplay : public juce::Component,
         teProps(kbmStart);
         kbmStart->setText("60", juce::dontSendNotification);
         addAndMakeVisible(*kbmStart);
+        kbmStart->addListener(this);
+        kbmStart->setSelectAllWhenFocused(true);
 
         kbmConstantL = newL("Constant:");
         kbmConstant = std::make_unique<juce::TextEditor>();
         teProps(kbmConstant);
         kbmConstant->setText("69", juce::dontSendNotification);
         addAndMakeVisible(*kbmConstant);
+        kbmConstant->addListener(this);
+        kbmConstant->setSelectAllWhenFocused(true);
 
         kbmFreqL = newL("Freq:");
         kbmFreq = std::make_unique<juce::TextEditor>();
         teProps(kbmFreq);
         kbmFreq->setText("440", juce::dontSendNotification);
         addAndMakeVisible(*kbmFreq);
+        kbmFreq->addListener(this);
+        kbmFreq->setSelectAllWhenFocused(true);
 
         kbmGo = std::make_unique<Surge::Widgets::SelfDrawButton>("Generate");
         kbmGo->setStorage(overlay->storage);
@@ -2555,6 +2589,10 @@ struct SCLKBMDisplay : public juce::Component,
     }
 
     void textEditorTextChanged(juce::TextEditor &editor) override { setApplyEnabled(true); }
+    void textEditorFocusLost(juce::TextEditor &editor) override
+    {
+        editor.setHighlightedRegion(juce::Range(-1, -1));
+    }
 
     void onSkinChanged() override
     {
@@ -2602,7 +2640,7 @@ struct SCLKBMDisplay : public juce::Component,
                          skin->getColor(qclr::ToneLabelText));
             r->applyColourToAllText(skin->getColor(qclr::ToneLabelText), true);
 
-            // Work around a buglet that the text editor applies fonts ontly to newly inserted
+            // Work around a buglet that the text editor applies fonts only to newly inserted
             // text after setFont
             auto t = r->getText();
             r->setText("--", juce::dontSendNotification);
@@ -2772,7 +2810,7 @@ struct TuningControlArea : public juce::Component,
             {
                 overlay->storage->reportError(
                     "You have unapplied changes in your SCL/KBM. Please apply them before saving!",
-                    "SCL Save Error");
+                    "Notification");
                 break;
             }
             fileChooser = std::make_unique<juce::FileChooser>("Save SCL", juce::File(), "*.scl");
@@ -2798,7 +2836,8 @@ struct TuningControlArea : public juce::Component,
                     }
                     else
                     {
-                        overlay->storage->reportError("Unable to save SCL file", "SCL File Error");
+                        overlay->storage->reportError(
+                            "Unable to save Scala file to " + fsp.u8string() + "!", "Write Error");
                     }
                 });
         }
@@ -2806,7 +2845,15 @@ struct TuningControlArea : public juce::Component,
         case tag_open_library:
         {
             auto path = overlay->storage->datapath / "tuning_library";
-            Surge::GUI::openFileOrFolder(path);
+            if (!Surge::GUI::openFileOrFolder(path))
+            {
+                overlay->storage->reportError(
+                    "The folder " + path_to_string(path) +
+                        " does not exist. It seems that your Surge factory data folder is "
+                        "missing.\n\n"
+                        "Please run the Surge installer to set up the factory data.",
+                    "Load Error");
+            }
         }
         break;
         case tag_export_html:
@@ -3007,6 +3054,13 @@ void TuningOverlay::onScaleRescaled(double scaleBy)
     double sFactor = (tCents + 1) / tCents - 1;
 
     double scale = (1.0 + sFactor * scaleBy);
+    // smallest compression is 20 cents
+    static constexpr float smallestRepInterval{100};
+    if (tCents <= smallestRepInterval && scaleBy < 0)
+    {
+        scale = smallestRepInterval / tCents;
+    }
+
     for (auto &t : storage->currentScale.tones)
     {
         t.type = Tunings::Tone::kToneCents;
@@ -3072,7 +3126,7 @@ void TuningOverlay::onNewSCLKBM(const std::string &scl, const std::string &kbm)
     }
     catch (const Tunings::TuningError &e)
     {
-        storage->reportError(e.what(), "Error Applying Tuning");
+        storage->reportError(e.what(), "Tuning Error");
     }
 }
 
@@ -3143,7 +3197,7 @@ void TuningOverlay::resetParentTitle()
     }
     else
     {
-        setEnclosingParentTitle("Tuning Editor - " + tuning.scale.description);
+        setEnclosingParentTitle("Tuning Editor - " + tuning.scale.name);
     }
     if (getParentComponent())
         getParentComponent()->repaint();

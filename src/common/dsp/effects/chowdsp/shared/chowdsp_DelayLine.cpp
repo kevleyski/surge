@@ -4,7 +4,7 @@
  *
  * Learn more at https://surge-synthesizer.github.io/
  *
- * Copyright 2018-2023, various authors, as described in the GitHub
+ * Copyright 2018-2024, various authors, as described in the GitHub
  * transaction log.
  *
  * Surge XT is released under the GNU General Public Licence v3
@@ -20,6 +20,9 @@
  * https://github.com/surge-synthesizer/surge
  */
 
+#include <cassert>
+#include <algorithm>
+
 namespace chowdsp
 {
 //==============================================================================
@@ -31,9 +34,9 @@ DelayLine<SampleType, InterpolationType>::DelayLine() : DelayLine(0)
 template <typename SampleType, typename InterpolationType>
 DelayLine<SampleType, InterpolationType>::DelayLine(int maximumDelayInSamples)
 {
-    jassert(maximumDelayInSamples >= 0);
+    assert(maximumDelayInSamples >= 0);
 
-    totalSize = juce::jmax(4, maximumDelayInSamples + 1);
+    totalSize = std::max(4, maximumDelayInSamples + 1);
 }
 
 //==============================================================================
@@ -42,9 +45,9 @@ void DelayLine<SampleType, InterpolationType>::setDelay(
     DelayLine<SampleType, InterpolationType>::NumericType newDelayInSamples)
 {
     auto upperLimit = (NumericType)(totalSize - 1);
-    jassert(juce::isPositiveAndNotGreaterThan(newDelayInSamples, upperLimit));
+    assert(newDelayInSamples >= 0 && newDelayInSamples < upperLimit);
 
-    delay = juce::jlimit((NumericType)0, upperLimit, newDelayInSamples);
+    delay = std::clamp(newDelayInSamples, (NumericType)0, upperLimit);
     delayInt = static_cast<int>(std::floor(delay));
     delayFrac = delay - (NumericType)delayInt;
 
@@ -60,12 +63,13 @@ DelayLine<SampleType, InterpolationType>::getDelay() const
 
 //==============================================================================
 template <typename SampleType, typename InterpolationType>
-void DelayLine<SampleType, InterpolationType>::prepare(const juce::dsp::ProcessSpec &spec)
+void DelayLine<SampleType, InterpolationType>::prepare(
+    const typename DelayLineBase<SampleType>::PrepareInfo &spec)
 {
-    jassert(spec.numChannels > 0);
+    assert(spec.numChannels > 0);
 
-    this->bufferData =
-        juce::dsp::AudioBlock<SampleType>(this->dataBlock, spec.numChannels, 2 * (size_t)totalSize);
+    this->bufferData = typename DelayLineBase<SampleType>::AudioBlock(
+        this->dataBlock, spec.numChannels, 2 * (size_t)totalSize);
 
     this->writePos.resize(spec.numChannels);
     this->readPos.resize(spec.numChannels);

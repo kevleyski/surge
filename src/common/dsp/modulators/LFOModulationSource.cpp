@@ -4,7 +4,7 @@
  *
  * Learn more at https://surge-synthesizer.github.io/
  *
- * Copyright 2018-2023, various authors, as described in the GitHub
+ * Copyright 2018-2024, various authors, as described in the GitHub
  * transaction log.
  *
  * Surge XT is released under the GNU General Public Licence v3
@@ -156,7 +156,7 @@ void LFOModulationSource::msegEnvelopePhaseAdjustment()
 
 void LFOModulationSource::initPhaseFromStartPhase()
 {
-    phase = localcopy[startphase].f;
+    phase = startPhaseClamped();
     phaseInitialized = true;
 
     if (lfo->shape.val.i == lt_tri && lfo->rate.deactivated && !lfo->unipolar.val.b)
@@ -217,7 +217,7 @@ void LFOModulationSource::attackFrom(float start)
 
     if (is_display)
     {
-        phase = lfo->start_phase.val.f;
+        phase = startPhaseClamped();
 
         if (lfo->shape.val.i == lt_stepseq)
         {
@@ -239,7 +239,7 @@ void LFOModulationSource::attackFrom(float start)
         }
         else
         {
-            phaseslider = localcopy[startphase].f;
+            phaseslider = startPhaseClamped();
         }
 
         // With modulation the phaseslider can be outside [0, 1), as in #1524
@@ -1214,7 +1214,7 @@ void LFOModulationSource::process_block()
 
         formulastate.isVoice = isVoice;
 
-        float tmpout[Surge::Formula::max_formula_outputs] = {0, 0, 0, 0, 0, 0, 0, 0};
+        float tmpout[Surge::Formula::max_formula_outputs] = {0};
 
         Surge::Formula::valueAt(unwrappedphase_intpart, phase, storage, fs, &formulastate, tmpout);
 
@@ -1228,8 +1228,8 @@ void LFOModulationSource::process_block()
 
         if (formulastate.raisedError)
         {
-            auto em = formulastate.error;
-            formulastate.error = "";
+            auto em = *formulastate.error;
+            formulastate.error.reset();
             formulastate.raisedError = false;
             storage->reportError(em, "Formula Evaluator Error");
             std::cout << "ERROR: " << em << std::endl;
@@ -1238,6 +1238,10 @@ void LFOModulationSource::process_block()
         // Since I'm (right now) the only vector valued modulator just do a little
         // chute and ladder dance here on the output and return
         auto magnf = limit_range(lfo->magnitude.get_extended(localcopy[magn].f), -3.f, 3.f);
+        if (!formulastate.useAmplitude)
+        {
+            magnf = 1.f;
+        }
         auto uni = lfo->unipolar.val.b;
 
         for (auto i = 0; i < formulastate.activeoutputs; ++i)

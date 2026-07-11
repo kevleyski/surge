@@ -4,7 +4,7 @@
  *
  * Learn more at https://surge-synthesizer.github.io/
  *
- * Copyright 2018-2023, various authors, as described in the GitHub
+ * Copyright 2018-2024, various authors, as described in the GitHub
  * transaction log.
  *
  * Surge XT is released under the GNU General Public Licence v3
@@ -116,6 +116,7 @@ struct SurgeFXConfig
     }
 
     static inline bool temposyncInitialized(GlobalStorage *s) { return s->temposyncratio_inv != 0; }
+    static inline bool isTemposynced(EffectStorage *e, int idx) { return e->p[idx].temposync; }
     static inline float temposyncRatio(GlobalStorage *s, EffectStorage *e, int idx)
     {
         return e->p[idx].temposync ? s->temposyncratio : 1;
@@ -148,6 +149,21 @@ struct SurgeFXConfig
     static inline float dbToLinear(GlobalStorage *s, float f) { return s->db_to_linear(f); }
 };
 
+template <typename T> class Has_processOnlyControl
+{
+    using No = uint8_t;
+    using Yes = uint64_t;
+    static_assert(sizeof(No) != sizeof(Yes));
+    template <typename C> static Yes test(decltype(&C::processOnlyControl) *);
+    template <typename C> static No test(...);
+
+  public:
+    enum
+    {
+        value = sizeof(test<T>(nullptr)) == sizeof(Yes)
+    };
+};
+
 /*
  * The SurgeSSTFXBase is a template class which adapts the surge Effect virtyal
  * methods to the sst-effects T<Config> concrete methods.
@@ -175,7 +191,7 @@ template <typename T> struct SurgeSSTFXBase : T
 
     void sampleRateReset() override { T::onSampleRateChanged(); }
 
-    const char *get_effectname() override { return T::effectName; }
+    const char *get_effectname() override { return T::displayName; }
 
     void init_default_values() override
     {
@@ -200,6 +216,7 @@ template <typename T> struct SurgeSSTFXBase : T
         // 2: make it throw a logic_error for really miscofingured cases
         for (int i = 0; i < T::numParams; ++i)
         {
+            bool started{false};
             auto pmd = T::paramAt(i);
 
             if (this->fxdata->p[i].ctrltype == ct_none &&
@@ -208,13 +225,21 @@ template <typename T> struct SurgeSSTFXBase : T
 
             if (pmd.name.empty())
             {
-                std::cout << "\n\n----- " << i << " " << this->fxdata->p[i].get_name() << std::endl;
+                std::cout << "\n\n----- " << i << " [pmdname-missing] "
+                          << this->fxdata->p[i].get_name() << std::endl;
+                started = true;
             }
             this->fxdata->p[i].set_name(pmd.name.c_str());
             this->fxdata->p[i].basicBlocksParamMetaData = pmd;
             auto check = [&, i](auto a, auto b, auto msg) {
                 if (a != b)
                 {
+                    if (!started)
+                    {
+                        std::cout << "\n\n----- " << i << " `" << pmd.name << "` `"
+                                  << this->fxdata->p[i].get_name() << "'" << std::endl;
+                        started = true;
+                    }
                     // If you are sitting here it is because your ct_blah for p[i] is not
                     // consistent with your sst-effects ParamMetaData. Go fix one of the other
                     // and this message will vanish
@@ -243,6 +268,14 @@ template <typename T> struct SurgeSSTFXBase : T
             check(pmd.canExtend, this->fxdata->p[i].can_extend_range(), "Can Extend");
             check(pmd.canDeactivate, this->fxdata->p[i].can_deactivate(), "Can Deactivate");
             check(pmd.supportsStringConversion, true, "Supports string value");
+        }
+    }
+
+    void process_only_control() override
+    {
+        if constexpr (sstfx::Has_processOnlyControl<T>::value)
+        {
+            this->processOnlyControl();
         }
     }
 };

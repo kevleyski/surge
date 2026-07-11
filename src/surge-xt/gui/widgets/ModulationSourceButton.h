@@ -4,7 +4,7 @@
  *
  * Learn more at https://surge-synthesizer.github.io/
  *
- * Copyright 2018-2023, various authors, as described in the GitHub
+ * Copyright 2018-2024, various authors, as described in the GitHub
  * transaction log.
  *
  * Surge XT is released under the GNU General Public Licence v3
@@ -84,8 +84,24 @@ struct ModulationSourceButton : public juce::Component,
     int modlistIndex{0};
     void setModList(const modlist_t &m)
     {
-        modlistIndex = limit_range(modlistIndex, 0, (int)(m.size() - 1));
         modlist = m;
+        // modlistIndex = 0;
+
+        auto ms = getCurrentModSource();
+
+        if (ms >= ms_lfo1 && ms <= ms_slfo6)
+        {
+            int lfo_id = ms - ms_lfo1;
+            auto sge = firstListenerOfType<SurgeGUIEditor>();
+
+            modlistIndex =
+                storage->getPatch()
+                    .dawExtraState.editor.modulationSourceButtonState[sge->current_scene][lfo_id]
+                    .index;
+        }
+
+        modlistIndex = limit_range(modlistIndex, 0, (int)(m.size() - 1));
+
         setAccessibleLabel(getCurrentModLabel());
         selectAccButton->setVisible(true);
         if (isLFO())
@@ -156,7 +172,7 @@ struct ModulationSourceButton : public juce::Component,
             repaint();
     }
 
-    juce::Font font;
+    juce::Font font{SST_JUCE_EMPTY_FONT};
 
     void setFont(const juce::Font &f)
     {

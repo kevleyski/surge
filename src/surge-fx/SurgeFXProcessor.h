@@ -4,7 +4,7 @@
  *
  * Learn more at https://surge-synthesizer.github.io/
  *
- * Copyright 2018-2023, various authors, as described in the GitHub
+ * Copyright 2018-2024, various authors, as described in the GitHub
  * transaction log.
  *
  * Surge XT is released under the GNU General Public Licence v3
@@ -23,9 +23,14 @@
 #ifndef SURGE_SRC_SURGE_FX_SURGEFXPROCESSOR_H
 #define SURGE_SRC_SURGE_FX_SURGEFXPROCESSOR_H
 
+// Header ordering ARM
+#include <juce_gui_extra/juce_gui_extra.h>
+
 #include "SurgeStorage.h"
 #include "Effect.h"
-
+#include "FXOpenSoundControl.h"
+#include "FxPresetAndClipboardManager.h"
+#include <atomic>
 #include "sst/filters/HalfRateFilter.h"
 
 #include "juce_audio_processors/juce_audio_processors.h"
@@ -61,10 +66,42 @@ class SurgefxAudioProcessor : public juce::AudioProcessor,
     bool isBusesLayoutSupported(const BusesLayout &layouts) const override;
 
     void processBlock(juce::AudioBuffer<float> &, juce::MidiBuffer &) override;
+    void processBlockOSC();
 
     //==============================================================================
     juce::AudioProcessorEditor *createEditor() override;
     bool hasEditor() const override;
+
+    //==============================================================================
+    // Open Sound Control
+    enum oscToAudio_type
+    {
+        FX_PARAM
+    };
+
+    // Message from OSC input to the audio thread
+    struct oscToAudio
+    {
+        oscToAudio_type type;
+        int p_index{0};
+        float fval{0.0};
+
+        oscToAudio() {}
+        explicit oscToAudio(oscToAudio_type omtype, float f, int pidx)
+            : type(omtype), fval(f), p_index(pidx)
+        {
+        }
+    };
+    sst::cpputils::SimpleRingBuffer<oscToAudio, 4096> oscRingBuf;
+
+    SurgeFX::FxOSC::FXOpenSoundControl oscHandler;
+    std::atomic<bool> oscCheckStartup{false};
+    void tryLazyOscStartupFromStreamedState();
+
+    bool initOSCIn(int port);
+    bool changeOSCInPort(int newport);
+    void initOSCError(int port, std::string outIP = "");
+    std::atomic<bool> oscReceiving{false};
 
     //==============================================================================
     const juce::String getName() const override;
@@ -73,6 +110,7 @@ class SurgefxAudioProcessor : public juce::AudioProcessor,
     bool producesMidi() const override;
     bool isMidiEffect() const override;
     double getTailLengthSeconds() const override;
+    void reset() override;
 
     //==============================================================================
     int getNumPrograms() override;
@@ -85,10 +123,27 @@ class SurgefxAudioProcessor : public juce::AudioProcessor,
     void getStateInformation(juce::MemoryBlock &destData) override;
     void setStateInformation(const void *data, int sizeInBytes) override;
 
+    void setCurrentPresetName(const std::string &name) { currentPresetName = name; }
+
+    std::string consumePendingPresetName()
+    {
+        auto r = pendingPresetName;
+        pendingPresetName.clear();
+        return r;
+    }
+
     int getEffectType() { return effectNum; }
     float getFXStorageValue01(int i) { return fxstorage->p[fx_param_remap[i]].get_value_f01(); }
+    float getFXDefaultValue01(int i)
+    {
+        return fxstorage->p[fx_param_remap[i]].get_default_value_f01();
+    }
     float getFXParamValue01(int i) { return *(fxParams[i]); }
-    void setFXParamValue01(int i, float f) { *(fxParams[i]) = f; }
+    void setFXParamValue01(int i, float f, bool forceInteger = false)
+    {
+        fxstorage->p[fx_param_remap[i]].set_value_f01(f, forceInteger);
+        *(fxParams[i]) = fxstorage->p[fx_param_remap[i]].get_value_f01();
+    }
 
     void setFXParamTempoSync(int i, bool b)
     {
@@ -282,6 +337,16 @@ class SurgefxAudioProcessor : public juce::AudioProcessor,
     void resetFxType(int t, bool updateJuceParams = true);
     void resetFxParams(bool updateJuceParams = true);
 
+    // Loads a scanned FX preset's parameter values onto the currently loaded
+    // effect. This does NOT change the effect type and does NOT respawn the
+    // effect - it only writes parameter values into fxstorage, exactly like
+    // setFXParamValue01() does for a single parameter. Callers must only
+    // pass a preset whose type matches the currently loaded effect type
+    // (getEffectType()); the FX type picker is solely responsible for
+    // changing the effect type, via resetFxType(). Violating this is a bug
+    // at the call site, asserted via jassert rather than handled here.
+    void loadFxPreset(const Surge::Storage::FxUserPreset::Preset &p);
+
     // Members for the FX. If this looks a lot like surge-rack/SurgeFX.hpp that's not a coincidence
     std::unique_ptr<SurgeStorage> storage;
 
@@ -373,6 +438,12 @@ class SurgefxAudioProcessor : public juce::AudioProcessor,
     std::atomic<bool> audioRunning{false};
 
   public:
+    bool oscStartIn = false;
+    int oscPortIn = 53290;
+
+    std::string currentPresetName;
+    std::string pendingPresetName;
+
     void prepareParametersAbsentAudio();
     void setParameterByString(int i, const std::string &s);
     float getParameterValueForString(int i, const std::string &s);

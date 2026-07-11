@@ -4,7 +4,7 @@
  *
  * Learn more at https://surge-synthesizer.github.io/
  *
- * Copyright 2018-2023, various authors, as described in the GitHub
+ * Copyright 2018-2024, various authors, as described in the GitHub
  * transaction log.
  *
  * Surge XT is released under the GNU General Public Licence v3
@@ -32,7 +32,7 @@ namespace Surge
 namespace Widgets
 {
 MenuForDiscreteParams::MenuForDiscreteParams()
-    : juce::Component(), WidgetBaseMixin<MenuForDiscreteParams>(this){};
+    : juce::Component(), WidgetBaseMixin<MenuForDiscreteParams>(this) {};
 MenuForDiscreteParams::~MenuForDiscreteParams() = default;
 
 void MenuForDiscreteParams::paint(juce::Graphics &g)

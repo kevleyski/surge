@@ -4,7 +4,7 @@
  *
  * Learn more at https://surge-synthesizer.github.io/
  *
- * Copyright 2018-2023, various authors, as described in the GitHub
+ * Copyright 2018-2024, various authors, as described in the GitHub
  * transaction log.
  *
  * Surge XT is released under the GNU General Public Licence v3
@@ -62,6 +62,9 @@ LFOAndStepDisplay::LFOAndStepDisplay(SurgeGUIEditor *e)
     setTitle("LFO Type And Display");
     setAccessible(true);
     setFocusContainerType(juce::Component::FocusContainerType::focusContainer);
+
+    memset(paramsFromLastDrawCall, 0, sizeof(paramsFromLastDrawCall));
+    memset(settingsFromLastDrawCall, 0, sizeof(settingsFromLastDrawCall));
 
     typeLayer = std::make_unique<OverlayAsAccessibleContainer>("LFO Type");
     addAndMakeVisible(*typeLayer);
@@ -346,6 +349,9 @@ void LFOAndStepDisplay::resized()
     typeLayer->setBounds(getLocalBounds());
     stepLayer->setBounds(getLocalBounds());
 
+    backingImage = std::make_unique<juce::Image>(juce::Image::PixelFormat::ARGB,
+                                                 outer.getWidth() * 2, outer.getHeight() * 2, true);
+
     for (int i = 0; i < n_lfo_types; ++i)
     {
         int xp = (i % 2) * 25 + left_panel.getX();
@@ -414,10 +420,96 @@ void LFOAndStepDisplay::paint(juce::Graphics &g)
     }
     else
     {
-        paintWaveform(g);
+
+        if (!paramsHasChanged())
+        {
+            g.drawImage(*backingImage, getLocalBounds().toFloat(),
+                        juce::RectanglePlacement::fillDestination);
+            paintTypeSelector(g);
+            return;
+        }
+        else
+        {
+            juce::Colour color =
+                juce::Colour((unsigned char)0, (unsigned char)0, (unsigned char)0, 0.f);
+
+            backingImage->clear(backingImage->getBounds());
+        }
+
+        juce::Graphics gr = juce::Graphics(*backingImage);
+        float zoomFloat = (float)zoomFactor / 100.f;
+
+        gr.addTransform(juce::AffineTransform().scale(zoomFloat * 2.f));
+
+        paintWaveform(gr);
+
+        g.drawImage(*backingImage, getLocalBounds().toFloat(),
+                    juce::RectanglePlacement::fillDestination);
     }
 
     paintTypeSelector(g);
+}
+
+bool LFOAndStepDisplay::paramsHasChanged()
+{
+    bool hasChanged = false;
+
+    auto *p = &lfodata->rate;      // look in the definition of LFOStorage for which param is first
+    while (p <= &lfodata->release) // and last
+    {
+
+        if (paramsFromLastDrawCall[p->param_id_in_scene].i != p->val.i)
+            hasChanged = true;
+
+        paramsFromLastDrawCall[p->param_id_in_scene].i = p->val.i;
+        ++p;
+    };
+
+    if (lfodata->rate.deactivated != settingsFromLastDrawCall[0].b)
+    {
+        settingsFromLastDrawCall[0].b = lfodata->rate.deactivated;
+        hasChanged = true;
+    }
+
+    if (lfodata->deform.deform_type != paramsFromLastDrawCall[1].i)
+    {
+        paramsFromLastDrawCall[1].i = lfodata->deform.deform_type;
+        hasChanged = true;
+    }
+
+    if (lfodata->rate.temposync != paramsFromLastDrawCall[2].b)
+    {
+        paramsFromLastDrawCall[2].b = lfodata->rate.temposync;
+        hasChanged = true;
+    }
+
+    if (lfoStorageFromLastDrawingCall != lfodata)
+        hasChanged = true;
+
+    if (forceRepaint)
+    {
+        hasChanged = true;
+        forceRepaint = false;
+    }
+
+    lfoStorageFromLastDrawingCall = lfodata;
+
+    return hasChanged;
+}
+
+void LFOAndStepDisplay::setZoomFactor(int zoom)
+{
+
+    if (zoomFactor != zoom)
+    {
+        float zoomFloat = (float)zoom / 100.f;
+        forceRepaint = true;
+        backingImage = std::make_unique<juce::Image>(juce::Image::PixelFormat::ARGB,
+                                                     outer.getWidth() * zoomFloat * 2,
+                                                     outer.getHeight() * zoomFloat * 2, true);
+    }
+
+    zoomFactor = zoom;
 }
 
 void LFOAndStepDisplay::paintWaveform(juce::Graphics &g)
@@ -492,7 +584,8 @@ void LFOAndStepDisplay::paintWaveform(juce::Graphics &g)
     LFOStorage deactivateStorage;
     bool hasFullWave = false, waveIsAmpWave = false;
 
-    if (lfodata->rate.deactivated)
+    if (lfodata->rate.deactivated &&
+        !(lfodata->shape.val.i == lt_formula && !tlfo->formulastate.useRate))
     {
         hasFullWave = true;
         deactivateStorage = *lfodata;
@@ -514,7 +607,9 @@ void LFOAndStepDisplay::paintWaveform(juce::Graphics &g)
         populateLFOMS(tFullWave);
         tFullWave->attack();
     }
-    else if (lfodata->magnitude.val.f != lfodata->magnitude.val_max.f && skin->getVersion() >= 2)
+    else if (lfodata->magnitude.val.f != lfodata->magnitude.val_max.f &&
+             !(lfodata->shape.val.i == lt_formula && !tlfo->formulastate.useAmplitude) &&
+             skin->getVersion() >= 2)
     {
         bool useAmpWave = Surge::Storage::getUserDefaultValue(
             storage, Surge::Storage::ShowGhostedLFOWaveReference, 1);
@@ -636,7 +731,12 @@ void LFOAndStepDisplay::paintWaveform(juce::Graphics &g)
 
             minval = std::min(tlfo->get_output(modIndex), minval);
             maxval = std::max(tlfo->get_output(modIndex), maxval);
-            eval += tlfo->env_val * lfodata->magnitude.get_extended(lfodata->magnitude.val.f);
+            float evalMag = lfodata->magnitude.get_extended(lfodata->magnitude.val.f);
+            if (lfodata->shape.val.i == lt_formula && !tlfo->formulastate.useAmplitude)
+            {
+                evalMag = 1.f;
+            }
+            eval += tlfo->env_val * evalMag;
         }
 
         val = val / averagingWindow;
@@ -1292,7 +1392,12 @@ void LFOAndStepDisplay::paintStepSeq(juce::Graphics &g)
 
             minval = std::min(tlfo->get_output(0), minval);
             maxval = std::max(tlfo->get_output(0), maxval);
-            eval += tlfo->env_val * lfodata->magnitude.get_extended(lfodata->magnitude.val.f);
+            float evalMag = lfodata->magnitude.get_extended(lfodata->magnitude.val.f);
+            if (lfodata->shape.val.i == lt_formula && !tlfo->formulastate.useAmplitude)
+            {
+                evalMag = 1.f;
+            }
+            eval += tlfo->env_val * evalMag;
         }
 
         val = val / averagingWindow;
@@ -1335,11 +1440,9 @@ void LFOAndStepDisplay::paintStepSeq(juce::Graphics &g)
 
     auto q = boxo;
 
-    auto tf = juce::AffineTransform()
-                  .scaled(boxo.getWidth() / valScale, boxo.getHeight() / valScale)
-                  .translated(q.getTopLeft().x, q.getTopLeft().y);
-
-    auto tfpath = tf;
+    const auto tfpath = juce::AffineTransform()
+                            .scaled(boxo.getWidth() / valScale, boxo.getHeight() / valScale)
+                            .translated(q.getTopLeft().x, q.getTopLeft().y);
 
     g.setColour(skin->getColor(Colors::LFO::StepSeq::Envelope));
 
@@ -1373,24 +1476,14 @@ void LFOAndStepDisplay::paintStepSeq(juce::Graphics &g)
     // Finally draw the drag label
     if (dragMode == VALUES && draggedStep >= 0 && draggedStep < n_stepseqsteps)
     {
-        int prec = 2;
-
-        if (storage)
-        {
-            int detailedMode = Surge::Storage::getUserDefaultValue(
-                storage, Surge::Storage::HighPrecisionReadouts, 0);
-
-            if (detailedMode)
-            {
-                prec = 6;
-            }
-        }
+        const int displayPrecision = Surge::Storage::getValueDisplayPrecision(storage);
 
         g.setFont(skin->fontManager->lfoTypeFont);
 
-        std::string txt = fmt::format("{:.{}f} %", ss->steps[draggedStep] * 100.f, prec);
+        std::string txt =
+            fmt::format("{:.{}f} %", ss->steps[draggedStep] * 100.f, displayPrecision);
 
-        int sw = g.getCurrentFont().getStringWidth(txt);
+        int sw = SST_STRING_WIDTH_INT(g.getCurrentFont(), txt);
 
         auto sr = steprect[draggedStep];
 
@@ -1658,6 +1751,7 @@ void LFOAndStepDisplay::onSkinChanged()
     {
         return;
     }
+    forceRepaint = true;
     auto typesWithHover = skin->standardHoverAndHoverOnForIDB(IDB_LFO_TYPE, associatedBitmapStore);
     typeImg = typesWithHover[0];
     typeImgHover = typesWithHover[1];
@@ -2337,14 +2431,15 @@ void LFOAndStepDisplay::showLFODisplayPopupMenu(SurgeGUIEditor::OverlayTags tag)
 
     std::string openname = (sge->isAnyOverlayPresent(tag)) ? "Close " : "Open ";
 
-    Surge::GUI::addMenuWithShortcut(contextMenu, Surge::GUI::toOSCase(openname + olname + "..."),
-                                    sge->showShortcutDescription("Alt+E", "⌥E"),
-                                    [this, sge, tag]() {
-                                        if (sge)
-                                        {
-                                            sge->toggleOverlay(tag);
-                                        }
-                                    });
+    Surge::GUI::addMenuItemWithShortcut(
+        contextMenu, Surge::GUI::toOSCase(openname + olname + "..."),
+        sge->getShortcutDescription(Surge::GUI::KeyboardActions::TOGGLE_LFO_EDITOR),
+        [this, sge, tag]() {
+            if (sge)
+            {
+                sge->toggleOverlay(tag);
+            }
+        });
 
     if (isMSEG())
     {
@@ -2424,7 +2519,8 @@ void LFOAndStepDisplay::populateLFOMS(LFOModulationSource *s)
     if (s->isVoice)
         s->formulastate.velocity = 100;
 
-    Surge::Formula::setupEvaluatorStateFrom(s->formulastate, storage->getPatch());
+    Surge::Formula::setupEvaluatorStateFrom(s->formulastate, storage->getPatch(),
+                                            guiEditor->current_scene);
 }
 
 void LFOAndStepDisplay::updateShapeTo(int i)
@@ -2441,7 +2537,7 @@ void LFOAndStepDisplay::updateShapeTo(int i)
 
         sge->refresh_mod();
         sge->broadcastPluginAutomationChangeFor(&(lfodata->shape));
-
+        forceRepaint = true;
         repaint();
 
         sge->lfoShapeChanged(prior, i);
@@ -2582,15 +2678,9 @@ void LFOAndStepDisplay::showStepRMB(int i)
 
     contextMenu.addSeparator();
 
-    int decimals = 2;
+    const int precision = Surge::Storage::getValueDisplayPrecision(storage);
 
-    if (storage)
-    {
-        decimals = 2 + (4 * Surge::Storage::getUserDefaultValue(
-                                storage, Surge::Storage::HighPrecisionReadouts, 0));
-    }
-
-    auto msg = fmt::format("Edit Step {}: {:.{}f} %", i + 1, ss->steps[i] * 100.f, decimals);
+    auto msg = fmt::format("Edit Step {} Value: {:.{}f} %", i + 1, ss->steps[i] * 100.f, precision);
 
     contextMenu.addItem(Surge::GUI::toOSCase(msg), true, false, [this, i]() { showStepTypein(i); });
 
@@ -2599,15 +2689,11 @@ void LFOAndStepDisplay::showStepRMB(int i)
 
 void LFOAndStepDisplay::showStepTypein(int i)
 {
-    int decimals = 2;
+    const bool isDetailed = Surge::Storage::getValueDisplayIsHighPrecision(storage);
+    const int precision = Surge::Storage::getValueDisplayPrecision(storage);
 
-    if (storage)
-    {
-        decimals = 2 + (4 * Surge::Storage::getUserDefaultValue(
-                                storage, Surge::Storage::HighPrecisionReadouts, 0));
-    }
     auto handleTypein = [this, i](const std::string &s) {
-        auto divPos = s.find("/");
+        auto divPos = s.find('/');
         float v = 0.f;
 
         if (divPos != std::string::npos)
@@ -2622,14 +2708,14 @@ void LFOAndStepDisplay::showStepTypein(int i)
                 return false;
             }
 
-            v = nv / dv;
+            v = (nv / dv) * 100.f;
         }
         else
         {
             v = std::atof(s.c_str());
         }
 
-        ss->steps[i] = std::clamp(v / 100.f, -1.f, 1.f);
+        ss->steps[i] = std::clamp(v * 0.01f, -1.f, 1.f);
 
         repaint();
 
@@ -2639,15 +2725,20 @@ void LFOAndStepDisplay::showStepTypein(int i)
     if (!stepEditor)
     {
         stepEditor = std::make_unique<Surge::Overlays::TypeinLambdaEditor>(handleTypein);
+    }
+
+    if (getParentComponent()->getIndexOfChildComponent(stepEditor.get()) < 0)
+    {
         getParentComponent()->addChildComponent(*stepEditor);
     }
 
     stepEditor->callback = handleTypein;
-    stepEditor->setMainLabel("Edit Step " + std::to_string(i + 1));
-    stepEditor->setValueLabels(fmt::format("current: {:.{}f} %", ss->steps[i] * 100.f, decimals),
+    stepEditor->setMainLabel(fmt::format("Edit Step {} Value", std::to_string(i + 1)));
+    stepEditor->setValueLabels(fmt::format("current: {:.{}f} %", ss->steps[i] * 100.f, precision),
                                "");
     stepEditor->setSkin(skin, associatedBitmapStore);
-    stepEditor->setEditableText(fmt::format("{:.{}f} %", ss->steps[i] * 100.f, decimals));
+    stepEditor->setEditableText(fmt::format("{:.{}f} %", ss->steps[i] * 100.f, precision));
+    stepEditor->setReturnFocusTarget(stepSliderOverlays[i].get());
 
     auto topOfControl = getY();
     auto pb = getBounds();

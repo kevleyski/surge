@@ -4,7 +4,7 @@
  *
  * Learn more at https://surge-synthesizer.github.io/
  *
- * Copyright 2018-2023, various authors, as described in the GitHub
+ * Copyright 2018-2024, various authors, as described in the GitHub
  * transaction log.
  *
  * Surge XT is released under the GNU General Public Licence v3
@@ -38,7 +38,8 @@ namespace Widgets
 {
 struct LFOAndStepDisplay : public juce::Component,
                            public WidgetBaseMixin<LFOAndStepDisplay>,
-                           public LongHoldMixin<LFOAndStepDisplay>
+                           public LongHoldMixin<LFOAndStepDisplay>,
+                           public ModulatableControlInterface
 {
     LFOAndStepDisplay(SurgeGUIEditor *e);
     void paint(juce::Graphics &g) override;
@@ -46,6 +47,9 @@ struct LFOAndStepDisplay : public juce::Component,
     void paintStepSeq(juce::Graphics &g);
     void paintTypeSelector(juce::Graphics &g);
     void resized() override;
+
+    Surge::GUI::IComponentTagValue *asControlValueInterface() override { return this; }
+    juce::Component *asJuceComponent() override { return this; }
 
     float value;
     float getValue() const override { return value; }
@@ -55,6 +59,17 @@ struct LFOAndStepDisplay : public juce::Component,
     bool isMSEG() { return lfodata->shape.val.i == lt_mseg; }
     bool isFormula() { return lfodata->shape.val.i == lt_formula; }
     bool isUnipolar() { return lfodata->unipolar.val.b; }
+
+    void setZoomFactor(int);
+    int zoomFactor{100};
+    std::unique_ptr<juce::Image> backingImage;
+    bool forceRepaint{false};
+    LFOStorage *lfoStorageFromLastDrawingCall{nullptr};
+    pdata paramsFromLastDrawCall[n_scene_params];
+    pdata settingsFromLastDrawCall[8];
+    int zoomFactorFromLastDrawCall{-1};
+
+    bool paramsHasChanged();
 
     void repaintIfIdIsInRange(int id)
     {
@@ -83,6 +98,7 @@ struct LFOAndStepDisplay : public juce::Component,
     {
         if (isAnythingTemposynced())
         {
+            forceRepaint = true;
             repaint();
         }
     }

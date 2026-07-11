@@ -4,7 +4,7 @@
  *
  * Learn more at https://surge-synthesizer.github.io/
  *
- * Copyright 2018-2023, various authors, as described in the GitHub
+ * Copyright 2018-2024, various authors, as described in the GitHub
  * transaction log.
  *
  * Surge XT is released under the GNU General Public Licence v3
@@ -176,7 +176,7 @@ struct PatchDBSQLTreeViewItem : public SharedTreeViewItem
                 if (type == 1)
                 {
                     auto res = storage->patchDB->readAllFeatureValueString(feature);
-                    for (auto r : res)
+                    for (const auto &r : res)
                         addSubItem(new TextSubItem(editor, storage, r));
                 }
                 else

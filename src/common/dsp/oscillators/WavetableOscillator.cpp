@@ -4,7 +4,7 @@
  *
  * Learn more at https://surge-synthesizer.github.io/
  *
- * Copyright 2018-2023, various authors, as described in the GitHub
+ * Copyright 2018-2024, various authors, as described in the GitHub
  * transaction log.
  *
  * Surge XT is released under the GNU General Public Licence v3
@@ -31,10 +31,17 @@ using namespace std;
 
 const float hpf_cycle_loss = 0.99f;
 
+double WavetableOscillator::skewHPhaseResponse[WavetableOscillator::SAMPLES_FOR_DISPLAY] = {
+    0.00, 0.00, 0.01, 0.02, 0.03, 0.03, 0.04, 0.05, 0.06, 0.07, 0.07, 0.08, 0.09, 0.10, 0.11,
+    0.11, 0.12, 0.13, 0.14, 0.15, 0.15, 0.16, 0.17, 0.18, 0.19, 0.19, 0.20, 0.21, 0.22, 0.23,
+    0.23, 0.24, 0.25, 0.26, 0.27, 0.27, 0.28, 0.29, 0.30, 0.31, 0.32, 0.32, 0.33, 0.34, 0.35,
+    0.36, 0.37, 0.38, 0.39, 0.40, 0.41, 0.43, 0.44, 0.46, 0.49, 0.54, 0.70, 0.84, 0.92, 0.97};
+
 WavetableOscillator::WavetableOscillator(SurgeStorage *storage, OscillatorStorage *oscdata,
-                                         pdata *localcopy)
+                                         pdata *localcopy, pdata *localcopyUnmod)
     : AbstractBlitOscillator(storage, oscdata, localcopy)
 {
+    unmodulatedLocalcopy = localcopyUnmod;
 }
 
 WavetableOscillator::~WavetableOscillator() {}
@@ -42,9 +49,11 @@ WavetableOscillator::~WavetableOscillator() {}
 void WavetableOscillator::init(float pitch, bool is_display, bool nonzero_init_drift)
 {
     assert(storage);
+    readDeformType();
+
     first_run = true;
-    osc_out = _mm_set1_ps(0.f);
-    osc_outR = _mm_set1_ps(0.f);
+    osc_out = SIMD_MM(set1_ps)(0.f);
+    osc_outR = SIMD_MM(set1_ps)(0.f);
     bufpos = 0;
 
     id_shape = oscdata->p[wt_morph].param_id_in_scene;
@@ -84,13 +93,28 @@ void WavetableOscillator::init(float pitch, bool is_display, bool nonzero_init_d
     // nointerp adjusts the tableid range so that it scans the whole wavetable
     // rather than wavetable from first to second to last frame
     nointerp = !oscdata->p[wt_morph].extend_range;
-    float shape = oscdata->p[wt_morph].val.f;
+
+    float shape;
     float intpart;
+    if (deformType == XT_134_EARLIER)
+    {
+        shape = oscdata->p[wt_morph].val.f;
+    }
+    else
+    {
+        shape = getMorph();
+    }
+
     shape *= ((float)oscdata->wt.n_tables - 1.f + nointerp) * 0.99999f;
     tableipol = modff(shape, &intpart);
+    if (deformType != XT_134_EARLIER)
+        tableipol = shape;
     tableid = limit_range((int)intpart, 0, std::max((int)oscdata->wt.n_tables - 2 + nointerp, 0));
     last_tableipol = tableipol;
     last_tableid = tableid;
+
+    selectDeform();
+
     hskew = 0.f;
     last_hskew = 0.f;
 
@@ -126,7 +150,7 @@ void WavetableOscillator::init(float pitch, bool is_display, bool nonzero_init_d
 void WavetableOscillator::init_ctrltypes()
 {
     oscdata->p[wt_morph].set_name("Morph");
-    oscdata->p[wt_morph].set_type(ct_countedset_percent_extendable);
+    oscdata->p[wt_morph].set_type(ct_countedset_percent_extendable_wtdeform);
     oscdata->p[wt_morph].set_user_data(oscdata);
     oscdata->p[wt_skewv].set_name("Skew Vertical");
     oscdata->p[wt_skewv].set_type(ct_percent_bipolar);
@@ -146,6 +170,7 @@ void WavetableOscillator::init_default_values()
 {
     oscdata->p[wt_morph].val.f = 0.0f;
     oscdata->p[wt_morph].set_extend_range(true);
+    oscdata->p[wt_morph].deform_type = FeatureDeform::XT_14;
     oscdata->p[wt_skewv].val.f = 0.0f;
     oscdata->p[wt_saturate].val.f = 0.f;
     oscdata->p[wt_formant].val.f = 0.f;
@@ -165,6 +190,86 @@ float WavetableOscillator::distort_level(float x)
 
     return x;
 }
+
+void WavetableOscillator::processSamplesForDisplay(float *samples, int size, bool real)
+{
+    if (!real)
+    {
+        // saturate and skewY
+        for (int i = 0; i < size; i++)
+        {
+            samples[i] = distort_level(samples[i]);
+        }
+
+        // formant
+        if (oscdata->p[wt_formant].val.f > 0.f)
+        {
+            float mult = pow(2, oscdata->p[wt_formant].val.f * 0.08333333333333333);
+
+            for (int i = 0; i < size; i++)
+            {
+                float pos = limit_range((float)i * mult, 0.f, (float)size - 1.f);
+                int from = floor(pos);
+                int to = limit_range(from + 1, 0, size - 1);
+
+                float proc = pos - (float)from;
+
+                samples[i] = samples[from] * (1.f - proc) + samples[to] * proc;
+            }
+        }
+
+        // skewH hard coded phase response
+
+        float skewH = pow(abs(oscdata->p[wt_skewh].val.f), 0.8);
+
+        if (skewH != 0)
+        {
+            float samplesTemp[SAMPLES_FOR_DISPLAY];
+            for (int i = 0; i < size; i++)
+            {
+                samplesTemp[i] = samples[i];
+            }
+
+            for (int i = 0; i < size; i++)
+            {
+
+                float from = i;
+                float to = WavetableOscillator::skewHPhaseResponse[i] * (SAMPLES_FOR_DISPLAY - 1);
+
+                if (oscdata->p[wt_skewh].val.f < 0)
+                {
+                    to = (
+
+                        (float)(SAMPLES_FOR_DISPLAY - 1) -
+                        WavetableOscillator::skewHPhaseResponse[(SAMPLES_FOR_DISPLAY - 1) - i] *
+                            (SAMPLES_FOR_DISPLAY - 1));
+                }
+
+                float fromSampleF = (float)from * (1.0 - skewH) + (float)to * skewH;
+
+                // interpolate
+                int fromSample = fromSampleF;
+                int toSample = limit_range(fromSample + 1, 0, size - 1);
+                float percSample = fromSampleF - fromSample;
+
+                float sample = samplesTemp[fromSample] * (1 - percSample) +
+                               samplesTemp[toSample] * (percSample);
+
+                samples[i] = sample;
+            }
+        }
+    }
+    else
+    {
+
+        // todo populate samples with process_block()
+        for (int i = 0; i < size; i++)
+        {
+            samples[i] = 0;
+        }
+    }
+    // saturation
+};
 
 void WavetableOscillator::convolute(int voice, bool FM, bool stereo)
 {
@@ -189,10 +294,19 @@ void WavetableOscillator::convolute(int voice, bool FM, bool stereo)
         last_hskew = hskew;
         hskew = l_hskew.v;
 
+        int paddingLoop = 4;
+        int paddingEnd = 1;
+
+        if (deformType == XT_134_EARLIER)
+        {
+            paddingLoop = 3 - nointerp;
+            paddingEnd = 2 - nointerp;
+        }
+
         if (oscdata->wt.flags & wtf_is_sample)
         {
             tableid++;
-            if (tableid > oscdata->wt.n_tables - 3 + nointerp)
+            if (tableid > oscdata->wt.n_tables - paddingLoop)
             {
                 if (sampleloop < 7)
                     sampleloop--;
@@ -203,10 +317,16 @@ void WavetableOscillator::convolute(int voice, bool FM, bool stereo)
                 }
                 else
                 {
-                    tableid = oscdata->wt.n_tables - 2 + nointerp;
+                    tableid = oscdata->wt.n_tables - paddingEnd;
                     oscstate[voice] = 100000000000.f; // rather large number
                     return;
                 }
+            }
+
+            if (deformType != XT_134_EARLIER)
+            {
+                tableipol = tableid;
+                last_tableipol = tableid;
             }
         }
 
@@ -243,8 +363,9 @@ void WavetableOscillator::convolute(int voice, bool FM, bool stereo)
 
     unsigned int m = ((ipos >> 16) & 0xff) * (FIRipol_N << 1);
     unsigned int lipolui16 = (ipos & 0xffff);
-    __m128 lipol128 = _mm_cvtsi32_ss(lipol128, lipolui16);
-    lipol128 = _mm_shuffle_ps(lipol128, lipol128, _MM_SHUFFLE(0, 0, 0, 0));
+    auto lipol128 = SIMD_MM(setzero_ps)();
+    lipol128 = SIMD_MM(cvtsi32_ss)(lipol128, lipolui16);
+    lipol128 = SIMD_MM(shuffle_ps)(lipol128, lipol128, SIMD_MM_SHUFFLE(0, 0, 0, 0));
 
     float g, gR;
     int wt_inc = (1 << mipmap[voice]);
@@ -291,19 +412,8 @@ void WavetableOscillator::convolute(int voice, bool FM, bool stereo)
 
     state[voice] = state[voice] & (wtsize - 1);
 
-    float tblip_ipol = (1 - block_pos) * last_tableipol + block_pos * tableipol;
     float newlevel;
-
-    // in Continuous Morph mode tblip_ipol gives us position between current and next frame
-    // when not in Continuous Morph mode, we don't interpolate so this position should be zero
-    float lipol = (1 - nointerp) * tblip_ipol;
-
-    // that 1 - nointerp makes sure we don't read the table off memory, keeps us bounded
-    // and since it gets multiplied by lipol, in morph mode ends up being zero - no sweat!
-    newlevel = distort_level(
-        (oscdata->wt.TableF32WeakPointers[mipmap[voice]][tableid][state[voice]] * (1.f - lipol)) +
-        (oscdata->wt.TableF32WeakPointers[mipmap[voice]][tableid + 1 - nointerp][state[voice]] *
-         lipol));
+    newlevel = distort_level((this->*deformSelected)(block_pos, voice));
 
     g = newlevel - last_level[voice];
     last_level[voice] = newlevel;
@@ -317,43 +427,43 @@ void WavetableOscillator::convolute(int voice, bool FM, bool stereo)
 
     if (stereo)
     {
-        __m128 g128L = _mm_load_ss(&g);
-        g128L = _mm_shuffle_ps(g128L, g128L, _MM_SHUFFLE(0, 0, 0, 0));
-        __m128 g128R = _mm_load_ss(&gR);
-        g128R = _mm_shuffle_ps(g128R, g128R, _MM_SHUFFLE(0, 0, 0, 0));
+        auto g128L = SIMD_MM(load_ss)(&g);
+        g128L = SIMD_MM(shuffle_ps)(g128L, g128L, SIMD_MM_SHUFFLE(0, 0, 0, 0));
+        auto g128R = SIMD_MM(load_ss)(&gR);
+        g128R = SIMD_MM(shuffle_ps)(g128R, g128R, SIMD_MM_SHUFFLE(0, 0, 0, 0));
 
         for (int k = 0; k < FIRipol_N; k += 4)
         {
             float *obfL = &oscbuffer[bufpos + k + delay];
             float *obfR = &oscbufferR[bufpos + k + delay];
-            __m128 obL = _mm_loadu_ps(obfL);
-            __m128 obR = _mm_loadu_ps(obfR);
-            __m128 st = _mm_load_ps(&storage->sinctable[m + k]);
-            __m128 so = _mm_load_ps(&storage->sinctable[m + k + FIRipol_N]);
-            so = _mm_mul_ps(so, lipol128);
-            st = _mm_add_ps(st, so);
-            obL = _mm_add_ps(obL, _mm_mul_ps(st, g128L));
-            _mm_storeu_ps(obfL, obL);
-            obR = _mm_add_ps(obR, _mm_mul_ps(st, g128R));
-            _mm_storeu_ps(obfR, obR);
+            auto obL = SIMD_MM(loadu_ps)(obfL);
+            auto obR = SIMD_MM(loadu_ps)(obfR);
+            auto st = SIMD_MM(load_ps)(&storage->sinctable[m + k]);
+            auto so = SIMD_MM(load_ps)(&storage->sinctable[m + k + FIRipol_N]);
+            so = SIMD_MM(mul_ps)(so, lipol128);
+            st = SIMD_MM(add_ps)(st, so);
+            obL = SIMD_MM(add_ps)(obL, SIMD_MM(mul_ps)(st, g128L));
+            SIMD_MM(storeu_ps)(obfL, obL);
+            obR = SIMD_MM(add_ps)(obR, SIMD_MM(mul_ps)(st, g128R));
+            SIMD_MM(storeu_ps)(obfR, obR);
         }
     }
     else
     {
-        __m128 g128 = _mm_load_ss(&g);
-        g128 = _mm_shuffle_ps(g128, g128, _MM_SHUFFLE(0, 0, 0, 0));
+        auto g128 = SIMD_MM(load_ss)(&g);
+        g128 = SIMD_MM(shuffle_ps)(g128, g128, SIMD_MM_SHUFFLE(0, 0, 0, 0));
 
         for (int k = 0; k < FIRipol_N; k += 4)
         {
             float *obf = &oscbuffer[bufpos + k + delay];
-            __m128 ob = _mm_loadu_ps(obf);
-            __m128 st = _mm_load_ps(&storage->sinctable[m + k]);
-            __m128 so = _mm_load_ps(&storage->sinctable[m + k + FIRipol_N]);
-            so = _mm_mul_ps(so, lipol128);
-            st = _mm_add_ps(st, so);
-            st = _mm_mul_ps(st, g128);
-            ob = _mm_add_ps(ob, st);
-            _mm_storeu_ps(obf, ob);
+            auto ob = SIMD_MM(loadu_ps)(obf);
+            auto st = SIMD_MM(load_ps)(&storage->sinctable[m + k]);
+            auto so = SIMD_MM(load_ps)(&storage->sinctable[m + k + FIRipol_N]);
+            so = SIMD_MM(mul_ps)(so, lipol128);
+            st = SIMD_MM(add_ps)(st, so);
+            st = SIMD_MM(mul_ps)(st, g128);
+            ob = SIMD_MM(add_ps)(ob, st);
+            SIMD_MM(storeu_ps)(obf, ob);
         }
     }
 
@@ -370,7 +480,16 @@ template <bool is_init> void WavetableOscillator::update_lagvals()
     l_hskew.newValue(limit_range(localcopy[id_hskew].f, -1.f, 1.f));
     float a = limit_range(localcopy[id_clip].f, 0.f, 1.f);
     l_clip.newValue(-8 * a * a * a);
-    l_shape.newValue(limit_range(localcopy[id_shape].f, 0.f, 1.f));
+
+    if (deformType == XT_134_EARLIER)
+    {
+        l_shape.newValue(localcopy[id_shape].f);
+    }
+    else
+    {
+        l_shape.newValue(unmodulatedLocalcopy[id_shape].f);
+    }
+
     formant_t = max(0.f, localcopy[id_formant].f);
 
     float invt = min(1.0, (8.175798915 * storage->note_to_pitch_tuningctr(pitch_t)) *
@@ -396,9 +515,110 @@ template <bool is_init> void WavetableOscillator::update_lagvals()
     }
 }
 
+void WavetableOscillator::readDeformType()
+{
+    deformType = (FeatureDeform)oscdata->p[wt_morph].deform_type;
+}
+
+void WavetableOscillator::selectDeform()
+{
+    if (deformType == XT_134_EARLIER)
+    {
+        deformSelected = &WavetableOscillator::deformLegacy;
+    }
+    else
+    {
+        deformSelected = &WavetableOscillator::deformContinuous;
+    }
+}
+
+float WavetableOscillator::getMorph()
+{
+
+    float shape;
+    if (deformType == XT_134_EARLIER)
+    {
+
+        shape = l_shape.v;
+    }
+    else
+    {
+        shape = limit_range(l_shape.v + (localcopy[id_shape].f - unmodulatedLocalcopy[id_shape].f),
+                            0.f, 1.f);
+    }
+    return shape;
+}
+/*
+    Interpolation modes
+*/
+float WavetableOscillator::deformLegacy(float block_pos, int voice)
+{
+    float tblip_ipol = (1 - block_pos) * last_tableipol + block_pos * tableipol;
+
+    // in Continuous Morph mode tblip_ipol gives us position between current and next frame
+    // when not in Continuous Morph mode, we don't interpolate so this position should be
+    // zero
+    float lipol = (1 - nointerp) * tblip_ipol;
+
+    // that 1 - nointerp makes sure we don't read the table off memory, keeps us bounded
+    // and since it gets multiplied by lipol, in morph mode ends up being zero - no sweat!
+    return (oscdata->wt.TableF32WeakPointers[mipmap[voice]][tableid][state[voice]] *
+            (1.f - lipol)) +
+           (oscdata->wt.TableF32WeakPointers[mipmap[voice]][tableid + 1 - nointerp][state[voice]] *
+            lipol);
+}
+
+float WavetableOscillator::deformContinuous(float block_pos, int voice)
+{
+    block_pos = nointerp ? 1 : block_pos;
+    float tblip_ipol = (1 - block_pos) * last_tableipol + block_pos * tableipol;
+
+    int tempTableId = floor(tblip_ipol);
+    int targetTableId = min((int)(tempTableId + 1), (int)(oscdata->wt.n_tables - 1));
+
+    float interpolationProc = (tblip_ipol - tempTableId) * (1 - nointerp);
+
+    return (oscdata->wt.TableF32WeakPointers[mipmap[voice]][tempTableId][state[voice]] *
+            (1.f - interpolationProc)) +
+           (oscdata->wt.TableF32WeakPointers[mipmap[voice]][targetTableId][state[voice]] *
+            interpolationProc);
+}
+
+float WavetableOscillator::deformMorph(float block_pos, int voice)
+{
+
+    float frames[2] = {(last_tableipol), (tableipol)};
+    for (int i = 0; i < 2; i++)
+    {
+        int actualFrame = floor(frames[i]);
+        float proc = frames[i] - floor(frames[i]);
+
+        int d = min((int)(actualFrame + 1), (int)(oscdata->wt.n_tables - 1));
+        frames[i] = oscdata->wt.TableF32WeakPointers[mipmap[voice]][actualFrame][state[voice]] *
+                        (1.f - proc) +
+                    oscdata->wt.TableF32WeakPointers[mipmap[voice]][d][state[voice]] * (proc);
+    }
+
+    return frames[0] * (1.f - block_pos) + frames[1] * block_pos;
+}
+
 void WavetableOscillator::process_block(float pitch0, float drift, bool stereo, bool FM,
                                         float depth)
 {
+
+#if 0
+    if (fd == XT_134_EARLIER)
+    {
+        std::cout << "OLD WAY" << std::endl;
+    }
+    else
+    {
+        std::cout << "NEW WAY" << std::endl;
+    }
+#endif
+
+    readDeformType();
+
     pitch_last = pitch_t;
     pitch_t = min(148.f, pitch0);
     pitchmult_inv =
@@ -425,39 +645,56 @@ void WavetableOscillator::process_block(float pitch0, float drift, bool stereo, 
     }
     else if (oscdata->wt.flags & wtf_is_sample)
     {
-        tableipol = 0.f;
-        last_tableipol = 0.f;
+        if (deformType == XT_134_EARLIER)
+        {
+            tableipol = 0.f;
+            last_tableipol = 0.f;
+        }
+        else
+        {
+            tableipol = tableid;
+            last_tableipol = tableid;
+        }
     }
     else
     {
         last_tableipol = tableipol;
         last_tableid = tableid;
 
-        float shape = l_shape.v;
+        float shape;
         float intpart;
+
+        shape = getMorph();
+
         shape *= ((float)oscdata->wt.n_tables - 1.f + nointerp) * 0.99999f;
-        tableipol = modff(shape, &intpart);
+        tableipol = deformType == XT_134_EARLIER ? modff(shape, &intpart) : shape;
+        modff(shape, &intpart);
         tableid = limit_range((int)intpart, 0, (int)oscdata->wt.n_tables - 2 + nointerp);
 
-        if (tableid > last_tableid)
+        selectDeform();
+
+        if (deformType == XT_134_EARLIER)
         {
-            if (last_tableipol != 1.f)
+            if (tableid > last_tableid)
             {
-                tableid = last_tableid;
-                tableipol = 1.f;
+                if (last_tableipol != 1.f)
+                {
+                    tableid = last_tableid;
+                    tableipol = 1.f;
+                }
+                else
+                    last_tableipol = 0.0f;
             }
-            else
-                last_tableipol = 0.0f;
-        }
-        else if (tableid < last_tableid)
-        {
-            if (last_tableipol != 0.f)
+            else if (tableid < last_tableid)
             {
-                tableid = last_tableid;
-                tableipol = 0.f;
+                if (last_tableipol != 0.f)
+                {
+                    tableid = last_tableid;
+                    tableipol = 0.f;
+                }
+                else
+                    last_tableipol = 1.0f;
             }
-            else
-                last_tableipol = 1.0f;
         }
     }
 
@@ -503,18 +740,18 @@ void WavetableOscillator::process_block(float pitch0, float drift, bool stereo, 
 
     for (int k = 0; k < BLOCK_SIZE_OS; k++)
     {
-        __m128 hpf = _mm_load_ss(&hpfblock[k]);
-        __m128 ob = _mm_load_ss(&oscbuffer[bufpos + k]);
-        __m128 a = _mm_mul_ss(osc_out, hpf);
-        osc_out = _mm_add_ss(a, ob);
-        _mm_store_ss(&output[k], osc_out);
+        auto hpf = SIMD_MM(load_ss)(&hpfblock[k]);
+        auto ob = SIMD_MM(load_ss)(&oscbuffer[bufpos + k]);
+        auto a = SIMD_MM(mul_ss)(osc_out, hpf);
+        osc_out = SIMD_MM(add_ss)(a, ob);
+        SIMD_MM(store_ss)(&output[k], osc_out);
 
         if (stereo)
         {
-            __m128 ob = _mm_load_ss(&oscbufferR[bufpos + k]);
-            __m128 a = _mm_mul_ss(osc_outR, hpf);
-            osc_outR = _mm_add_ss(a, ob);
-            _mm_store_ss(&outputR[k], osc_outR);
+            auto ob = SIMD_MM(load_ss)(&oscbufferR[bufpos + k]);
+            auto a = SIMD_MM(mul_ss)(osc_outR, hpf);
+            osc_outR = SIMD_MM(add_ss)(a, ob);
+            SIMD_MM(store_ss)(&outputR[k], osc_outR);
         }
     }
 
@@ -529,18 +766,18 @@ void WavetableOscillator::process_block(float pitch0, float drift, bool stereo, 
 
     if (!bufpos) // only needed if the new bufpos == 0
     {
-        __m128 overlap[FIRipol_N >> 2], overlapR[FIRipol_N >> 2];
-        const __m128 zero = _mm_setzero_ps();
+        SIMD_M128 overlap[FIRipol_N >> 2], overlapR[FIRipol_N >> 2];
+        const auto zero = SIMD_MM(setzero_ps)();
         for (int k = 0; k < (FIRipol_N); k += 4)
         {
-            overlap[k >> 2] = _mm_load_ps(&oscbuffer[OB_LENGTH + k]);
-            _mm_store_ps(&oscbuffer[k], overlap[k >> 2]);
-            _mm_store_ps(&oscbuffer[OB_LENGTH + k], zero);
+            overlap[k >> 2] = SIMD_MM(load_ps)(&oscbuffer[OB_LENGTH + k]);
+            SIMD_MM(store_ps)(&oscbuffer[k], overlap[k >> 2]);
+            SIMD_MM(store_ps)(&oscbuffer[OB_LENGTH + k], zero);
             if (stereo)
             {
-                overlapR[k >> 2] = _mm_load_ps(&oscbufferR[OB_LENGTH + k]);
-                _mm_store_ps(&oscbufferR[k], overlapR[k >> 2]);
-                _mm_store_ps(&oscbufferR[OB_LENGTH + k], zero);
+                overlapR[k >> 2] = SIMD_MM(load_ps)(&oscbufferR[OB_LENGTH + k]);
+                SIMD_MM(store_ps)(&oscbufferR[k], overlapR[k >> 2]);
+                SIMD_MM(store_ps)(&oscbufferR[OB_LENGTH + k], zero);
             }
         }
     }
@@ -552,5 +789,9 @@ void WavetableOscillator::handleStreamingMismatches(int streamingRevision,
     if (streamingRevision <= 16)
     {
         oscdata->p[wt_morph].set_extend_range(true);
+    }
+    if (streamingRevision <= 25)
+    {
+        oscdata->p[wt_morph].deform_type = (int)FeatureDeform::XT_134_EARLIER;
     }
 }

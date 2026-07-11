@@ -4,7 +4,7 @@
  *
  * Learn more at https://surge-synthesizer.github.io/
  *
- * Copyright 2018-2023, various authors, as described in the GitHub
+ * Copyright 2018-2024, various authors, as described in the GitHub
  * transaction log.
  *
  * Surge XT is released under the GNU General Public Licence v3
@@ -91,6 +91,8 @@ struct FilterAnalysis : public OverlayComponent, Surge::GUI::SkinConsumingCompon
 
     int whichFilter{0};
     void selectFilter(int which);
+
+    bool wantsInitialKeyboardFocus() const override { return false; }
 
     std::unique_ptr<Surge::Widgets::SelfDrawToggleButton> f1Button, f2Button;
     std::unique_ptr<FilterAnalysisEvaluator> evaluator;

@@ -4,7 +4,7 @@
  *
  * Learn more at https://surge-synthesizer.github.io/
  *
- * Copyright 2018-2023, various authors, as described in the GitHub
+ * Copyright 2018-2024, various authors, as described in the GitHub
  * transaction log.
  *
  * Surge XT is released under the GNU General Public Licence v3
@@ -71,7 +71,7 @@ struct TypeAhead : public juce::TextEditor, juce::TextEditor::Listener
     {
         virtual ~TypeAheadListener() = default;
         virtual void itemFocused(int providerIndex) {}
-        virtual void itemSelected(int providerIndex) = 0;
+        virtual void itemSelected(int providerIndex, bool dontCloseTypeAhead = false) = 0;
         virtual void typeaheadCanceled() = 0;
     };
 
@@ -88,8 +88,10 @@ struct TypeAhead : public juce::TextEditor, juce::TextEditor::Listener
     std::unique_ptr<juce::ListBox> lbox;
     std::unique_ptr<TypeAheadListBoxModel> lboxmodel;
 
-    void searchAndShowLBox();
-    void showLbox();
+    bool isRowMouseOver(int row);
+    void searchAndShowListBox();
+    void showListBox();
+    void closeListBox();
     void parentHierarchyChanged() override;
     void textEditorTextChanged(juce::TextEditor &editor) override;
 
@@ -100,6 +102,8 @@ struct TypeAhead : public juce::TextEditor, juce::TextEditor::Listener
     void textEditorEscapeKeyPressed(juce::TextEditor &editor) override;
 
     bool keyPressed(const juce::KeyPress &press) override;
+
+    juce::SparseSet<int> lastSelectedRow;
 };
 
 } // namespace Widgets

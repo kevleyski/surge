@@ -4,7 +4,7 @@
  *
  * Learn more at https://surge-synthesizer.github.io/
  *
- * Copyright 2018-2023, various authors, as described in the GitHub
+ * Copyright 2018-2024, various authors, as described in the GitHub
  * transaction log.
  *
  * Surge XT is released under the GNU General Public Licence v3
@@ -29,7 +29,6 @@
 #include <condition_variable>
 #include "filesystem/import.h"
 #include <iostream>
-#include <vector>
 #include <functional>
 
 class SurgeStorage;

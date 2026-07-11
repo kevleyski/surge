@@ -4,7 +4,7 @@
  *
  * Learn more at https://surge-synthesizer.github.io/
  *
- * Copyright 2018-2023, various authors, as described in the GitHub
+ * Copyright 2018-2024, various authors, as described in the GitHub
  * transaction log.
  *
  * Surge XT is released under the GNU General Public Licence v3
@@ -91,13 +91,13 @@ const int modsource_display_order[n_modsources] = {
     ms_lowest_key,
     ms_highest_key,
     ms_latest_key,
-    ms_polyaftertouch,
     ms_aftertouch,
+    ms_polyaftertouch,
+    ms_pitchbend,
     ms_modwheel,
     ms_breath,
     ms_expression,
     ms_sustain,
-    ms_pitchbend,
     ms_timbre,
     ms_alternate_bipolar,
     ms_alternate_unipolar,
@@ -161,7 +161,7 @@ const char modsource_names[n_modsources][32] = {
     "Polyphonic Aftertouch",
     "Channel Aftertouch",
     "Pitch Bend",
-    "Modulation Wheel",
+    "Modwheel",
     "Macro 1",
     "Macro 2",
     "Macro 3",
@@ -280,15 +280,15 @@ class ModulationSource
     virtual const char *get_title() { return 0; }
     virtual int get_type() { return mst_undefined; }
     virtual void process_block() {}
-    virtual void attack(){};
-    virtual void release(){};
-    virtual void reset(){};
+    virtual void attack() {};
+    virtual void release() {};
+    virtual void reset() {};
 
     // override these if you support indices
     virtual void set_active_outputs(int ao) { active_outputs = ao; }
     virtual int get_active_outputs() { return active_outputs; }
 
-    virtual float get_output(int which)
+    virtual float get_output(int which) const
     {
         if (which == 0)
         {
@@ -304,7 +304,7 @@ class ModulationSource
         }
     }
 
-    virtual float get_output01(int which)
+    virtual float get_output01(int which) const
     {
         if (which == 0)
         {
@@ -365,7 +365,7 @@ template <int NDX = 1> class ControllerModulationSourceVector : public Modulatio
 {
   public:
     // smoothing and shaping behaviors
-    Modulator::SmoothingMode smoothingMode = Modulator::SmoothingMode::LEGACY;
+    Modulator::SmoothingMode smoothingMode = Modulator::SmoothingMode::FAST_LINE;
 
     ControllerModulationSourceVector()
     {
@@ -375,7 +375,7 @@ template <int NDX = 1> class ControllerModulationSourceVector : public Modulatio
             value[i] = 0.f;
             changed[i] = true;
         }
-        smoothingMode = Modulator::SmoothingMode::LEGACY;
+        smoothingMode = Modulator::SmoothingMode::FAST_LINE;
         bipolar = false;
     }
 
@@ -444,9 +444,9 @@ template <int NDX = 1> class ControllerModulationSourceVector : public Modulatio
         }
     }
 
-    virtual float get_output(int which) override { return value[which]; }
+    virtual float get_output(int which) const override { return value[which]; }
 
-    virtual float get_output01(int i) override
+    virtual float get_output01(int i) const override
     {
         if (bipolar)
         {
@@ -562,18 +562,15 @@ template <int NDX = 1> class ControllerModulationSourceVector : public Modulatio
     {
         assert(samplerate > 1000);
 
-        if (smoothingMode == Modulator::SmoothingMode::LEGACY)
-        {
-            processSmoothing(Modulator::SmoothingMode::SLOW_EXP, sigma);
-        }
-        else
-        {
-            processSmoothing(smoothingMode, sigma);
-        }
+        const auto sm = smoothingMode == Modulator::SmoothingMode::LEGACY
+                            ? Modulator::SmoothingMode::SLOW_EXP
+                            : smoothingMode;
 
-        auto res = (value[0] != target[0]);
+        processSmoothing(sm, sigma);
 
-        for (int i = 1; i < NDX; ++i)
+        bool res = true;
+
+        for (int i = 0; (i < NDX) && res; ++i)
         {
             res &= (value[i] != target[i]);
         }
@@ -600,12 +597,12 @@ struct MacroModulationSource : ControllerModulationSource
         modunderlyer.init(0);
     }
 
-    virtual float get_output(int which) override
+    virtual float get_output(int which) const override
     {
         return value[which] + modunderlyer.get_output(which);
     }
 
-    virtual float get_output01(int i) override
+    virtual float get_output01(int i) const override
     {
         if (bipolar)
             return 0.5f + 0.5f * (value[i] + modunderlyer.value[i]);
@@ -654,7 +651,7 @@ class RandomModulationSource : public ModulationSource
         return 2; // bipolar can't support lognormal obvs
     }
 
-    float get_output(int which) override { return output[which]; }
+    float get_output(int which) const override { return output[which]; }
 
     virtual void attack() override
     {

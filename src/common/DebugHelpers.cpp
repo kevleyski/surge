@@ -4,7 +4,7 @@
  *
  * Learn more at https://surge-synthesizer.github.io/
  *
- * Copyright 2018-2023, various authors, as described in the GitHub
+ * Copyright 2018-2024, various authors, as described in the GitHub
  * transaction log.
  *
  * Surge XT is released under the GNU General Public Licence v3
@@ -26,9 +26,12 @@
 #endif
 
 #if MAC || LINUX
-#include <execinfo.h>
 #include <stdio.h>
 #include <cstdlib>
+#endif
+
+#if __GLIBC__ || MAC
+#include <execinfo.h>
 #endif
 
 #include "version.h"
@@ -85,7 +88,7 @@ bool Surge::Debug::toggleConsole()
 
 void Surge::Debug::stackTraceToStdout(int depth)
 {
-#if MAC || LINUX
+#if __GLIBC__ || MAC
     void *callstack[128];
     int i, frames = backtrace(callstack, 128);
     char **strs = backtrace_symbols(callstack, frames);

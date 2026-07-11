@@ -4,7 +4,7 @@
  *
  * Learn more at https://surge-synthesizer.github.io/
  *
- * Copyright 2018-2023, various authors, as described in the GitHub
+ * Copyright 2018-2024, various authors, as described in the GitHub
  * transaction log.
  *
  * Surge XT is released under the GNU General Public Licence v3
@@ -23,7 +23,6 @@
 #include "AboutScreen.h"
 #include "SurgeGUIEditor.h"
 #include "SurgeStorage.h"
-#include "version.h"
 #include "RuntimeFont.h"
 #include "SurgeImage.h"
 #include "sst/plugininfra/paths.h"
@@ -37,8 +36,9 @@ namespace Overlays
 
 struct ClickURLImage : public juce::Component
 {
-    ClickURLImage(SurgeImage *img, int offset, const std::string &URL, const std::string &title)
-        : url(URL), offset(offset), img(img)
+    ClickURLImage(SurgeImage *img, int offset, const std::string &URL, const std::string &title,
+                  juce::Label *tooltip)
+        : url(URL), offset(offset), img(img), tooltip(tooltip)
     {
         setAccessible(true);
         setTitle(title);
@@ -62,12 +62,14 @@ struct ClickURLImage : public juce::Component
     void mouseEnter(const juce::MouseEvent &e) override
     {
         isHovered = true;
+        tooltip->setVisible(true);
         repaint();
     }
 
     void mouseExit(const juce::MouseEvent &e) override
     {
         isHovered = false;
+        tooltip->setVisible(false);
         repaint();
     }
 
@@ -86,9 +88,11 @@ struct ClickURLImage : public juce::Component
     }
 
     bool isHovered{false};
-    int offset, imgsz = 36;
+    int offset;
+    const int imgsz = 36;
     std::string url;
     SurgeImage *img;
+    juce::Label *tooltip;
 };
 
 struct HyperlinkLabel : public juce::Label, public Surge::GUI::SkinConsumingComponent
@@ -121,8 +125,8 @@ struct ClipboardCopyButton : public juce::TextButton, Surge::GUI::SkinConsumingC
     {
         setAccessible(true);
         setWantsKeyboardFocus(true);
-        setDescription("Copy Version Info");
-        setTitle("Copy Version Info");
+        setDescription("Copy Info to Clipboard");
+        setTitle("Copy Info to Clipboard");
     }
 
     void paintButton(juce::Graphics &g, bool shouldDrawButtonAsHighlighted,
@@ -140,7 +144,8 @@ struct ClipboardCopyButton : public juce::TextButton, Surge::GUI::SkinConsumingC
         }
 
         g.setFont(skin->fontManager->getLatoAtSize(10));
-        g.drawText("Copy Version Info", getLocalBounds(), juce::Justification::centred, false);
+        g.drawText("Copy Info to Clipboard", getLocalBounds(), juce::Justification::centredLeft,
+                   false);
     }
 };
 
@@ -152,6 +157,13 @@ AboutScreen::AboutScreen()
     std::string version = std::string("About Surge XT ") + Surge::Build::FullVersionStr;
     setTitle(version);
     setDescription(version);
+
+    for (auto idx : iconOrder)
+    {
+        iconTooltips[idx] = std::make_unique<juce::Label>();
+        iconTooltips[idx].get()->setText(iconLabels[idx], juce::dontSendNotification);
+        addChildComponent(iconTooltips[idx].get());
+    }
 }
 
 AboutScreen::~AboutScreen() noexcept = default;
@@ -171,27 +183,38 @@ void AboutScreen::populateData()
     std::string platform = "macOS";
 #elif WINDOWS
     std::string platform = "Windows";
+#if defined(_M_ARM64EC)
+    platform += " (arm64ec)";
+#elif defined(_M_ARM64)
+    platform += " (arm64)";
+#endif
 #elif LINUX
     std::string platform = "Linux";
 #else
     std::string platform = "GLaDOS, Orac or Skynet";
 #endif
 
-    std::string bitness = (sizeof(size_t) == 4 ? std::string("32") : std::string("64")) + "-bit";
-    std::string system =
-        platform + " " + bitness + " " + wrapper + " on " + sst::plugininfra::cpufeatures::brand();
+    const auto ramsize = juce::SystemStats::getMemorySizeInMegabytes();
+    const auto ramString =
+        fmt::format("{:.0f} {} RAM", ramsize >= 1024 ? std::roundf(ramsize / 1024.f) : ramsize,
+                    ramsize >= 1024 ? "GB" : "MB");
+
+    const auto bitness = (sizeof(size_t) == 4 ? std::string("32") : std::string("64")) + "-bit";
+    const auto system = fmt::format("{} {}{} on {}, {}", platform, bitness,
+                                    wrapper == "Undefined" ? "" : " " + wrapper,
+                                    sst::plugininfra::cpufeatures::brand(), ramString);
 
     lowerLeft.clear();
     lowerLeft.emplace_back("Version:", version, "");
-    lowerLeft.emplace_back("Build:", buildinfo, "");
-    lowerLeft.emplace_back("System:", system, "");
+    lowerLeft.emplace_back("Build Info:", buildinfo, "");
+    lowerLeft.emplace_back("System Info:", system, "");
 
-    auto srString = fmt::format("{:.1f} kHz / Process block size: {} samples",
-                                storage->samplerate / 1000.0, BLOCK_SIZE);
+    const auto srString = fmt::format("{} Hz", (int)storage->samplerate);
 
     if (host != "Unknown")
     {
         auto hstr = host + " @ " + srString;
+
         lowerLeft.emplace_back("Host:", hstr, "");
     }
     else
@@ -199,9 +222,12 @@ void AboutScreen::populateData()
         lowerLeft.emplace_back("Sample Rate:", srString, "");
     }
 
+    lowerLeft.emplace_back("Processing Block:", fmt::format("{} samples", BLOCK_SIZE), "");
+
     lowerLeft.emplace_back("", "", "");
 
-    auto apppath = sst::plugininfra::paths::sharedLibraryBinaryPath();
+    const auto apppath = sst::plugininfra::paths::sharedLibraryBinaryPath();
+
     lowerLeft.emplace_back("Executable:", apppath.u8string(), apppath.parent_path().u8string());
     lowerLeft.emplace_back("Factory Data:", storage->datapath.u8string(),
                            storage->datapath.u8string());
@@ -210,7 +236,7 @@ void AboutScreen::populateData()
 
     lowerRight.clear();
 
-    std::string skinFullName = skin->displayName;
+    auto skinFullName = skin->displayName;
 
     if (!skin->category.empty())
     {
@@ -252,12 +278,12 @@ void AboutScreen::resized()
         auto lrs = lowerRight.size();
         auto h0 = getHeight() - lls * lHeight - margin;
         auto h1 = getHeight() - lrs * lHeight - margin;
-        auto colW = 66;
+        auto colW = 84;
         auto font = skin->fontManager->getLatoAtSize(10);
 
         copyButton = std::make_unique<ClipboardCopyButton>();
         copyButton->setSkin(skin, associatedBitmapStore);
-        copyButton->setBounds(margin + 4, h0 - lHeight - 4, 80, 16);
+        copyButton->setBounds(margin + 4, h0 - lHeight - 4, 112, 16);
         copyButton->addListener(this);
 
         addAndMakeVisible(*copyButton);
@@ -293,7 +319,7 @@ void AboutScreen::resized()
                 lb->setColour(juce::Label::textColourId, skin->getColor(Colors::AboutPage::Link));
                 lb->setText(std::get<1>(l), juce::NotificationType::dontSendNotification);
 
-                auto strw = font.getStringWidth(std::get<1>(l)) + 8;
+                auto strw = SST_STRING_WIDTH_INT(font, std::get<1>(l)) + 8;
                 lb->setBounds(margin + colW, h0, strw, lHeight);
 
                 addAndMakeVisible(*lb);
@@ -335,7 +361,7 @@ void AboutScreen::resized()
                 lb->setColour(juce::Label::textColourId, skin->getColor(Colors::AboutPage::Link));
                 lb->setText(std::get<1>(l), juce::NotificationType::dontSendNotification);
 
-                auto strw = font.getStringWidth(std::get<1>(l)) + 8;
+                auto strw = SST_STRING_WIDTH_INT(font, std::get<1>(l)) + 8;
                 lb->setBounds(rightSide + colW, h1, strw, lHeight);
 
                 addAndMakeVisible(*lb);
@@ -368,9 +394,11 @@ void AboutScreen::resized()
 
         yp += lblvs;
 
-        addLabel("VST is a trademark of Steinberg Media Technologies GmbH; Audio Units is a "
-                 "trademark of Apple Inc.",
-                 600);
+        addLabel("ASIO and VST are trademarks of Steinberg Media Technologies GmbH", 600);
+
+        yp += lblvs;
+
+        addLabel("Audio Units is a trademark of Apple Inc.", 600);
 
         yp += lblvs;
 
@@ -430,30 +458,33 @@ void AboutScreen::resized()
                  "under GNU GPL v3 license",
                  600);
 
+        yp += lblvs;
+
+        addLabel("Floaty Delay effect based on eponymous effect by Daniel Arena "
+                 "(RemainCalm), licensed under GNU GPL v3 license",
+                 600);
+
         auto img = associatedBitmapStore->getImage(IDB_ABOUT_LOGOS);
-        auto idxes = {0, 4, 3, 6, 1, 2, 5};
 
-        std::vector<std::string> urls = {
-            stringRepository,
-            "https://www.steinberg.net/en/company/technologies/vst3.html",
-            "https://developer.apple.com/documentation/audiounit",
-            "https://www.gnu.org/licenses/gpl-3.0-standalone.html",
-            "https://discord.gg/aFQDdMV",
-            "https://juce.com",
-            "https://cleveraudio.org"};
+        int x = iconOrder.size();
 
-        std::vector<std::string> urllabels = {
-            "Surge XT GitHub Repository", "Steinberg VST3", "Apple Audio Units",  "GNU GPL3",
-            "Join our Discord!",          "JUCE Framework", "CLever Audio Plugin"};
-
-        int x = idxes.size();
-
-        for (auto idx : idxes)
+        for (auto idx : iconOrder)
         {
-            auto bt = std::make_unique<ClickURLImage>(img, idx, urls[idx], urllabels[idx]);
+            auto bt = std::make_unique<ClickURLImage>(img, idx, urls[idx], iconLabels[idx],
+                                                      iconTooltips[idx].get());
 
-            bt->setBounds(getWidth() - (margin / 2) - (x * 42), margin, 36, 36);
+            bt->setBounds(getWidth() - (margin / 2) - (x * 42) - 30, margin, 36, 36);
+
+            auto tooltip = iconTooltips[idx].get();
+
+            tooltip->setBounds(bt->getBounds().expanded(30, 0).translated(0, 38).withHeight(10));
+            tooltip->setFont(skin->fontManager->getLatoAtSize(8));
+            tooltip->setColour(juce::Label::ColourIds::textColourId,
+                               skin->getColor(Colors::AboutPage::LinkHover));
+            tooltip->setJustificationType(juce::Justification::centredTop);
+
             addAndMakeVisible(*bt);
+
             icons.push_back(std::move(bt));
 
             x--;

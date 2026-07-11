@@ -4,7 +4,7 @@
  *
  * Learn more at https://surge-synthesizer.github.io/
  *
- * Copyright 2018-2023, various authors, as described in the GitHub
+ * Copyright 2018-2024, various authors, as described in the GitHub
  * transaction log.
  *
  * Surge XT is released under the GNU General Public Licence v3
@@ -39,23 +39,12 @@ using namespace std;
 namespace mech = sst::basic_blocks::mechanics;
 namespace sdsp = sst::basic_blocks::dsp;
 
-enum lag_entries
-{
-    le_osc1,
-    le_osc2,
-    le_osc3,
-    le_noise,
-    le_ring12,
-    le_ring23,
-    le_pfg,
-};
+inline void set1f(SIMD_M128 &m, int i, float f) { *((float *)&m + i) = f; }
 
-inline void set1f(__m128 &m, int i, float f) { *((float *)&m + i) = f; }
+inline void set1i(SIMD_M128 &m, int e, int i) { *((int *)&m + e) = i; }
+inline void set1ui(SIMD_M128 &m, int e, unsigned int i) { *((unsigned int *)&m + e) = i; }
 
-inline void set1i(__m128 &m, int e, int i) { *((int *)&m + e) = i; }
-inline void set1ui(__m128 &m, int e, unsigned int i) { *((unsigned int *)&m + e) = i; }
-
-inline float get1f(__m128 m, int i) { return *((float *)&m + i); }
+inline float get1f(SIMD_M128 m, int i) { return *((float *)&m + i); }
 
 float SurgeVoiceState::getPitch(SurgeStorage *storage)
 {
@@ -73,12 +62,17 @@ float SurgeVoiceState::getPitch(SurgeStorage *storage)
             key != keyRetuningForKey)
         {
             keyRetuningForKey = key;
-            keyRetuning = MTS_RetuningInSemitones(storage->oddsound_mts_client, key + mpeBend,
-                                                  mtsUseChannelWhenRetuning ? 0 : channel);
+            if (mpeEnabled)
+            {
+                keyRetuning = MTS_RetuningForBentKey(storage, res);
+            }
+            else
+            {
+                keyRetuning = MTS_RetuningInSemitones(storage->oddsound_mts_client, key,
+                                                      mtsUseChannelWhenRetuning ? channel : -1);
+            }
         }
-        auto rkey = keyRetuning;
-
-        res = res + rkey;
+        res += keyRetuning;
     }
     else
 #endif
@@ -88,69 +82,108 @@ float SurgeVoiceState::getPitch(SurgeStorage *storage)
         res = storage->remapKeyInMidiOnlyMode(res);
     }
 
-    res = SurgeVoice::channelKeyEquvialent(res, channel, mpeEnabled, storage, false);
+    if (!mpeEnabled && storage->mapChannelToOctave)
+    {
+        res = SurgeVoice::channelKeyEquivalent(res, channel, storage, false);
+    }
 
     return res;
 }
 
-float SurgeVoice::channelKeyEquvialent(float key, int channel, bool isMpeEnabled,
-                                       SurgeStorage *storage, bool remapKeyForTuning)
+#ifndef SURGE_SKIP_ODDSOUND_MTS
+float SurgeVoiceState::MTS_RetuningForBentKey(SurgeStorage *storage, float bentKey)
+{
+    auto ik = std::floor(bentKey);
+    auto frac = bentKey - ik;
+
+    auto r1 = MTS_RetuningInSemitones(storage->oddsound_mts_client, ik, -1);
+    auto r2 = MTS_RetuningInSemitones(storage->oddsound_mts_client, ik + 1, -1);
+
+    return r1 + frac * (r2 - r1);
+}
+#endif
+
+float SurgeVoice::channelKeyEquivalent(float key, int channel, SurgeStorage *storage,
+                                       bool remapKeyForTuning)
 {
     float res = key;
-    if (storage->mapChannelToOctave && !storage->oddsound_mts_active_as_client && !isMpeEnabled)
-    {
-        if (remapKeyForTuning)
-        {
-            res = storage->remapKeyInMidiOnlyMode(res);
-        }
 
-        float shift;
-        if (channel > 7)
-        {
-            shift = channel - 16;
-        }
-        else
-        {
-            shift = channel;
-        }
-        if (storage->tuningApplicationMode == SurgeStorage::RETUNE_ALL)
-        {
-            // keys are in scale space so move scale.count
-            res += storage->currentScale.count * shift;
-        }
-        else
-        {
-            // keys are in tuning space so move cents worth of keys
-            if (storage->isStandardTuning)
-                res += 12 * shift;
-            else
-            {
-                auto ct = storage->currentScale.tones[storage->currentScale.count - 1].cents;
-                res += ct / 100 * shift;
-            }
-        }
+    if (remapKeyForTuning)
+    {
+        res = storage->remapKeyInMidiOnlyMode(res);
     }
+
+    float shift;
+    if (channel > 7)
+    {
+        shift = channel - 16;
+    }
+    else
+    {
+        shift = channel;
+    }
+
+    if (storage->isStandardTuning)
+    {
+        res += 12 * shift;
+    }
+    else if (storage->oddsound_mts_active_as_client)
+    {
+        res += MTS_GetMapSize(storage->oddsound_mts_client) * shift;
+    }
+    else if (storage->tuningApplicationMode == SurgeStorage::RETUNE_ALL)
+    {
+        // keys are in scale space so move scale.count
+        res += storage->currentScale.count * shift;
+    }
+    else
+    {
+        // keys are in tuning space so move cents worth of keys
+        auto ct = storage->currentScale.tones[storage->currentScale.count - 1].cents;
+        res += ct / 100 * shift;
+    }
+
     return res;
 }
 
-SurgeVoice::SurgeVoice() {}
+// This is super useful for debugging placement new issues. Please leave it here until
+// we stabilize 1.3.1 at least
+// #define VOICE_LIFETIME_DEBUG 1
+#ifdef VOICE_LIFETIME_DEBUG
+int voiceCDCount{0};
+#endif
 
-SurgeVoice::SurgeVoice(SurgeStorage *storage, SurgeSceneStorage *oscene, pdata *params, int key,
-                       int velocity, int channel, int scene_id, float detune,
-                       MidiKeyState *keyState, MidiChannelState *mainChannelState,
+SurgeVoice::SurgeVoice()
+{
+#ifdef VOICE_LIFETIME_DEBUG
+    voiceCDCount++;
+    std::cout << "Calling SurgeVoice CTOR NoArg " << voiceCDCount << std::endl;
+#endif
+}
+
+SurgeVoice::SurgeVoice(SurgeStorage *storage, SurgeSceneStorage *oscene, pdata *params,
+                       pdata *paramsUnmod, int key, int velocity, int channel, int scene_id,
+                       float detune, MidiKeyState *keyState, MidiChannelState *mainChannelState,
                        MidiChannelState *voiceChannelState, bool mpeEnabled, int64_t voiceOrder,
                        int32_t host_nid, int16_t host_key, int16_t host_chan, float aegStart,
                        float fegStart)
 //: fb(storage,oscene)
 {
+#ifdef VOICE_LIFETIME_DEBUG
+    voiceCDCount++;
+    std::cout << "Calling SurgeVoice CTOR FullArg " << voiceCDCount << std::endl;
+#endif
     // assign pointers
     this->storage = storage;
     this->scene = oscene;
     this->paramptr = params;
+    this->paramptrUnmod = paramsUnmod;
     this->mpeEnabled = mpeEnabled;
     this->host_note_id = host_nid;
     this->originating_host_key = host_key;
     this->originating_host_channel = host_chan;
+    this->tilt_noise.emplace(storage->noiseRng);
+    this->tilt_noise->s = this;
     this->paramModulationCount = 0;
     assert(storage);
     assert(oscene);
@@ -167,13 +200,14 @@ SurgeVoice::SurgeVoice(SurgeStorage *storage, SurgeSceneStorage *oscene, pdata *
     // We want this on the keystate so it survives the voice for mono mode
     keyState->voiceOrder = voiceOrder;
 
+    state.voiceOrderAtCreate = voiceOrder;
+
     age = 0;
     age_release = 0;
 
     state.key = key;
     state.keyRetuningForKey = -1000;
     state.channel = channel;
-    state.voiceOrderAtCreate = voiceOrder;
 
     state.velocity = velocity;
     state.fvel = velocity / 127.f;
@@ -199,8 +233,11 @@ SurgeVoice::SurgeVoice(SurgeStorage *storage, SurgeSceneStorage *oscene, pdata *
         storage, Surge::Storage::UseCh2Ch3ToPlayScenesIndividually, true, false);
     const bool isChSplitMode = storage->getPatch().scenemode.val.i == sm_chsplit;
 
-    state.mtsUseChannelWhenRetuning = (mpeEnabled || isChSplitMode || isCh23Mode);
+    state.mtsUseChannelWhenRetuning =
+        !(mpeEnabled || isChSplitMode || isCh23Mode || storage->mapChannelToOctave);
 #endif
+
+    state.tunedkey = state.getPitch(storage);
 
     resetPortamentoFrom(storage->last_key[scene_id], channel);
 
@@ -209,6 +246,8 @@ SurgeVoice::SurgeVoice(SurgeStorage *storage, SurgeSceneStorage *oscene, pdata *
     noisegenR[0] = 0.f;
     noisegenL[1] = 0.f;
     noisegenR[1] = 0.f;
+
+    tilt_noise->initVoiceEffect();
 
     // set states & variables
     state.gate = true;
@@ -261,7 +300,8 @@ SurgeVoice::SurgeVoice(SurgeStorage *storage, SurgeSceneStorage *oscene, pdata *
 
         if (scene->lfo[i].shape.val.i == lt_formula)
         {
-            Surge::Formula::setupEvaluatorStateFrom(lfo[i].formulastate, storage->getPatch());
+            Surge::Formula::setupEvaluatorStateFrom(lfo[i].formulastate, storage->getPatch(),
+                                                    scene_id);
             Surge::Formula::setupEvaluatorStateFrom(lfo[i].formulastate, this);
         }
 
@@ -362,7 +402,13 @@ SurgeVoice::SurgeVoice(SurgeStorage *storage, SurgeSceneStorage *oscene, pdata *
     switch_toggled();
 }
 
-SurgeVoice::~SurgeVoice() {}
+SurgeVoice::~SurgeVoice()
+{
+#ifdef VOICE_LIFETIME_DEBUG
+    voiceCDCount--;
+    std::cout << "Calling SurgeVoice DTOR " << voiceCDCount << std::endl;
+#endif
+}
 
 void SurgeVoice::legato(int key, int velocity, char detune)
 {
@@ -500,7 +546,7 @@ void SurgeVoice::switch_toggled()
         {
             bool nzid = scene->drift.extend_range;
             osc[i] = spawn_osc(scene->osc[i].type.val.i, storage, &scene->osc[i], localcopy,
-                               oscbuffer[i]);
+                               this->paramptrUnmod, oscbuffer[i]);
             if (osc[i])
             {
                 // this matches the override in ::process_block
@@ -709,7 +755,8 @@ template <bool first> void SurgeVoice::calc_ctrldata(QuadFilterChainState *Q, in
     {
         if (scene->lfo[i].shape.val.i == lt_formula)
         {
-            Surge::Formula::setupEvaluatorStateFrom(lfo[i].formulastate, storage->getPatch());
+            Surge::Formula::setupEvaluatorStateFrom(lfo[i].formulastate, storage->getPatch(),
+                                                    state.scene_id);
             Surge::Formula::setupEvaluatorStateFrom(lfo[i].formulastate, this);
         }
 
@@ -777,8 +824,15 @@ template <bool first> void SurgeVoice::calc_ctrldata(QuadFilterChainState *Q, in
         pb *= (float)scene->pbrange_dn.val.i * (scene->pbrange_dn.extend_range ? 0.01f : 1.f);
 
     octaveSize = 12.0f;
-    if (!storage->isStandardTuning && storage->tuningApplicationMode == SurgeStorage::RETUNE_ALL)
+    if (storage->transposeByTuningPeriod)
+    {
+        octaveSize = storage->tuningPeriodSemitones();
+    }
+    else if (!storage->isStandardTuning &&
+             storage->tuningApplicationMode == SurgeStorage::RETUNE_ALL)
+    {
         octaveSize = storage->currentScale.count;
+    }
 
     state.scenepbpitch = pb + localcopy[pitch_id].f * (scene->pitch.extend_range ? 12.f : 1.f) +
                          (octaveSize * localcopy[octave_id].i);
@@ -906,6 +960,14 @@ inline void all_ring_modes_block(float *__restrict src1_l, float *__restrict src
             cxor43_2_block(src1_l, src2_l, dst_l, nquads);
             cxor43_2_block(src1_r, src2_r, dst_r, nquads);
             break;
+        case CombinatorMode::cxm_cxor43_3_legacy:
+            cxor43_3_legacy_block(src1_l, src2_l, dst_l, nquads);
+            cxor43_3_legacy_block(src1_r, src2_r, dst_r, nquads);
+            break;
+        case CombinatorMode::cxm_cxor43_4_legacy:
+            cxor43_4_legacy_block(src1_l, src2_l, dst_l, nquads);
+            cxor43_4_legacy_block(src1_r, src2_r, dst_r, nquads);
+            break;
         case CombinatorMode::cxm_cxor43_3:
             cxor43_3_block(src1_l, src2_l, dst_l, nquads);
             cxor43_3_block(src1_r, src2_r, dst_r, nquads);
@@ -952,6 +1014,12 @@ inline void all_ring_modes_block(float *__restrict src1_l, float *__restrict src
             break;
         case CombinatorMode::cxm_cxor43_2:
             cxor43_2_block(src1_l, src2_l, dst_l, nquads);
+            break;
+        case CombinatorMode::cxm_cxor43_3_legacy:
+            cxor43_3_legacy_block(src1_l, src2_l, dst_l, nquads);
+            break;
+        case CombinatorMode::cxm_cxor43_4_legacy:
+            cxor43_4_legacy_block(src1_l, src2_l, dst_l, nquads);
             break;
         case CombinatorMode::cxm_cxor43_3:
             cxor43_3_block(src1_l, src2_l, dst_l, nquads);
@@ -1172,36 +1240,16 @@ bool SurgeVoice::process_block(QuadFilterChainState &Q, int Qe)
 
     if (noise)
     {
-        float noisecol = limit_range(localcopy[scene->noise_colour.param_id_in_scene].f, -1.f, 1.f);
-        auto is_stereo_noise = scene->noise_colour.deform_type == NoiseColorChannels::STEREO;
-        for (int i = 0; i < BLOCK_SIZE_OS; i += 2)
+        bool stereo =
+            ((scene->noise_colour.deform_type & 0x1) == NoiseColorChannels::STEREO) && is_wide;
+        int type = scene->noise_colour.deform_type & 0x2;
+        if (type)
         {
-            ((float *)tblock)[i] = sdsp::correlated_noise_o2mk2_supplied_value(
-                noisegenL[0], noisegenL[1], noisecol, storage->rand_pm1());
-            ((float *)tblock)[i + 1] = ((float *)tblock)[i];
-            if (is_wide)
-            {
-                if (is_stereo_noise)
-                {
-                    ((float *)tblockR)[i] = sdsp::correlated_noise_o2mk2_supplied_value(
-                        noisegenR[0], noisegenR[1], noisecol, storage->rand_pm1());
-                    ((float *)tblockR)[i + 1] = ((float *)tblockR)[i];
-                }
-                else
-                {
-                    ((float *)tblockR)[i] = ((float *)tblock)[i];
-                    ((float *)tblockR)[i + 1] = ((float *)tblock)[i + 1];
-                }
-            }
-        }
-
-        if (is_wide)
-        {
-            osclevels[le_noise].multiply_2_blocks(tblock, tblockR, BLOCK_SIZE_OS_QUAD);
+            generate_tilt_noise(is_wide, stereo, tblock, tblockR);
         }
         else
         {
-            osclevels[le_noise].multiply_block(tblock, BLOCK_SIZE_OS_QUAD);
+            generate_legacy_noise(is_wide, stereo, tblock, tblockR);
         }
 
         if (route[5] < 2)
@@ -1219,8 +1267,8 @@ bool SurgeVoice::process_block(QuadFilterChainState &Q, int Qe)
 
     for (int i = 0; i < BLOCK_SIZE_OS; i++)
     {
-        _mm_store_ss(((float *)&Q.DL[i] + Qe), _mm_load_ss(&output[0][i]));
-        _mm_store_ss(((float *)&Q.DR[i] + Qe), _mm_load_ss(&output[1][i]));
+        SIMD_MM(store_ss)(((float *)&Q.DL[i] + Qe), SIMD_MM(load_ss)(&output[0][i]));
+        SIMD_MM(store_ss)(((float *)&Q.DR[i] + Qe), SIMD_MM(load_ss)(&output[1][i]));
     }
     SetQFB(&Q, Qe);
 
@@ -1637,8 +1685,7 @@ void SurgeVoice::resetPortamentoFrom(int key, int channel)
 #endif
         {
             if (storage->mapChannelToOctave && !mpeEnabled)
-                state.portasrc_key =
-                    channelKeyEquvialent(lk, state.channel, mpeEnabled, storage, true);
+                state.portasrc_key = channelKeyEquivalent(lk, state.channel, storage, true);
             else
                 state.portasrc_key = storage->remapKeyInMidiOnlyMode(lk);
         }
@@ -1696,4 +1743,53 @@ bool SurgeVoice::matchesChannelKeyId(int16_t channel, int16_t key, int32_t nid)
         nidMatch = (host_note_id == nid);
 
     return chanMatch && keyMatch && nidMatch;
+}
+
+void SurgeVoice::generate_legacy_noise(bool wide, bool stereo, float *blockL, float *blockR)
+{
+    float noisecol = limit_range(localcopy[scene->noise_colour.param_id_in_scene].f, -1.f, 1.f);
+    for (int i = 0; i < BLOCK_SIZE_OS; i += 2)
+    {
+        (blockL)[i] = sdsp::correlated_noise_o2mk2_supplied_value(noisegenL[0], noisegenL[1],
+                                                                  noisecol, storage->rand_pm1());
+        (blockL)[i + 1] = (blockL)[i];
+        if (wide)
+        {
+            if (stereo)
+            {
+                (blockR)[i] = sdsp::correlated_noise_o2mk2_supplied_value(
+                    noisegenR[0], noisegenR[1], noisecol, storage->rand_pm1());
+                (blockR)[i + 1] = (blockR)[i];
+            }
+            else
+            {
+                (blockR)[i] = (blockL)[i];
+                (blockR)[i + 1] = (blockL)[i + 1];
+            }
+        }
+    }
+    if (wide)
+    {
+        osclevels[le_noise].multiply_2_blocks(blockL, blockR, BLOCK_SIZE_OS_QUAD);
+    }
+    else
+    {
+        osclevels[le_noise].multiply_block(blockL, BLOCK_SIZE_OS_QUAD);
+    }
+}
+
+void SurgeVoice::generate_tilt_noise(bool wide, bool stereo, float *blockL, float *blockR)
+{
+    if (wide && stereo)
+    {
+        tilt_noise->processStereo(nullptr, nullptr, blockL, blockR, 0.f);
+    }
+    else
+    {
+        tilt_noise->processMonoToMono(nullptr, blockL, 0.f);
+        if (wide)
+        {
+            std::copy(blockL, blockL + BLOCK_SIZE_OS, blockR);
+        }
+    }
 }

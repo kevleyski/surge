@@ -4,7 +4,7 @@
  *
  * Learn more at https://surge-synthesizer.github.io/
  *
- * Copyright 2018-2023, various authors, as described in the GitHub
+ * Copyright 2018-2024, various authors, as described in the GitHub
  * transaction log.
  *
  * Surge XT is released under the GNU General Public Licence v3
@@ -24,6 +24,7 @@
 #define SURGE_SRC_COMMON_DSP_EFFECTS_CHOWDSP_SPRING_REVERB_REFLECTIONNETWORK_H
 
 #include <array>
+#include <cstdint>
 
 #include "globals.h"
 #include "UnitConversions.h"
@@ -44,7 +45,7 @@ class ReflectionNetwork
         fs = sampleRate;
 
         for (auto &d : delays)
-            d.prepare({sampleRate, (juce::uint32)samplesPerBlock, 2});
+            d.prepare({sampleRate, (size_t)samplesPerBlock, 2});
 
         shelfFilter.reset();
     }
@@ -62,7 +63,7 @@ class ReflectionNetwork
             feedbackArr[i] *= 0.23f * mix * (0.735f + 0.235f * reverbSize);
         }
 
-        feedback = _mm_load_ps(feedbackArr);
+        feedback = SIMD_MM(load_ps)(feedbackArr);
 
         float dampDB = -1.0f - 9.0f * damping;
         shelfFilter.calcCoefs(1.0f, (float)dB_to_linear((double)dampDB), 800.0f, fs);
@@ -74,14 +75,14 @@ class ReflectionNetwork
         for (int i = 0; i < 4; ++i)
             output[i] = delays[i].popSample(ch);
 
-        auto outVec = _mm_load_ps(output);
+        auto outVec = SIMD_MM(load_ps)(output);
 
         // householder matrix
         constexpr auto householderFactor = -2.0f / (float)4;
         const auto sumXhh = vSum(outVec) * householderFactor;
-        outVec = _mm_add_ps(outVec, _mm_load1_ps(&sumXhh));
+        outVec = SIMD_MM(add_ps)(outVec, SIMD_MM(load1_ps)(&sumXhh));
 
-        outVec = _mm_mul_ps(outVec, feedback);
+        outVec = SIMD_MM(mul_ps)(outVec, feedback);
         return shelfFilter.processSample(vSum(outVec) / (float)4);
     }
 
@@ -98,7 +99,7 @@ class ReflectionNetwork
     std::array<ReflectionDelay, 4> delays{ReflectionDelay{1 << 18}, ReflectionDelay{1 << 18},
                                           ReflectionDelay{1 << 18}, ReflectionDelay{1 << 18}};
 
-    __m128 feedback;
+    SIMD_M128 feedback;
 
     chowdsp::ShelfFilter<> shelfFilter;
 };

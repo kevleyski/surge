@@ -4,7 +4,7 @@
  *
  * Learn more at https://surge-synthesizer.github.io/
  *
- * Copyright 2018-2023, various authors, as described in the GitHub
+ * Copyright 2018-2024, various authors, as described in the GitHub
  * transaction log.
  *
  * Surge XT is released under the GNU General Public Licence v3
@@ -134,14 +134,8 @@ class alignas(16) AirWindowsEffect : public Effect
                         fx->airwin->setParameter(idx, value);
                     }
 
-                    if (fx->storage)
-                    {
-                        auto detailedMode = Surge::Storage::getUserDefaultValue(
-                            fx->storage, Surge::Storage::HighPrecisionReadouts, 0);
-
-                        fx->airwin->displayPrecision = (detailedMode ? 6 : 2);
-                    }
-
+                    fx->airwin->displayPrecision =
+                        Surge::Storage::getValueDisplayPrecision(fx->storage);
                     fx->airwin->getParameterLabel(idx, lab);
                     fx->airwin->getParameterDisplay(idx, dis, value, true);
                 }

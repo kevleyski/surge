@@ -4,7 +4,7 @@
  *
  * Learn more at https://surge-synthesizer.github.io/
  *
- * Copyright 2018-2023, various authors, as described in the GitHub
+ * Copyright 2018-2024, various authors, as described in the GitHub
  * transaction log.
  *
  * Surge XT is released under the GNU General Public Licence v3
@@ -165,6 +165,9 @@ void XMLMenuPopulator::populate()
                 delete c;
         }
 
+        SurgeStorage *storage{nullptr};
+        void setStorage(SurgeStorage *s) { storage = s; }
+
         std::string name;
         std::vector<std::string> fullPath;
         int idx = -1;
@@ -181,6 +184,7 @@ void XMLMenuPopulator::populate()
             {
                 auto t = new Tree();
 
+                t->setStorage(storage);
                 t->name = i.name;
                 t->idx = idx;
                 t->fullPath = i.pathElements;
@@ -207,6 +211,7 @@ void XMLMenuPopulator::populate()
                 if (!addToThis)
                 {
                     addToThis = new Tree();
+                    addToThis->setStorage(storage);
                     addToThis->name = i.pathElements[depth];
                     addToThis->fullPath = std::vector<std::string>(
                         i.pathElements.begin(), i.pathElements.begin() + depth + 1);
@@ -263,12 +268,59 @@ void XMLMenuPopulator::populate()
             for (auto c : children)
             {
                 // std::cout << c->type << " " << c->name << std::endl;
+
+                // this is so damn ugly. I apologize!
+                // but showing checkboxes for selected menu entry is nice!
+                bool isChecked = false;
+
+                for (int i = 0; i < n_osc_types; i++)
+                {
+                    if (c->name.compare(osc_type_names[i]) == 0)
+                    {
+                        if (storage)
+                        {
+                            auto &des = storage->getPatch().dawExtraState;
+                            const auto sc = des.editor.current_scene;
+                            const auto o = des.editor.current_osc[sc];
+
+                            if (storage->getPatch().scene[sc].osc[o].type.val.i == i)
+                            {
+                                isChecked = true;
+                            }
+                        }
+                    }
+                }
+
+                for (int i = 0; i < n_fx_slots; i++)
+                {
+                    if (storage)
+                    {
+                        auto &des = storage->getPatch().dawExtraState;
+                        const auto idx = des.editor.current_fx;
+
+                        if (fxslot_order[i] == idx)
+                        {
+                            for (int j = 0; j < n_fx_types; j++)
+                            {
+                                if (c->name.compare(fx_type_names[j]) == 0)
+                                {
+                                    if (storage->getPatch().fx[idx].type.val.i == j)
+                                    {
+                                        isChecked = true;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
                 switch (c->type)
                 {
                 case FACPS:
                 {
                     auto idx = c->idx;
-                    m.addItem(c->name, [host, idx, n = c->name]() { host->loadByIndex(n, idx); });
+                    m.addItem(c->name, true, isChecked,
+                              [host, idx, n = c->name]() { host->loadByIndex(n, idx); });
                 }
                 break;
                 case USPS:
@@ -300,7 +352,7 @@ void XMLMenuPopulator::populate()
                 {
                     auto subM = juce::PopupMenu();
                     c->buildJuceMenu(subM, host);
-                    m.addSubMenu(c->name, subM);
+                    m.addSubMenu(c->name, subM, true, nullptr, isChecked);
                 }
                 break;
                 }
@@ -319,6 +371,8 @@ void XMLMenuPopulator::populate()
 
     rootTree->updateFacUserFlag();
     menu = juce::PopupMenu();
+
+    rootTree->setStorage(storage);
 
     rootTree->buildJuceMenu(menu, this);
 
@@ -435,8 +489,7 @@ void OscillatorMenu::populate()
 
         menu.addCustomItem(-1, std::move(hmen), nullptr, title);
 
-#if SURGE_HAS_OSC
-        if (storage->oscListenerRunning)
+        if (storage->oscReceiving)
         {
             menu.addSeparator();
 
@@ -451,7 +504,6 @@ void OscillatorMenu::populate()
 
             menu.addItem(i);
         }
-#endif
     }
 }
 
@@ -545,7 +597,7 @@ template <typename T> struct XMLMenuAH : public juce::AccessibilityHandler
 
         bool isReadOnly() const override { return true; }
         juce::String getCurrentValueAsString() const override { return XMLValue<T>::value(comp); }
-        void setValueAsString(const juce::String &newValue) override{};
+        void setValueAsString(const juce::String &newValue) override {}
     };
 
     explicit XMLMenuAH(T *s)
@@ -713,6 +765,39 @@ void FxMenu::loadSnapshot(int type, TiXmlElement *e, int idx)
     }
 }
 
+/////////////////
+
+static int fxSlotToChain(int patchSlot)
+{
+    for (int i = 0; i < n_fx_slots; ++i)
+    {
+        if (fxslot_order[i] == patchSlot)
+        {
+            return i / n_fx_per_chain; // fxchains value
+        }
+    }
+
+    return fxc_scenea; // unreachable
+}
+
+static void buildChainSlotPtrs(SurgeGUIEditor *sge, int current_fx,
+                               FxStorage *slots[n_fx_per_chain], FxStorage *bufs[n_fx_per_chain],
+                               std::string names[n_fx_per_chain])
+{
+    auto &patch = sge->synth->storage.getPatch();
+
+    for (int i = 0; i < n_fx_per_chain; ++i)
+    {
+        int idx = fxslot_order[fxSlotToChain(current_fx) * n_fx_per_chain + i];
+
+        slots[i] = &patch.fx[idx];
+        bufs[i] = &sge->synth->fxsync[idx];
+        names[i] = sge->fxPresetName[idx];
+    }
+}
+
+/////////////////
+
 void FxMenu::populateForContext(bool isCalledInEffectChooser)
 {
     auto sge = firstListenerOfType<SurgeGUIEditor>();
@@ -724,7 +809,6 @@ void FxMenu::populateForContext(bool isCalledInEffectChooser)
 
     auto cfxid = -1;
     auto cfxtype = 0;
-    bool addDeact = false;
     bool isDeact = false;
     bool enableClear = true;
 
@@ -736,7 +820,6 @@ void FxMenu::populateForContext(bool isCalledInEffectChooser)
         {
             auto deactbm = sge->effectChooser->getDeactivatedBitmask();
 
-            addDeact = true;
             isDeact = deactbm & (1 << cfxid);
             cfxtype = sge->effectChooser->fxTypes[cfxid];
             enableClear = cfxtype != fxt_off;
@@ -744,14 +827,18 @@ void FxMenu::populateForContext(bool isCalledInEffectChooser)
     }
 
     auto cfx = std::string{"Current FX Slot"};
+    auto cfxc = std::string{"Current FX Chain"};
     auto helpMenuText = std::string{"FX Presets"};
     auto helpMenuScreeReaderText = helpMenuText;
+
+    const auto cur_fx = current_fx;
 
     if (cfxid >= 0 && cfxid < n_fx_slots)
     {
         if (isCalledInEffectChooser)
         {
             cfx = fxslot_longnames[cfxid];
+            cfxc = fxchain_names[fxSlotToChain(cfxid)];
             helpMenuText = cfx;
         }
 
@@ -760,17 +847,17 @@ void FxMenu::populateForContext(bool isCalledInEffectChooser)
     }
 
     menu.addColumnBreak();
+
     Surge::Widgets::MenuCenteredBoldLabel::addToMenuAsSectionHeader(menu, "FUNCTIONS");
 
-    if (addDeact)
-    {
-        menu.addItem(
-            Surge::GUI::toOSCase(fmt::format("{} {}", (isDeact ? "Activate" : "Deactivate"), cfx)),
-            [that = juce::Component::SafePointer(sge->effectChooser.get())]() {
-                that->toggleSelectedDeactivation();
-                that->repaint();
-            });
-    }
+    menu.addItem(
+        Surge::GUI::toOSCase(fmt::format("{} {}", (isDeact ? "Activate" : "Deactivate"), cfx)),
+        [that = juce::Component::SafePointer(sge->effectChooser.get())]() {
+            that->toggleSelectedDeactivation();
+            that->repaint();
+        });
+
+    menu.addSeparator();
 
     menu.addItem(Surge::GUI::toOSCase(fmt::format("Clear {}", cfx)), enableClear, false,
                  [this, cfxid, that = juce::Component::SafePointer(sge->effectChooser.get())]() {
@@ -784,26 +871,97 @@ void FxMenu::populateForContext(bool isCalledInEffectChooser)
                      repaint();
                  });
 
+    menu.addItem(Surge::GUI::toOSCase(fmt::format("Clear {}", cfxc)), true, false,
+                 [this, sge, cur_fx]() { sge->enqueueFXChainClear(fxSlotToChain(cur_fx)); });
+
+    menu.addItem(Surge::GUI::toOSCase("Clear All FX Chains"), true, false,
+                 [this, sge]() { sge->enqueueFXChainClear(-1); });
+
+    menu.addSeparator();
+
+    if (fx->type.val.i != fxt_off)
+    {
+        menu.addItem(Surge::GUI::toOSCase("Save FX Preset As..."), [this]() { this->saveFX(); });
+    }
+
+    menu.addItem(Surge::GUI::toOSCase("Save FX Chain Preset As..."),
+                 [this]() { this->saveChain(); });
+
+    menu.addSeparator();
+
+    menu.addItem(Surge::GUI::toOSCase("Copy FX Preset"), [this]() { this->copyFX(); });
+
+    if (Surge::FxClipboard::isPasteAvailable(fxClipboard))
+    {
+        menu.addItem(Surge::GUI::toOSCase("Paste FX Preset"), [this]() {
+            this->pasteFX();
+            this->storage->getPatch().isDirty = true;
+        });
+    }
+
+    menu.addItem(Surge::GUI::toOSCase("Copy FX Chain"), [this]() { this->copyChain(); });
+
+    if (Surge::FxClipboard::isChainPasteAvailable(fxChainClipboard))
+    {
+        menu.addItem(Surge::GUI::toOSCase("Paste FX Chain"), [this]() {
+            this->pasteChain();
+            this->storage->getPatch().isDirty = true;
+        });
+    }
+
+    menu.addSeparator();
+
     if (sge)
     {
-        auto initSubmenu = juce::PopupMenu();
+        storage->fxChainUserPreset->doPresetRescan(storage);
+        const auto &chainPresets = storage->fxChainUserPreset->getPresets();
+        auto chainSubmenu = juce::PopupMenu();
 
-        initSubmenu.addItem(Surge::GUI::toOSCase("Clear Scene A Insert FX Chain"), true, false,
-                            [this, sge]() { sge->enqueueFXChainClear(0); });
+        if (!chainPresets.empty())
+        {
+            chainSubmenu.addSeparator();
 
-        initSubmenu.addItem(Surge::GUI::toOSCase("Clear Scene B Insert FX Chain"), true, false,
-                            [this, sge]() { sge->enqueueFXChainClear(1); });
+            // Group by subPath (folder), matching how scanExtraPresets
+            // structures user single-slot presets.
+            fs::path lastSub;
 
-        initSubmenu.addItem(Surge::GUI::toOSCase("Clear Send FX Chain"), true, false,
-                            [this, sge]() { sge->enqueueFXChainClear(2); });
+            for (const auto &cp : chainPresets)
+            {
+                if (cp.subPath != lastSub)
+                {
+                    if (!lastSub.empty())
+                        chainSubmenu.addSeparator();
+                    if (!cp.subPath.empty())
+                        Surge::Widgets::MenuCenteredBoldLabel::addToMenuAsSectionHeader(
+                            chainSubmenu, path_to_string(cp.subPath));
+                    lastSub = cp.subPath;
+                }
 
-        initSubmenu.addItem(Surge::GUI::toOSCase("Clear Global FX Chain"), true, false,
-                            [this, sge]() { sge->enqueueFXChainClear(3); });
+                chainSubmenu.addItem(cp.name, [this, cp, sge, cur_fx]() {
+                    // Push undo for all slots in the chain at once.
+                    // If a per-chain undo push exists use that; otherwise
+                    // push each slot individually.
 
-        initSubmenu.addItem(Surge::GUI::toOSCase("Clear All FX Chains"), true, false,
-                            [this, sge]() { sge->enqueueFXChainClear(-1); });
+                    int chainIdx = fxSlotToChain(cur_fx);
 
-        menu.addSubMenu(Surge::GUI::toOSCase("Clear Chains"), initSubmenu);
+                    for (int i = 0; i < n_fx_per_chain; ++i)
+                        sge->undoManager()->pushFX(fxslot_order[(chainIdx * n_fx_per_chain) + i]);
+
+                    FxStorage *slots[n_fx_per_chain];
+                    FxStorage *bufs[n_fx_per_chain];
+                    std::string names[n_fx_per_chain];
+                    buildChainSlotPtrs(sge, cur_fx, slots, bufs, names);
+
+                    storage->fxChainUserPreset->loadPresetOnto(cp, storage, bufs);
+
+                    sge->synth->load_fx_needed = true;
+                    storage->getPatch().isDirty = true;
+                    sge->queueRebuildUI();
+                });
+            }
+        }
+
+        menu.addSubMenu(Surge::GUI::toOSCase("FX Chains"), chainSubmenu);
     }
 
     menu.addSeparator();
@@ -818,21 +976,6 @@ void FxMenu::populateForContext(bool isCalledInEffectChooser)
     };
 
     menu.addItem(Surge::GUI::toOSCase("Refresh FX Preset List"), rsA);
-    if (fx->type.val.i != fxt_off)
-    {
-        menu.addItem(Surge::GUI::toOSCase("Save FX Preset As..."), [this]() { this->saveFX(); });
-    }
-
-    menu.addSeparator();
-
-    menu.addItem(Surge::GUI::toOSCase("Copy FX Preset"), [this]() { this->copyFX(); });
-    if (Surge::FxClipboard::isPasteAvailable(fxClipboard))
-    {
-        menu.addItem(Surge::GUI::toOSCase("Paste FX Preset"), [this]() {
-            this->pasteFX();
-            this->storage->getPatch().isDirty = true;
-        });
-    }
 
     menu.addSeparator();
 
@@ -853,8 +996,7 @@ void FxMenu::populateForContext(bool isCalledInEffectChooser)
 
         menu.addCustomItem(-1, std::move(hmen), nullptr, helpMenuScreeReaderText);
 
-#if SURGE_HAS_OSC
-        if (storage->oscListenerRunning)
+        if (storage->oscReceiving)
         {
             menu.addSeparator();
 
@@ -869,9 +1011,10 @@ void FxMenu::populateForContext(bool isCalledInEffectChooser)
 
             menu.addItem(i);
         }
-#endif
     }
 }
+
+//////////
 
 Surge::FxClipboard::Clipboard FxMenu::fxClipboard;
 
@@ -899,13 +1042,111 @@ void FxMenu::saveFX()
             "", "Enter the preset name:", "Save FX Preset", juce::Point<int>{},
             [this](const std::string &s) {
                 this->storage->fxUserPreset->saveFxIn(this->storage, fx, s);
+                /*
+                // TODO: queueRebuildUI() nukes the okCancelProvider() box so remove this later
                 auto *sge = firstListenerOfType<SurgeGUIEditor>();
                 if (sge)
                     sge->queueRebuildUI();
+                */
             },
             this);
     }
 }
+
+//////////
+
+Surge::FxClipboard::ChainClipboard FxMenu::fxChainClipboard;
+
+void FxMenu::copyChain()
+{
+    auto sge = firstListenerOfType<SurgeGUIEditor>();
+
+    if (!sge)
+        return;
+
+    FxStorage *slots[n_fx_per_chain];
+    FxStorage *bufs[n_fx_per_chain];
+    std::string names[n_fx_per_chain];
+
+    buildChainSlotPtrs(sge, current_fx, slots, bufs, names);
+
+    Surge::FxClipboard::copyFxChain(storage, slots, names, fxChainClipboard);
+}
+
+void FxMenu::pasteChain()
+{
+    auto sge = firstListenerOfType<SurgeGUIEditor>();
+
+    if (!sge)
+        return;
+
+    FxStorage *slots[n_fx_per_chain];
+    FxStorage *bufs[n_fx_per_chain];
+    std::string names[n_fx_per_chain];
+
+    buildChainSlotPtrs(sge, current_fx, slots, bufs, names);
+
+    Surge::FxClipboard::pasteFxChain(storage, bufs, fxChainClipboard);
+
+    storage->getPatch().isDirty = true;
+    sge->queueRebuildUI();
+}
+
+void FxMenu::saveChain()
+{
+    auto sge = firstListenerOfType<SurgeGUIEditor>();
+
+    if (!sge)
+        return;
+
+    FxStorage *slots[n_fx_per_chain];
+    FxStorage *bufs[n_fx_per_chain];
+    std::string names[n_fx_per_chain];
+
+    buildChainSlotPtrs(sge, current_fx, slots, bufs, names);
+
+    sge->promptForMiniEdit(
+        "", "Enter the FX chain name:", "Save FX Chain", juce::Point<int>{},
+        [this, sge, slots, names](const std::string &presetName) {
+            // Build SlotData array from live FxStorage + selectedName
+            Surge::Storage::FxChainUserPreset::Preset::SlotData sd[n_fx_per_chain];
+
+            for (int i = 0; i < n_fx_per_chain; ++i)
+            {
+                FxStorage *fx = slots[i];
+                sd[i].type = fx->type.val.i;
+                sd[i].presetName = names[i];
+
+                for (int p = 0; p < n_fx_params; ++p)
+                {
+                    switch (fx->p[p].valtype)
+                    {
+                    case vt_float:
+                        sd[i].p[p] = fx->p[p].val.f;
+                        break;
+                    case vt_int:
+                        sd[i].p[p] = (float)fx->p[p].val.i;
+                        break;
+                    default:
+                        break;
+                    }
+
+                    sd[i].ts[p] = fx->p[p].can_temposync() && fx->p[p].temposync;
+                    sd[i].er[p] = fx->p[p].can_extend_range() && fx->p[p].extend_range;
+                    sd[i].da[p] = fx->p[p].can_deactivate() && fx->p[p].deactivated;
+                    sd[i].dt[p] = fx->p[p].has_deformoptions() ? fx->p[p].deform_type : -1;
+                }
+
+                if (fx->user_data.contains("filename"))
+                    sd[i].filename = fx->by_key("filename").to_string();
+            }
+
+            storage->fxChainUserPreset->saveChainPresetIn(storage, sd, presetName);
+        },
+        this);
+}
+
+//////////
 
 void FxMenu::loadUserPreset(const Surge::Storage::FxUserPreset::Preset &p)
 {
@@ -934,6 +1175,8 @@ void FxMenu::scanExtraPresets()
             auto alit = allPresets.begin();
             while (alit->itemType != tp.first && alit != allPresets.end())
                 alit++;
+            if (alit == allPresets.end())
+                continue;
             std::vector<std::string> rootPath;
             rootPath.push_back(alit->pathElements[0]);
 
@@ -966,10 +1209,10 @@ void FxMenu::scanExtraPresets()
     {
         // really nothing to do about this other than continue without the preset
         std::ostringstream oss;
-        oss << "Experienced file system error when scanning user FX. " << e.what();
+        oss << "Experienced file system error when scanning user FX presets!\n\n" << e.what();
 
         if (storage)
-            storage->reportError(oss.str(), "FileSystem Error");
+            storage->reportError(oss.str(), "Filesystem Error");
     }
 }
 

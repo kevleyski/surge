@@ -4,7 +4,7 @@
  *
  * Learn more at https://surge-synthesizer.github.io/
  *
- * Copyright 2018-2023, various authors, as described in the GitHub
+ * Copyright 2018-2024, various authors, as described in the GitHub
  * transaction log.
  *
  * Surge XT is released under the GNU General Public Licence v3
@@ -282,13 +282,8 @@ void AirWindowsEffect::process(float *dataL, float *dataR)
 void AirWindowsEffect::setupSubFX(int sfx, bool useStreamedValues)
 {
     const auto &r = fxreg[sfx];
-
-    bool detailedMode = false;
-    if (storage)
-        detailedMode =
-            Surge::Storage::getUserDefaultValue(storage, Surge::Storage::HighPrecisionReadouts, 0);
-
-    int dp = (detailedMode ? 6 : 2);
+    const bool detailedMode = Surge::Storage::getValueDisplayIsHighPrecision(storage);
+    int dp = detailedMode ? 6 : 2;
 
     airwin = r.create(r.id, storage->dsamplerate, dp); // FIXME
     airwin->storage = storage;

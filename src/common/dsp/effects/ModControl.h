@@ -4,7 +4,7 @@
  *
  * Learn more at https://surge-synthesizer.github.io/
  *
- * Copyright 2018-2023, various authors, as described in the GitHub
+ * Copyright 2018-2024, various authors, as described in the GitHub
  * transaction log.
  *
  * Surge XT is released under the GNU General Public Licence v3
@@ -31,7 +31,8 @@
 // to the sst-effects
 namespace Surge
 {
-using ModControl = sst::basic_blocks::modulators::FXModControl<BLOCK_SIZE>;
+using ModControl = sst::basic_blocks::modulators::FXModControl<
+    BLOCK_SIZE, sst::basic_blocks::modulators::RandomBehavior::rnd_single>;
 } // namespace Surge
 
 #endif // SURGE_SRC_COMMON_DSP_EFFECTS_MODCONTROL_H

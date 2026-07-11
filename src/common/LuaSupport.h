@@ -4,7 +4,7 @@
  *
  * Learn more at https://surge-synthesizer.github.io/
  *
- * Copyright 2018-2023, various authors, as described in the GitHub
+ * Copyright 2018-2024, various authors, as described in the GitHub
  * transaction log.
  *
  * Surge XT is released under the GNU General Public Licence v3
@@ -29,22 +29,22 @@
 #ifndef SURGE_SRC_COMMON_LUASUPPORT_H
 #define SURGE_SRC_COMMON_LUASUPPORT_H
 
-#include <string>
-#include <vector>
-
 #if HAS_LUA
 extern "C"
 {
-#include "lua.h"
-#include "lauxlib.h"
-#include "lualib.h"
-#include "luajit.h"
+#include <lua.h>
+#include <lauxlib.h>
+#include <lualib.h>
 
-#include "lj_arch.h"
+#include <pffft.h>
 }
 #else
 typedef int lua_State;
 #endif
+
+#include <cstdint>
+#include <string>
+#include <vector>
 
 namespace Surge
 {
@@ -59,7 +59,7 @@ namespace LuaSupport
  * stack by 1.
  */
 
-bool parseStringDefiningFunction(lua_State *s, const std::string &definition,
+bool parseStringDefiningFunction(lua_State *L, const std::string &definition,
                                  const std::string &functionName, std::string &errorMessage);
 
 /*
@@ -72,8 +72,8 @@ bool parseStringDefiningFunction(lua_State *s, const std::string &definition,
  * the number which were nil. If the function returns 0 errorMessage will be populated
  * with something.
  */
-int parseStringDefiningMultipleFunctions(lua_State *s, const std::string &definition,
-                                         const std::vector<std::string> functions,
+int parseStringDefiningMultipleFunctions(lua_State *L, const std::string &definition,
+                                         const std::vector<std::string> &functions,
                                          std::string &errorMessage);
 
 /*
@@ -82,18 +82,48 @@ int parseStringDefiningMultipleFunctions(lua_State *s, const std::string &defini
  * surge environment (math imported, most things stripped, add
  * our C++ functions, etc...)
  */
-bool setSurgeFunctionEnvironment(lua_State *s);
+bool setSurgeFunctionEnvironment(lua_State *s, uint64_t features);
 
 /*
- * Call this function with a LUA state and it will introduce the global
- * 'surge' which is the surge prelude
+ * Call this function with a LUA state, the std::string at Surge::LuaSources and it will load the
+ * prelude in the table "surge"
  */
-bool loadSurgePrelude(lua_State *s);
+bool loadSurgePrelude(lua_State *s, const std::string &lua_script);
 
 /*
- * Call this function to get a string representation of the prelude
+ * Call this function to get a string representation of the Formula prelude
  */
-std::string getSurgePrelude();
+std::string getFormulaPrelude();
+
+/*
+ * Call this function to get a string representation of the WTSE prelude
+ */
+std::string getWTSEPrelude();
+
+/*
+ * Flags representing optional features that can be enabled in the Lua sandbox environment
+ */
+enum EnvironmentFeatures : uint64_t
+{
+    BASE = 0,
+    HAS_FFT = 1 << 1
+};
+
+/*
+ * Additional enum classes for PFFFT, since we're not using the library on ARM64EC it lacks the
+ * included definitions
+ */
+enum class FFTDirection
+{
+    Forward,
+    Backward
+};
+
+enum class FFTTransform
+{
+    Real,
+    Complex
+};
 
 /*
  * A little leak debugger. Make this on your stack and if you exit the
@@ -117,7 +147,14 @@ struct SGLD
     lua_State *L;
     int top;
 };
+
+/*
+ * Global table names
+ */
+static constexpr const char *surgeTableName{"surge"};
+static constexpr const char *sharedTableName{"shared"};
+
 } // namespace LuaSupport
 } // namespace Surge
 
-#endif // SURGE_XT_LUASUPPORT_H
+#endif // SURGE_SRC_COMMON_LUASUPPORT_H

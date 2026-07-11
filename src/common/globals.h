@@ -4,7 +4,7 @@
  *
  * Learn more at https://surge-synthesizer.github.io/
  *
- * Copyright 2018-2023, various authors, as described in the GitHub
+ * Copyright 2018-2024, various authors, as described in the GitHub
  * transaction log.
  *
  * Surge XT is released under the GNU General Public Licence v3
@@ -29,35 +29,9 @@
 #include <algorithm>
 #include <string>
 
-// if you hit this on msvc and pass the above, you probably need /Zc:__cplusplus
-static_assert(__cplusplus == 201703L, "Surge requires C++17; please update your build");
+#include <cmath>
 
-#if MAC
-
-#if defined(__x86_64__)
-#else
-#define ARM_NEON 1
-#endif
-
-#endif
-
-#if LINUX
-#if defined(__aarch64__) || defined(__arm__)
-#define ARM_NEON 1
-#endif
-#endif
-
-#if defined(__SSE2__) || defined(_M_AMD64) || defined(_M_X64) ||                                   \
-    (defined(_M_IX86_FP) && _M_IX86_FP >= 2)
-#include <emmintrin.h>
-#else
-#if defined(__arm__) || defined(__aarch64__) || defined(__riscv)
-#define SIMDE_ENABLE_NATIVE_ALIASES
-#include "simde/x86/sse2.h"
-#else
-#error Surge XT requires either X86/SSE2 or ARM architectures.
-#endif
-#endif
+#include "sst/basic-blocks/simd/setup.h"
 
 #if MAC || LINUX
 #include <strings.h>
@@ -70,10 +44,6 @@ static inline int _stricmp(const char *s1, const char *s2) { return strcasecmp(s
 
 #if !defined(SURGE_COMPILE_BLOCK_SIZE)
 #error You must compile with -DSURGE_COMPILE_BLOCK_SIZE=32 (or whatnot)
-#endif
-
-#ifndef SURGE_HAS_OSC
-#define SURGE_HAS_OSC 1
 #endif
 
 const int BASE_WINDOW_SIZE_X = 913;
@@ -98,6 +68,7 @@ const int N_INPUTS = 2;
 const int DEFAULT_POLYLIMIT = 16;
 
 const int DEFAULT_OSC_PORT_IN = 53280;
-const int DEFAULT_OSC_PORT_OUT = 53281;
-const std::string DEFAULT_OSC_IPADDR_OUT = "127.0.0.1";
+const int DEFAULT_OSC_PORT_OUT = 53270; // Out port outside the range of in ports we try binding to
+const int OSC_IN_PORT_SCAN_RANGE = 100; // Number of ports to try binding to
+const inline std::string DEFAULT_OSC_IPADDR_OUT = "127.0.0.1";
 #endif // SURGE_SRC_COMMON_GLOBALS_H

@@ -4,7 +4,7 @@
  *
  * Learn more at https://surge-synthesizer.github.io/
  *
- * Copyright 2018-2023, various authors, as described in the GitHub
+ * Copyright 2018-2024, various authors, as described in the GitHub
  * transaction log.
  *
  * Surge XT is released under the GNU General Public Licence v3
@@ -51,7 +51,7 @@ struct XMLMenuPopulator
     virtual Surge::GUI::IComponentTagValue::Listener *getControlListener() = 0;
 
     virtual void populate();
-    virtual void loadSnapshot(int type, TiXmlElement *e, int idx){};
+    virtual void loadSnapshot(int type, TiXmlElement *e, int idx) {}
 
     SurgeStorage *storage{nullptr};
     void setStorage(SurgeStorage *s) { storage = s; }
@@ -231,13 +231,20 @@ struct FxMenu : public juce::Component, public XMLMenuPopulator, public WidgetBa
     void setFxStorage(FxStorage *s);
     void setFxBuffer(FxStorage *s) { fxbuffer = s; }
 
-    int current_fx;
+    int current_fx{0};
     void setCurrentFx(int i) { current_fx = i; }
 
     static Surge::FxClipboard::Clipboard fxClipboard;
+
     void copyFX();
     void pasteFX();
     void saveFX();
+
+    static Surge::FxClipboard::ChainClipboard fxChainClipboard;
+
+    void copyChain();
+    void pasteChain();
+    void saveChain();
 
     void loadByIndex(const std::string &name, int index) override;
     void loadUserPreset(const Surge::Storage::FxUserPreset::Preset &p);

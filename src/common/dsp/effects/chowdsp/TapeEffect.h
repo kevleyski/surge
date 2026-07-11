@@ -4,7 +4,7 @@
  *
  * Learn more at https://surge-synthesizer.github.io/
  *
- * Copyright 2018-2023, various authors, as described in the GitHub
+ * Copyright 2018-2024, various authors, as described in the GitHub
  * transaction log.
  *
  * Surge XT is released under the GNU General Public Licence v3
@@ -74,6 +74,7 @@ class TapeEffect : public Effect
     virtual const char *get_effectname() override { return "Tape"; }
 
     virtual void init() override;
+    virtual void sampleRateReset() override;
     virtual void process(float *dataL, float *dataR) override;
     virtual void suspend() override;
     virtual int get_ringout_decay() override { return -1; };

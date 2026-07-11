@@ -4,7 +4,7 @@
  *
  * Learn more at https://surge-synthesizer.github.io/
  *
- * Copyright 2018-2023, various authors, as described in the GitHub
+ * Copyright 2018-2024, various authors, as described in the GitHub
  * transaction log.
  *
  * Surge XT is released under the GNU General Public Licence v3
@@ -50,9 +50,11 @@ struct binary : pegtl::seq<expression, pegtl::plus<pegtl::space>, bin_op, pegtl:
 
 struct author : TAO_PEGTL_STRING( "AUTHOR" ) {};
 struct category : TAO_PEGTL_STRING( "CATEGORY" ) {};
+struct favorites : TAO_PEGTL_STRING( "FAVORITES" ) {};
 struct auth : TAO_PEGTL_STRING( "AUTH" ) {};
 struct cat : TAO_PEGTL_STRING( "CAT" ) {};
-struct subsearch_keyword : pegtl::sor<author, category, auth, cat> {};
+struct fav : TAO_PEGTL_STRING( "FAV" ) {};
+struct subsearch_keyword : pegtl::sor<author, category, favorites, auth, cat, fav> {};
 
 struct subsearch : pegtl::seq< subsearch_keyword, pegtl::one< '=' >, value >{};
 

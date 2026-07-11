@@ -4,7 +4,7 @@
  *
  * Learn more at https://surge-synthesizer.github.io/
  *
- * Copyright 2018-2023, various authors, as described in the GitHub
+ * Copyright 2018-2024, various authors, as described in the GitHub
  * transaction log.
  *
  * Surge XT is released under the GNU General Public Licence v3
@@ -35,8 +35,7 @@ class SurgeGUIEditor;
 class SurgeJUCELookAndFeel;
 
 //==============================================================================
-/**
- */
+
 class SurgeSynthEditor : public juce::AudioProcessorEditor,
                          public juce::AsyncUpdater,
                          public juce::FileDragAndDropTarget,
@@ -91,23 +90,29 @@ class SurgeSynthEditor : public juce::AudioProcessorEditor,
         void timerCallback() override;
         SurgeSynthEditor *ed;
     };
-    void idle();
-    std::unique_ptr<IdleTimer> idleTimer;
 
+    void idle();
+
+    std::unique_ptr<IdleTimer> idleTimer;
     bool drawExtendedControls{false};
     int midiKeyboardOctave{5};
     float midiKeyboardVelocity{127.f / 127.f}; // see issue #6409
-    void setPitchModSustainGUI(int pitch, int mod, int sus);
+
+    bool fireListenersOnEndEdit{true};
+
     std::unique_ptr<juce::Component> pitchwheel, modwheel, suspedal;
     std::unique_ptr<juce::MidiKeyboardComponent> keyboard;
     std::unique_ptr<juce::Label> tempoLabel, sustainLabel;
     std::unique_ptr<juce::TextEditor> tempoTypein;
-
     std::unique_ptr<juce::Component> topLevelContainer;
+
+    void setPitchModSustainGUI(int pitch, int mod, int sus);
 
     /* Drag and drop */
     bool isInterestedInFileDrag(const juce::StringArray &files) override;
     void filesDropped(const juce::StringArray &files, int, int) override;
+
+    juce::PopupMenu modifyHostMenu(juce::PopupMenu menu);
 
     juce::PopupMenu hostMenuFor(Parameter *p);
     juce::PopupMenu hostMenuForMacro(int macro);
@@ -117,27 +122,28 @@ class SurgeSynthEditor : public juce::AudioProcessorEditor,
     // clang-format off
     std::forward_list<std::pair<std::string, std::vector<int>>> vkbLayouts =
     {
-        {"QWERTY",          {'a', 'w', 's', 'e', 'd', 'f', 't', 'g', 'y', 'h', 'u', 'j', 'k', 'o', 'l', 'p', 186, 219, 222, 221}},
-        {"QWERTZ (German)", {'a', 'w', 's', 'e', 'd', 'f', 't', 'g', 'z', 'h', 'u', 'j', 'k', 'o', 'l', 'p', 192, 186, 222, 187, 191}},
-        {"QWERTZ (Slavic)", {'a', 'w', 's', 'e', 'd', 'f', 't', 'g', 'z', 'h', 'u', 'j', 'k', 'o', 'l', 'p', 186, 219, 222, 221, 220}},
-        {"AZERTY",          {'q', 'z', 's', 'e', 'd', 'f', 't', 'g', 'y', 'h', 'u', 'j', 'k', 'o', 'l', 'p', 'm'}},
-        {"Dvorak",          {'a', ',', 'o', '.', 'e', 'u', 'y', 'i', 'f', 'd', 'g', 'h', 't', 'r', 'n', 'l', 's', 191, 189, 187}},
-        {"Colemak",         {'a', 'w', 'r', 'f', 's', 't', 'g', 'd', 'j', 'h', 'l', 'n', 'e', 'y', 'i', 186, 'o', 219, 222, 221}},
-        {"Workman",         {'a', 'd', 's', 'r', 'h', 't', 'b', 'g', 'j', 'y', 'f', 'n', 'e', 'p', 'o', 186, 'i', 219, 222, 221}}
+        {"QWERTY",            {'a', 'w', 's', 'e', 'd', 'f', 't', 'g', 'y', 'h', 'u', 'j', 'k', 'o', 'l', 'p', 186, 219, 222, 221}},
+        {"QWERTY (2 Octave)", {'z', 's', 'x', 'd', 'c', 'v', 'g', 'b', 'h', 'n', 'j', 'm', 'q', '2', 'w', '3', 'e', 'r', '5', 't', '6', 'y', '7', 'u', 'i', '9', 'o', '0', 'p', 219, 187, 221}},
+        {"QWERTZ (German)",   {'a', 'w', 's', 'e', 'd', 'f', 't', 'g', 'z', 'h', 'u', 'j', 'k', 'o', 'l', 'p', 192, 186, 222, 187, 191}},
+        {"QWERTZ (Slavic)",   {'a', 'w', 's', 'e', 'd', 'f', 't', 'g', 'z', 'h', 'u', 'j', 'k', 'o', 'l', 'p', 186, 219, 222, 221, 220}},
+        {"AZERTY",            {'q', 'z', 's', 'e', 'd', 'f', 't', 'g', 'y', 'h', 'u', 'j', 'k', 'o', 'l', 'p', 'm'}},
+        {"Dvorak",            {'a', ',', 'o', '.', 'e', 'u', 'y', 'i', 'f', 'd', 'g', 'h', 't', 'r', 'n', 'l', 's', 191, 189, 187}},
+        {"Colemak",           {'a', 'w', 'r', 'f', 's', 't', 'g', 'd', 'j', 'h', 'l', 'n', 'e', 'y', 'i', 186, 'o', 219, 222, 221}},
+        {"Workman",           {'a', 'd', 's', 'r', 'h', 't', 'b', 'g', 'j', 'y', 'f', 'n', 'e', 'p', 'o', 186, 'i', 219, 222, 221}},
     };
     // clang-format on
+
     std::string currentVKBLayout;
 
     std::shared_ptr<SurgeJUCELookAndFeel> surgeLF;
     SurgeJUCELookAndFeel *getSurgeLookAndFeel() { return surgeLF.get(); }
 
-  private:
     // This reference is provided as a quick way for your editor to
     // access the processor object that created it.
     SurgeSynthProcessor &processor;
 
+  private:
     std::unique_ptr<SurgeGUIEditor> sge;
-    std::unique_ptr<juce::Drawable> logo;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(SurgeSynthEditor)
 };
@@ -156,7 +162,7 @@ struct SurgeSynthStartupErrorEditor : juce::AudioProcessorEditor
 
         g.setFont(40);
         auto lb = getLocalBounds().withHeight(50).translated(0, 100);
-        g.drawText("Fatal Surge Startup Error", lb, juce::Justification::centred);
+        g.drawText("Fatal Surge XT Startup Error", lb, juce::Justification::centred);
 
         g.setColour(juce::Colours::white);
         g.setFont(20);
@@ -165,9 +171,99 @@ struct SurgeSynthStartupErrorEditor : juce::AudioProcessorEditor
         lb = lb.translated(0, 125);
         g.drawText(Surge::Build::FullVersionStr, lb, juce::Justification::centred);
         lb = lb.translated(0, 25);
-        g.drawText("Report on Surge discord or github issue with a screenshot of this screen", lb,
-                   juce::Justification::centred);
+        g.drawText(
+            "Report issue on Surge Synth Team Discord or GitHub with a screenshot of this screen",
+            lb, juce::Justification::centred);
     }
+};
+
+//==============================================================================
+
+struct SurgeVirtualKeyboard : public juce::MidiKeyboardComponent
+{
+    SurgeVirtualKeyboard(SurgeSynthEditor *e, juce::MidiKeyboardState &state,
+                         Orientation orientation)
+        : editor(e), juce::MidiKeyboardComponent(state, orientation), keyboardState(state),
+          onVelocityChanged([](float) {})
+    {
+    }
+
+    ~SurgeVirtualKeyboard();
+
+    std::function<void(float)> onVelocityChanged;
+
+    // When true, clicking on the keyboard sets the overall velocity of the vkb
+    // When false (default), vkb velocity is not linked to click position
+    bool useClickPositionForOverallVelocity{false};
+
+    void toggleClickVelocityMode()
+    {
+        useClickPositionForOverallVelocity = !useClickPositionForOverallVelocity;
+    }
+
+    void clearAllLatches()
+    {
+        for (auto note : latchedNotes)
+        {
+            keyboardState.noteOff(getMidiChannel(), note, 0.0f);
+        }
+
+        latchedNotes.clear();
+    }
+
+    bool mouseDownOnKey(int midiNoteNumber, const juce::MouseEvent &e) override
+    {
+        if (useClickPositionForOverallVelocity)
+        {
+            float v = std::clamp(getNoteAndVelocityAtPosition(e.position).velocity, 0.0f, 1.0f);
+            setVelocity(v, false);
+            onVelocityChanged(v);
+        }
+
+        // right-click will latch keys!
+        if (e.mods.isPopupMenu())
+        {
+            if (latchedNotes.count(midiNoteNumber))
+            {
+                latchedNotes.erase(midiNoteNumber);
+                keyboardState.noteOff(getMidiChannel(), midiNoteNumber, 0.0f);
+            }
+            else
+            {
+                latchedNotes.insert(midiNoteNumber);
+                keyboardState.noteOn(getMidiChannel(), midiNoteNumber, getCurrentVelocity());
+            }
+
+            return false;
+        }
+
+        if (latchedNotes.count(midiNoteNumber))
+        {
+            latchedNotes.erase(midiNoteNumber);
+            keyboardState.noteOff(getMidiChannel(), midiNoteNumber, 0.0f);
+
+            return false;
+        }
+
+        return juce::MidiKeyboardComponent::mouseDownOnKey(midiNoteNumber, e);
+    }
+
+    bool mouseDraggedToKey(int midiNoteNumber, const juce::MouseEvent &e) override
+    {
+        if (e.mods.isPopupMenu())
+        {
+            return false;
+        }
+
+        return juce::MidiKeyboardComponent::mouseDraggedToKey(midiNoteNumber, e);
+    }
+
+  private:
+    juce::MidiKeyboardState &keyboardState;
+    std::set<int> latchedNotes;
+    SurgeSynthEditor *editor{nullptr};
+
+    float getCurrentVelocity() const;
 };
 
 #endif // SURGE_SRC_SURGE_XT_SURGESYNTHEDITOR_H

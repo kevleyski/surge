@@ -4,7 +4,7 @@
  *
  * Learn more at https://surge-synthesizer.github.io/
  *
- * Copyright 2018-2023, various authors, as described in the GitHub
+ * Copyright 2018-2024, various authors, as described in the GitHub
  * transaction log.
  *
  * Surge XT is released under the GNU General Public Licence v3
@@ -21,6 +21,7 @@
  */
 
 #include "TypeAheadTextEditor.h"
+#include "SurgeGUIUtils.h"
 #include "MainFrame.h"
 #include "AccessibleHelpers.h"
 
@@ -52,10 +53,14 @@ struct TypeAheadListBoxModel : public juce::ListBoxModel
     TypeAheadDataProvider *provider;
     std::vector<int> search;
     TypeAhead *ta{nullptr};
+    int rowIsMouseOver = 0;
+
     TypeAheadListBoxModel(TypeAhead *t, TypeAheadDataProvider *p) : ta(t), provider(p) {}
 
     void setSearch(const std::string &t) { search = provider->searchFor(t); }
     int getNumRows() override { return search.size(); }
+
+    int isRowMouseOver(int row) { return rowIsMouseOver == row; };
 
     void paintListBoxItem(int rowNumber, juce::Graphics &g, int width, int height,
                           bool rowIsSelected) override
@@ -109,6 +114,8 @@ struct TypeAheadListBoxModel : public juce::ListBoxModel
     {
         int row{0};
         bool isSelected{false};
+        bool isMouseOver{false};
+
         TypeAheadListBoxModel *model{nullptr};
         TARow(TypeAheadListBoxModel *m) : model(m) { setWantsKeyboardFocus(true); }
 
@@ -153,6 +160,20 @@ struct TypeAheadListBoxModel : public juce::ListBoxModel
 
         void mouseDown(const juce::MouseEvent &e) override { model->returnKeyPressed(row); }
 
+        void mouseEnter(const juce::MouseEvent &event) override
+        {
+            isMouseOver = true;
+            model->rowIsMouseOver = row;
+            repaint();
+        }
+
+        void mouseExit(const juce::MouseEvent &event) override
+        {
+            model->rowIsMouseOver = -1;
+            isMouseOver = false;
+            repaint();
+        }
+
         void mouseDoubleClick(const juce::MouseEvent &e) override { model->escapeKeyPressed(); }
 
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(TARow);
@@ -161,7 +182,9 @@ struct TypeAheadListBoxModel : public juce::ListBoxModel
     void selectedRowsChanged(int lastRowSelected) override
     {
         if (lastRowSelected >= 0 && lastRowSelected < search.size())
+        {
             ta->updateSelected(search[lastRowSelected]);
+        }
     }
 
     juce::Component *refreshComponentForRow(int rowNumber, bool isRowSelected,
@@ -204,9 +227,10 @@ struct TypeAheadListBox : public juce::ListBox
 
     void paintOverChildren(juce::Graphics &graphics) override
     {
+
         juce::ListBox::paintOverChildren(graphics);
 
-        if (auto m = dynamic_cast<TypeAheadListBoxModel *>(getModel()))
+        if (auto m = dynamic_cast<TypeAheadListBoxModel *>(getListBoxModel()))
         {
             m->provider->paintOverChildren(graphics,
                                            getLocalBounds().reduced(getOutlineThickness()));
@@ -217,7 +241,7 @@ struct TypeAheadListBox : public juce::ListBox
     {
         if (press.isKeyCode(juce::KeyPress::escapeKey))
         {
-            if (auto m = dynamic_cast<TypeAheadListBoxModel *>(getModel()))
+            if (auto m = dynamic_cast<TypeAheadListBoxModel *>(getListBoxModel()))
             {
                 m->escapeKeyPressed();
 
@@ -230,7 +254,7 @@ struct TypeAheadListBox : public juce::ListBox
 
     void focusLost(FocusChangeType cause) override
     {
-        if (auto m = dynamic_cast<TypeAheadListBoxModel *>(getModel()))
+        if (auto m = dynamic_cast<TypeAheadListBoxModel *>(getListBoxModel()))
         {
             m->ta->focusLost(cause);
         }
@@ -250,9 +274,13 @@ TypeAhead::TypeAhead(const std::string &l, TypeAheadDataProvider *p)
     setColour(ColourIds::borderid, juce::Colours::black);
     setColour(ColourIds::emptyBackgroundId, juce::Colours::white);
     fixupJuceTextEditorAccessibility(*this);
+
+    lastSelectedRow.clear();
 }
 
 TypeAhead::~TypeAhead() = default;
+
+bool TypeAhead::isRowMouseOver(int row) { return lboxmodel->rowIsMouseOver == row; }
 
 void TypeAhead::dismissWithValue(int providerIdx, const std::string &s,
                                  const juce::ModifierKeys &mod)
@@ -267,16 +295,18 @@ void TypeAhead::dismissWithValue(int providerIdx, const std::string &s,
 
     if (doDismiss)
     {
+        lastSelectedRow = lbox->getSelectedRows();
         lbox->setVisible(false);
 
         if (isVisible())
         {
-            grabKeyboardFocus();
+            Surge::GUI::grabKeyboardFocusIfAllowed(this);
         }
     }
 
     lbox->selectRow(providerIdx);
     lbox->repaint();
+
     for (auto l : taList)
     {
         l->itemSelected(providerIdx);
@@ -288,7 +318,7 @@ void TypeAhead::dismissWithoutValue()
     lbox->setVisible(false);
 
     if (isShowing())
-        grabKeyboardFocus();
+        Surge::GUI::grabKeyboardFocusIfAllowed(this);
 
     for (auto l : taList)
     {
@@ -300,7 +330,9 @@ void TypeAhead::updateSelected(int providerIdx)
 {
     for (auto l : taList)
     {
+        lastSelectedRow = lbox->getSelectedRows();
         l->itemFocused(providerIdx);
+        l->itemSelected(providerIdx);
     }
 }
 
@@ -352,17 +384,19 @@ void TypeAhead::parentHierarchyChanged()
     }
 }
 
-void TypeAhead::searchAndShowLBox()
+void TypeAhead::searchAndShowListBox()
 {
     lboxmodel->setSearch(getText().toStdString());
 
-    showLbox();
+    showListBox();
 
     lbox->updateContent();
     lbox->repaint();
 }
 
-void TypeAhead::showLbox()
+void TypeAhead::closeListBox() { lbox->setVisible(false); }
+
+void TypeAhead::showListBox()
 {
     auto p = getParentComponent();
 
@@ -375,7 +409,7 @@ void TypeAhead::showLbox()
         getLocalBounds()
             .translated(0, getHeight())
             .withHeight(
-                lboxmodel->provider->getRowHeight() * lboxmodel->provider->getDisplayedRows() + 4);
+                lboxmodel->provider->getRowHeight() * lboxmodel->provider->getDisplayedRows() + 2);
 
     if (p)
     {
@@ -390,34 +424,58 @@ void TypeAhead::textEditorTextChanged(TextEditor &editor)
 {
     lastSearch = editor.getText().toStdString();
     lboxmodel->setSearch(editor.getText().toStdString());
+    lastSelectedRow.clear();
 
     if (!lbox->isVisible())
     {
-        showLbox();
+        showListBox();
     }
 
+    lbox->setSelectedRows(lastSelectedRow);
     lbox->updateContent();
     lbox->repaint();
 }
 
 bool TypeAhead::keyPressed(const juce::KeyPress &press)
 {
-    if (press.isKeyCode(juce::KeyPress::downKey))
+    using kp = juce::KeyPress;
+
+    const int key = press.isKeyCode(kp::downKey) ? 1 : press.isKeyCode(kp::upKey) ? -1 : 0;
+
+    if (key != 0)
     {
         if (!lbox->isVisible())
         {
             lastSearch = "";
             lboxmodel->setSearch("");
-            showLbox();
+            showListBox();
 
             lbox->updateContent();
             lbox->repaint();
         }
 
-        juce::SparseSet<int> r;
-        r.addRange({0, 1});
-        lbox->setSelectedRows(r);
-        lbox->grabKeyboardFocus();
+        const auto numRows = lboxmodel->getNumRows();
+
+        // if we're opening a new search, select the first entry when pressing the up or down arrow
+        if (lbox->getSelectedRows().isEmpty())
+        {
+            lastSelectedRow.clear();
+            lastSelectedRow.addRange({0, 1});
+
+            lbox->setSelectedRows(lastSelectedRow);
+        }
+        else // select previous or next entry based on last selected row
+        {
+            auto nextRowIdx =
+                std::clamp(lastSelectedRow.getRange(0).getStart() + key, 0, numRows - 1);
+
+            lastSelectedRow.clear();
+            lastSelectedRow.addRange({nextRowIdx, nextRowIdx + 1});
+
+            lbox->setSelectedRows(lastSelectedRow);
+        }
+
+        Surge::GUI::grabKeyboardFocusIfAllowed(lbox.get());
 
         return true;
     }
@@ -451,12 +509,14 @@ void TypeAhead::focusLost(juce::Component::FocusChangeType type)
         return;
     }
 
-    lbox->setVisible(false);
+    closeListBox();
 
     for (auto l : taList)
     {
         l->typeaheadCanceled();
     }
+
+    setHighlightedRegion(juce::Range(-1, -1));
 }
 } // namespace Widgets
 } // namespace Surge

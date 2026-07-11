@@ -4,7 +4,7 @@
  *
  * Learn more at https://surge-synthesizer.github.io/
  *
- * Copyright 2018-2023, various authors, as described in the GitHub
+ * Copyright 2018-2024, various authors, as described in the GitHub
  * transaction log.
  *
  * Surge XT is released under the GNU General Public Licence v3
@@ -26,11 +26,10 @@
 #include "SurgeStorage.h"
 
 #include "sst/basic-blocks/mechanics/endian-ops.h"
-namespace mech = sst::basic_blocks::mechanics;
 
-#if WINDOWS
-#include <intrin.h>
-#endif
+#include <bit>
+
+namespace mech = sst::basic_blocks::mechanics;
 
 using namespace std;
 
@@ -60,14 +59,6 @@ const int HRFilterI16[64] = {
     -66, -240, 95,    143,   -92,  -74,   72,    31,   -48,   -8,    33,   1};
 
 int min_F32_tables = 3;
-
-#if MAC || LINUX
-bool _BitScanReverse(unsigned int *result, unsigned int bits)
-{
-    *result = __builtin_ctz(bits);
-    return true;
-}
-#endif
 
 //! Calculate the worst-case scenario of the needed samples for a specific wavetable and see if it
 //! fits
@@ -182,6 +173,16 @@ bool Wavetable::BuildWT(void *wdata, wt_header &wh, bool AppendSilence)
     n_tables = mech::endian_read_int16LE(wh.n_tables);
     size = mech::endian_read_int32LE(wh.n_samples);
 
+    // Reject malformed/oversized headers before writing into the fixed-size
+    // TableF32WeakPointers[max_mipmap_levels][max_subtables] arrays; otherwise a
+    // bogus frame or sample count is an out-of-bounds write. The false return is
+    // surfaced as a load error by load_wt_wt / load_wt_wt_mem.
+    if (size <= 0 || size > max_wtable_size ||
+        n_tables + (AppendSilence ? 3u : 0u) > (unsigned)max_subtables)
+    {
+        return false;
+    }
+
     size_t req_size = RequiredWTSize(size, n_tables);
 
     if (req_size > dataSizes)
@@ -196,15 +197,7 @@ bool Wavetable::BuildWT(void *wdata, wt_header &wh, bool AppendSilence)
         n_tables += 3; // this "3" should match the "3" in RequiredWTSize
     }
 
-#if WINDOWS
-    unsigned long MSBpos;
-    _BitScanReverse(&MSBpos, size);
-#else
-    unsigned int MSBpos;
-    _BitScanReverse(&MSBpos, size);
-#endif
-
-    size_po2 = MSBpos;
+    size_po2 = std::bit_width(static_cast<unsigned int>(size)) - 1;
 
     dt = 1.0f / size;
 
@@ -247,11 +240,14 @@ bool Wavetable::BuildWT(void *wdata, wt_header &wh, bool AppendSilence)
                                        &((short *)wdata)[this->size * j], this->size);
             if (this->flags & wtf_int16_is_16)
             {
-                i16toi15_block(&this->TableI16WeakPointers[0][j][FIRoffsetI16],
-                               &this->TableI16WeakPointers[0][j][FIRoffsetI16], this->size);
+                i162float_block(&this->TableI16WeakPointers[0][j][FIRoffsetI16],
+                                this->TableF32WeakPointers[0][j], this->size);
             }
-            i152float_block(&this->TableI16WeakPointers[0][j][FIRoffsetI16],
-                            this->TableF32WeakPointers[0][j], this->size);
+            else
+            {
+                i152float_block(&this->TableI16WeakPointers[0][j][FIRoffsetI16],
+                                this->TableF32WeakPointers[0][j], this->size);
+            }
         }
     }
     else

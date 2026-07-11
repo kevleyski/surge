@@ -4,7 +4,7 @@
  *
  * Learn more at https://surge-synthesizer.github.io/
  *
- * Copyright 2018-2023, various authors, as described in the GitHub
+ * Copyright 2018-2024, various authors, as described in the GitHub
  * transaction log.
  *
  * Surge XT is released under the GNU General Public Licence v3
@@ -1141,8 +1141,9 @@ juce::Font Skin::getFont(const Surge::Skin::FontDesc &d)
     {
         auto fo = fontOverrides[d.id];
         if (typeFaces.find(fo.family) != typeFaces.end())
-            return juce::Font(typeFaces[fo.family]).withPointHeight(fo.size);
-        return juce::Font(fo.family, fo.size, juce::Font::FontStyleFlags::plain);
+            return juce::Font(SST_JUCE_FONT_OPTIONS(typeFaces[fo.family])).withPointHeight(fo.size);
+        return juce::Font(
+            SST_JUCE_FONT_OPTIONS(fo.family, fo.size, juce::Font::FontStyleFlags::plain));
     }
 
     if (d.hasParent)
@@ -1259,7 +1260,6 @@ Skin::hoverBitmapOverlayForBackgroundBitmap(Skin::Control::ptr_t c, SurgeImage *
         auto pos = b->fname.find("bmp00");
         if (pos != std::string::npos)
         {
-            auto b4 = b->fname.substr(0, pos);
             auto ftr = b->fname.substr(pos + 3);
 
             switch (t)

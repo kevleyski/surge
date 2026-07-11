@@ -4,7 +4,7 @@
  *
  * Learn more at https://surge-synthesizer.github.io/
  *
- * Copyright 2018-2023, various authors, as described in the GitHub
+ * Copyright 2018-2024, various authors, as described in the GitHub
  * transaction log.
  *
  * Surge XT is released under the GNU General Public Licence v3
@@ -124,7 +124,9 @@ struct FilterSelectorMapper : public ParameterDiscreteIndexRemapper
         p(FilterType::fut_cutoffwarp_n, "Notch");
         p(FilterType::fut_resonancewarp_n, "Notch");
 
+        p(FilterType::fut_cytomic_svf, "Multi");
         p(FilterType::fut_tripole, "Multi");
+        p(FilterType::fut_obxd_xpander, "Multi");
 
         p(FilterType::fut_apf, "Effect");
         p(FilterType::fut_cutoffwarp_ap, "Effect");
@@ -217,6 +219,8 @@ const int fut_glyph_index[sst::filters::num_filter_types][2] = {
     {4, bprow},    // fut_resonancewarp_bp
     {0, fxrow},    // fut_resonancewarp_ap (also temporarily set to just use the regular AP glyph)
     {0, multirow}, // fut_tripole
+    {1, multirow}, // fut_cytomicsvf
+    {2, multirow}, // fut_obxd_xpander
 };
 
 const char wst_ui_names[(int)sst::waveshapers::WaveshaperType::n_ws_types][16] = {

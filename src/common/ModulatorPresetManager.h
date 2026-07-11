@@ -4,7 +4,7 @@
  *
  * Learn more at https://surge-synthesizer.github.io/
  *
- * Copyright 2018-2023, various authors, as described in the GitHub
+ * Copyright 2018-2024, various authors, as described in the GitHub
  * transaction log.
  *
  * Surge XT is released under the GNU General Public Licence v3
@@ -34,7 +34,7 @@ namespace Storage
 struct ModulatorPreset
 {
     /*
-     * Given a storage, scene, and LFO, stream stream it to a file relative to the location
+     * Given a storage, scene, and LFO, stream it to a file relative to the location
      * in the user directory LFO presets area
      */
     void savePresetToUser(const fs::path &location, SurgeStorage *s, int scene, int lfo);
@@ -61,11 +61,20 @@ struct ModulatorPreset
         std::vector<Preset> presets;
     };
 
-    std::vector<Category> getPresets(SurgeStorage *s);
+    enum class PresetScanMode
+    {
+        FactoryOnly,
+        UserOnly
+    };
+
+    std::vector<Category> getPresets(SurgeStorage *s, PresetScanMode mode);
     void forcePresetRescan();
 
-    std::vector<Category> scanedPresets;
-    bool haveScanedPresets{false};
+    std::vector<Category> scannedUserPresets;
+    bool haveScannedUser{false};
+
+    std::vector<Category> scannedFactoryPresets;
+    bool haveScannedFactory{false};
 };
 } // namespace Storage
 } // namespace Surge

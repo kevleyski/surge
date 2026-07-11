@@ -4,7 +4,7 @@
  *
  * Learn more at https://surge-synthesizer.github.io/
  *
- * Copyright 2018-2023, various authors, as described in the GitHub
+ * Copyright 2018-2024, various authors, as described in the GitHub
  * transaction log.
  *
  * Surge XT is released under the GNU General Public Licence v3
@@ -21,6 +21,7 @@
  */
 
 #include "TypeinParamEditor.h"
+#include "SurgeGUIUtils.h"
 #include "RuntimeFont.h"
 #include "SurgeGUIEditor.h"
 #include "AccessibleHelpers.h"
@@ -249,13 +250,13 @@ void TypeinParamEditor::textEditorEscapeKeyPressed(juce::TextEditor &te)
     setVisible(false);
 }
 
-void TypeinParamEditor::grabFocus() { textEd->grabKeyboardFocus(); }
+void TypeinParamEditor::grabFocus() { Surge::GUI::grabKeyboardFocusIfAllowed(textEd.get()); }
 
 void TypeinParamEditor::doReturnFocus()
 {
     if (returnFocusComp)
     {
-        returnFocusComp->grabKeyboardFocus();
+        Surge::GUI::grabKeyboardFocusIfAllowed(returnFocusComp);
     }
     returnFocusComp = nullptr;
 }

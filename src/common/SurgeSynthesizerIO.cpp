@@ -4,7 +4,7 @@
  *
  * Learn more at https://surge-synthesizer.github.io/
  *
- * Copyright 2018-2023, various authors, as described in the GitHub
+ * Copyright 2018-2024, various authors, as described in the GitHub
  * transaction log.
  *
  * Surge XT is released under the GNU General Public Licence v3
@@ -32,30 +32,12 @@
 #include "SurgeMemoryPools.h"
 
 #include "sst/basic-blocks/mechanics/endian-ops.h"
+#include "sst/plugininfra/misc_platform.h"
+#include "PatchFileHeaderStructs.h"
+
 namespace mech = sst::basic_blocks::mechanics;
 
 using namespace std;
-
-// seems to be missing from VST2.3, so it's copied from the VST list instead
-//--------------------------------------------------------------------
-// For Preset (Program) (.fxp) with chunk (magic = 'FPCh')
-//--------------------------------------------------------------------
-struct fxChunkSetCustom
-{
-    int chunkMagic; // 'CcnK'
-    int byteSize;   // of this chunk, excl. magic + byteSize
-
-    int fxMagic; // 'FPCh'
-    int version;
-    int fxID; // fx unique id
-    int fxVersion;
-
-    int numPrograms;
-    char prgName[28];
-
-    int chunkSize;
-    // char chunk[8]; // variable
-};
 
 void SurgeSynthesizer::jogPatch(bool increment, bool insideCategory)
 {
@@ -67,6 +49,34 @@ void SurgeSynthesizer::jogPatch(bool increment, bool insideCategory)
     if (!p)
     {
         return;
+    }
+
+    // If browsing favorites, navigate within the favorites list
+    // Favorites is a flat list; insideCategory has no effect here
+    if (patchSelectedFromFavorites && !storage.favoritesOrdering.empty())
+    {
+        auto &favs = storage.favoritesOrdering;
+        auto it = std::find(favs.begin(), favs.end(), patchid);
+
+        if (it == favs.end())
+        {
+            // Current patch no longer in favorites, fall through to normal navigation
+            patchSelectedFromFavorites = false;
+        }
+        else
+        {
+            int idx = std::distance(favs.begin(), it);
+            int n = favs.size();
+
+            if (increment)
+                idx = (idx + 1) % n;
+            else
+                idx = (idx - 1 + n) % n;
+
+            patchid_queue = favs[idx];
+            processAudioThreadOpsWhenAudioEngineUnavailable();
+            return;
+        }
     }
 
     /*
@@ -144,6 +154,8 @@ void SurgeSynthesizer::jogPatch(bool increment, bool insideCategory)
 
 void SurgeSynthesizer::jogCategory(bool increment)
 {
+    patchSelectedFromFavorites = false;
+
     int c = storage.patch_category.size();
 
     if (!c)
@@ -198,6 +210,8 @@ void SurgeSynthesizer::jogPatchOrCategory(bool increment, bool isCategory, bool 
 
 void SurgeSynthesizer::selectRandomPatch()
 {
+    patchSelectedFromFavorites = false;
+
     if (patchid_queue >= 0)
         return;
     int p = storage.patch_list.size();
@@ -228,9 +242,22 @@ void SurgeSynthesizer::loadPatch(int id)
 bool SurgeSynthesizer::loadPatchByPath(const char *fxpPath, int categoryId, const char *patchName,
                                        bool forceIsPreset)
 {
+    storage.getPatch().dawExtraState.editor.clearAllFormulaStates();
+    storage.getPatch().dawExtraState.editor.clearAllWTSEStates();
+    storage.getPatch().dawExtraState.editor.clearAllModulationSourceButtonStates();
+
+    using namespace sst::io;
+
     std::filebuf f;
     if (!f.open(string_to_path(fxpPath), std::ios::binary | std::ios::in))
+    {
+        auto msg = sst::plugininfra::misc_platform::getLastSystemError();
+
+        storage.reportError(std::string() + "Unable to open file '" + std::string(fxpPath) +
+                                "'.\n\n" + msg,
+                            "Load Error");
         return false;
+    }
     fxChunkSetCustom fxp;
     auto read = f.sgetn(reinterpret_cast<char *>(&fxp), sizeof(fxp));
     // FIXME - error if read != chunk size
@@ -263,9 +290,9 @@ bool SurgeSynthesizer::loadPatchByPath(const char *fxpPath, int categoryId, cons
         //   oss << "Synth ID is '" << q.c[0] << q.c[1] << q.c[2] << q.c[3] << "'; Surge expected
         //   'cjs3'. ";
         //}
-        oss << "This error usually occurs when you attempt to load an .fxp that belongs to another "
-               "plugin into Surge XT.";
-        storage.reportError(oss.str(), "Unknown FXP File");
+        oss << "Loaded file has unknown FXP file format. This error usually occurs when you "
+               "attempt to load an .fxp that belongs to another plugin into Surge XT.";
+        storage.reportError(oss.str(), "Load Error");
         return false;
     }
 
@@ -348,7 +375,7 @@ bool SurgeSynthesizer::loadPatchByPath(const char *fxpPath, int categoryId, cons
             }
             catch (Tunings::TuningError &e)
             {
-                storage.reportError(e.what(), "Error applying tuning!");
+                storage.reportError(e.what(), "Tuning Error");
                 storage.retuneTo12TETScaleC261Mapping();
             }
         }
@@ -466,6 +493,7 @@ void SurgeSynthesizer::loadRaw(const void *data, int size, bool preset)
                                                           &(storage.getPatch().formulamods[sc][m]));
         }
     }
+    Surge::Formula::requestSharedDataWipe(&storage);
 
     storage.getPatch().isDirty = false;
 
@@ -536,7 +564,7 @@ void SurgeSynthesizer::savePatch(bool factoryInPlace, bool skipOverwrite)
 {
     if (storage.getPatch().category.empty())
     {
-        storage.getPatch().category = "Default";
+        storage.getPatch().category = "Unsorted";
     }
 
     fs::path savepath = storage.userPatchesPath;
@@ -566,7 +594,7 @@ void SurgeSynthesizer::savePatch(bool factoryInPlace, bool skipOverwrite)
             storage.reportError(
                 "Please use relative paths when saving patches. Referring to drive names directly "
                 "and using absolute paths is not allowed!",
-                "Error");
+                "Relative Path Required");
             return;
         }
 
@@ -577,49 +605,67 @@ void SurgeSynthesizer::savePatch(bool factoryInPlace, bool skipOverwrite)
         savepath = savepath.lexically_normal();
 
         // make sure your category isnt "../../../etc/config"
-
         auto [_, compIt] =
             std::mismatch(savepath.begin(), savepath.end(), comppath.begin(), comppath.end());
         if (compIt != comppath.end())
         {
             storage.reportError(
-                "Your save path is not a directory below the user patches directory. "
-                "This usually means you are doing something like trying to use too many ../"
+                "Your save path is not a directory inside the user patches directory. "
+                "This usually means you are doing something like trying to use ../"
                 " in your category name.",
-                "Save Path not below user path");
+                "Invalid Save Path");
             return;
         }
 
         create_directories(savepath);
     }
-    catch (...)
+    catch (const fs::filesystem_error &e)
     {
-        storage.reportError(
-            "Exception occurred while creating category folder! Most likely, invalid characters "
-            "were used to name the category. Please remove suspicious characters and try again!",
-            "Error");
+        auto msg = sst::plugininfra::misc_platform::getLastSystemError();
+
+        std::ostringstream oss;
+        oss << "Exception occurred while creating category folder! Most likely, invalid characters "
+               "were used to name the category. Please remove suspicious characters and try "
+               "again!\nError Message: "
+            << msg << "\n\n"
+            << e.what();
+        storage.reportError(oss.str(), "Path Create Error");
         return;
     }
 
     fs::path filename = savepath;
     filename /= string_to_path(storage.getPatch().name + ".fxp");
 
-    if (fs::exists(filename) && !skipOverwrite)
+    try
     {
-        storage.okCancelProvider(std::string("The patch '" + storage.getPatch().name +
-                                             "' already exists in '" + storage.getPatch().category +
-                                             "'. Are you sure you want to overwrite it?"),
-                                 std::string("Overwrite Patch"), SurgeStorage::OK,
-                                 [filename, this](SurgeStorage::OkCancel okc) {
-                                     if (okc == SurgeStorage::OK)
-                                     {
-                                         savePatchToPath(filename);
-                                     }
-                                 });
+        if (fs::exists(filename) && !skipOverwrite)
+        {
+            storage.okCancelProvider(std::string("The patch '" + storage.getPatch().name +
+                                                 "' already exists in '" +
+                                                 storage.getPatch().category +
+                                                 "'. Are you sure you want to overwrite it?"),
+                                     std::string("Overwrite Patch"), SurgeStorage::OK,
+                                     [filename, this](SurgeStorage::OkCancel okc) {
+                                         if (okc == SurgeStorage::OK)
+                                         {
+                                             savePatchToPath(filename);
+                                         }
+                                     });
+        }
+        else
+        {
+            savePatchToPath(filename);
+        }
     }
-    else
+    catch (const fs::filesystem_error &e)
     {
-        savePatchToPath(filename);
+        std::ostringstream oss;
+        oss << "Exception occurred while attempting to write the patch! Most likely, "
+               "invalid characters or a reserved name was used to name the patch. "
+               "Please try again with a different name!\n\n"
+            << e.what();
+        storage.reportError(oss.str(), "Patch Write Error");
+        return;
     }
 
     storage.getPatch().isDirty = false;
@@ -627,13 +673,17 @@ void SurgeSynthesizer::savePatch(bool factoryInPlace, bool skipOverwrite)
 
 void SurgeSynthesizer::savePatchToPath(fs::path filename, bool refreshPatchList)
 {
+    using namespace sst::io;
+
     std::ofstream f(filename, std::ios::out | std::ios::binary);
 
     if (!f)
     {
-        storage.reportError(
-            "Unable to save the patch to the specified path! Maybe it contains invalid characters?",
-            "Error");
+        auto msg = sst::plugininfra::misc_platform::getLastSystemError();
+
+        storage.reportError("Unable to save the patch to '" + filename.u8string() + "'. \n\n" + msg,
+                            "Patch Write Error");
+
         return;
     }
 

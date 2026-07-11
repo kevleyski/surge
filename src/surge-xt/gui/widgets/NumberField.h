@@ -4,7 +4,7 @@
  *
  * Learn more at https://surge-synthesizer.github.io/
  *
- * Copyright 2018-2023, various authors, as described in the GitHub
+ * Copyright 2018-2024, various authors, as described in the GitHub
  * transaction log.
  *
  * Surge XT is released under the GNU General Public Licence v3
@@ -27,6 +27,7 @@
 #include "WidgetBaseMixin.h"
 #include "SurgeJUCEHelpers.h"
 #include "SurgeImage.h"
+#include "ModulatableControlInterface.h"
 
 #include "juce_gui_basics/juce_gui_basics.h"
 
@@ -38,12 +39,16 @@ namespace Widgets
 {
 struct NumberField : public juce::Component,
                      public WidgetBaseMixin<NumberField>,
-                     public LongHoldMixin<NumberField>
+                     public LongHoldMixin<NumberField>,
+                     public ModulatableControlInterface
 {
     NumberField() : juce::Component(), WidgetBaseMixin<NumberField>(this) {}
 
     SurgeStorage *storage{nullptr};
     void setStorage(SurgeStorage *s) { storage = s; }
+
+    Surge::GUI::IComponentTagValue *asControlValueInterface() override { return this; }
+    juce::Component *asJuceComponent() override { return this; }
 
     float value{0};
     int iValue{0}, iMin{0}, iMax{1};
@@ -156,6 +161,9 @@ struct NumberField : public juce::Component,
         textHoverColour = c;
         repaint();
     }
+
+    // Special case - we use these without an SGE so hack around a bit for now. See the ::keyPressed
+    std::function<bool(uint32_t, NumberField *)> onReturnPressed{nullptr};
 
     std::unique_ptr<juce::AccessibilityHandler> createAccessibilityHandler() override;
 

@@ -1,8 +1,18 @@
 # vi:set sw=2 et:
 project(surge-common)
 
+# necessary for bindings to know how to operate.
+if(SURGE_BUILD_RS)
+  set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+endif()
+
 surge_add_lib_subdirectory(airwindows)
+surge_add_lib_subdirectory(binn)
+
+# Toggle this to false to turn on superparasites for surge
+set(EURORACK_CLOUDS_IS_CLOUDS TRUE)
 surge_add_lib_subdirectory(eurorack)
+surge_add_lib_subdirectory(pffft)
 surge_add_lib_subdirectory(fmt)
 
 # Make MTS optional
@@ -14,17 +24,15 @@ else()
   add_library(surge::oddsound-mts ALIAS oddsound-mts)
 endif()
 
-if(MINGW)
-  set(HAVE_VISIBILITY 0 CACHE INTERNAL "Force-disable libsamplerate's visibility check on MinGW")
-endif()
-
-surge_add_lib_subdirectory(libsamplerate)
-surge_add_lib_subdirectory(pffft)
 surge_add_lib_subdirectory(tuning-library)
 surge_add_lib_subdirectory(sqlite-3.23.3)
 
+set(ZSTD_BUILD_STATIC ON)
+set(ZSTD_BUILD_SHARED OFF)
+surge_add_lib_subdirectory(zstd)
+
 if(NOT SURGE_SKIP_LUA)
-  surge_add_lib_subdirectory(LuaJitLib)
+  surge_add_lib_subdirectory(luajitlib)
   target_compile_definitions(luajit-5.1 INTERFACE HAS_LUA=1)
 else()
   # Make sure we know it is missing
@@ -32,74 +40,34 @@ else()
   target_compile_definitions(luajit-5.1 INTERFACE HAS_LUA=0)
 endif()
 
-surge_add_lib_subdirectory(sst/sst-basic-blocks)
 surge_add_lib_subdirectory(sst/sst-cpputils)
+set(SST_BASIC_BLOCKS_SIMD_OMIT_NATIVE_ALIASES ON CACHE BOOL "No Native Aliases for Surge XT") # Makes ARM64EC use Neon, basically
+surge_add_lib_subdirectory(sst/sst-basic-blocks)
 surge_add_lib_subdirectory(sst/sst-plugininfra)
 surge_add_lib_subdirectory(sst/sst-filters)
 surge_add_lib_subdirectory(sst/sst-waveshapers)
+
+target_compile_definitions(sst-waveshapers INTERFACE SURGE_XT_1X_WST=1)
 surge_add_lib_subdirectory(sst/sst-effects)
 
 set(PEGTL_BUILD_TESTS OFF CACHE BOOL "")
 set(PEGTL_BUILD_EXAMPLES OFF CACHE BOOL "")
 surge_add_lib_subdirectory(PEGTL)
 
-if(NOT SURGE_SKIP_JUCE_FOR_RACK)
-  juce_add_binary_data(surge-common-binary
-    NAMESPACE SurgeSharedBinary
-    HEADER_NAME SurgeSharedBinary.h
-    SOURCES
-    ${SURGE_SOURCE_DIR}/resources/surge-shared/configuration.xml
-    ${SURGE_SOURCE_DIR}/resources/surge-shared/memoryWavetable.wt
-    ${SURGE_SOURCE_DIR}/resources/surge-shared/oscspecification.html
-    ${SURGE_SOURCE_DIR}/resources/surge-shared/paramdocumentation.xml
-    ${SURGE_SOURCE_DIR}/resources/surge-shared/README_UserArea.txt
-    ${SURGE_SOURCE_DIR}/resources/surge-shared/windows.wt
-  )
-  target_compile_definitions(surge-common-binary PUBLIC HAS_JUCE=1 SKIP_JUCE=0)
 
-else()
-  # So what the heck is this? Well a few effects use juce_dsp so this
-  # is code which skips the entire juce build infrastructure but buids the
-  # source of juce_dsp, juce_audio_basic and juce_cde as a lib we can link
-  # into rac so we can get spring reverb and neuron
-  add_library(surge-common-binary INTERFACE)
-  target_compile_definitions(surge-common-binary INTERFACE HAS_JUCE=0 SKIP_JUCE=1)
-
-  add_library(juce_dsp_rack_sub STATIC
-    ${SURGE_JUCE_PATH}/modules/juce_audio_basics/juce_audio_basics.cpp
-    ${SURGE_JUCE_PATH}/modules/juce_dsp/juce_dsp.cpp
-  )
-
-  if(APPLE)
-    target_sources(juce_dsp_rack_sub PRIVATE
-      ${SURGE_JUCE_PATH}/modules/juce_core/juce_core.mm
-      ${SURGE_JUCE_PATH}/modules/juce_audio_formats/juce_audio_formats.mm
-    )
-  else()
-    target_sources(juce_dsp_rack_sub PRIVATE
-      ${SURGE_JUCE_PATH}/modules/juce_core/juce_core.cpp
-      ${SURGE_JUCE_PATH}/modules/juce_audio_formats/juce_audio_formats.cpp
-    )
-  endif()
-
-  target_compile_definitions(juce_dsp_rack_sub PUBLIC
-    NDEBUG=$<IF:$<CONFIG:Release>,1,0>
-    JUCE_GLOBAL_MODULE_SETTINGS_INCLUDED=1
-    JUCE_MODULE_AVAILABLE_juce_dsp=1
-    JUCE_MODULE_AVAILABLE_juce_audio_basics=1
-    JUCE_MODULE_AVAILABLE_juce_core=1
-    JUCE_MODULE_VAILABLE_juce_audio_formats=1
-    JUCE_STANDALONE_APPLICATION=0
-    JUCE_USE_CURL=0
-    JUCE_WEB_BROWSER=0
-    JUCE_USE_FLAC=0
-    JUCE_USE_OGGVORBIS=0
-    JUCE_USE_WINDOWS_MEDIA_FORMAT=0
-  )
-  target_include_directories(juce_dsp_rack_sub PUBLIC ${SURGE_JUCE_PATH}/modules)
-
-  add_library(juce::juce_dsp ALIAS juce_dsp_rack_sub)
-endif()
+# CMakeRC replacement for the juce_add_binary_data. Resources are
+# accessed via Surge::Storage::getSurgeCommonBinaryResource().
+cmrc_add_resource_library(surge-common-binary
+  ALIAS surge::common-binary
+  NAMESPACE surge_common_binary
+  WHENCE ${SURGE_SOURCE_DIR}/resources/surge-shared
+  ${SURGE_SOURCE_DIR}/resources/surge-shared/configuration.xml
+  ${SURGE_SOURCE_DIR}/resources/surge-shared/memoryWavetable.wt
+  ${SURGE_SOURCE_DIR}/resources/surge-shared/oscspecification.html
+  ${SURGE_SOURCE_DIR}/resources/surge-shared/paramdocumentation.xml
+  ${SURGE_SOURCE_DIR}/resources/surge-shared/README_UserArea.txt
+  ${SURGE_SOURCE_DIR}/resources/surge-shared/windows.wt
+)
 
 add_library(${PROJECT_NAME}
   DebugHelpers.cpp
@@ -137,7 +105,6 @@ add_library(${PROJECT_NAME}
   UserDefaults.cpp
   UserDefaults.h
   WAVFileSupport.cpp
-  dsp/DSPExternalAdapterUtils.cpp
   dsp/Effect.cpp
   dsp/Effect.h
   dsp/Oscillator.cpp
@@ -147,6 +114,8 @@ add_library(${PROJECT_NAME}
   dsp/SurgeVoice.cpp
   dsp/SurgeVoice.h
   dsp/SurgeVoiceState.h
+  dsp/TiltNoiseAdapter.cpp
+  dsp/TiltNoiseAdapter.h
   dsp/Wavetable.cpp
   dsp/Wavetable.h
   dsp/WavetableScriptEvaluator.cpp
@@ -161,12 +130,16 @@ add_library(${PROJECT_NAME}
   dsp/effects/CombulatorEffect.h
   dsp/effects/ConditionerEffect.cpp
   dsp/effects/ConditionerEffect.h
+  dsp/effects/ConvolutionEffect.cpp
+  dsp/effects/ConvolutionEffect.h
   dsp/effects/DelayEffect.cpp
   dsp/effects/DelayEffect.h
   dsp/effects/DistortionEffect.cpp
   dsp/effects/DistortionEffect.h
   dsp/effects/FlangerEffect.cpp
   dsp/effects/FlangerEffect.h
+  dsp/effects/FloatyDelayEffect.cpp
+  dsp/effects/FloatyDelayEffect.h
   dsp/effects/FrequencyShifterEffect.cpp
   dsp/effects/FrequencyShifterEffect.h
   dsp/effects/GraphicEQ11BandEffect.cpp
@@ -249,7 +222,6 @@ add_library(${PROJECT_NAME}
   dsp/effects/chowdsp/tape/ToneControl.h
   dsp/effects/AudioInputEffect.cpp
   dsp/effects/AudioInputEffect.h
-  dsp/filters/AllpassFilter.h
   dsp/filters/BiquadFilter.h
   dsp/filters/VectorizedSVFilter.cpp
   dsp/filters/VectorizedSVFilter.h
@@ -339,6 +311,10 @@ elseif(WIN32)
     UNICODE
     _UNICODE
   )
+
+  message(STATUS "Adding SIMDe interface library on Windows")
+  target_link_libraries(${PROJECT_NAME} PUBLIC surge::simde)
+
 endif()
 
 option(SURGE_RELIABLE_VERSION_INFO "Update version info on every build (off: generate only at configuration time)" ON)
@@ -365,13 +341,19 @@ endif()
 
 target_sources(${PROJECT_NAME} PRIVATE ${CMAKE_BINARY_DIR}/geninclude/version.cpp)
 
+# r8brain isn't cmaked but it's just one file
+target_sources(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/libs/r8brain-free-src/r8bbase.cpp)
+target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/libs/r8brain-free-src)
+
 add_library(surge::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
 target_link_libraries(${PROJECT_NAME}
   PUBLIC
   fmt
   luajit-5.1
-  samplerate
+  pffft
+  libzstd_static
   surge::airwindows
+  surge::binn
   surge::eurorack
 
   sst-cpputils
@@ -389,13 +371,12 @@ target_link_libraries(${PROJECT_NAME}
   surge::sqlite
   surge-common-binary
   tuning-library
+
   PRIVATE
   surge-lua-src
   surge-platform
   surge-juce
   taocpp::pegtl
-  PRIVATE
-  juce::juce_dsp
 )
 
 target_compile_definitions(${PROJECT_NAME} PRIVATE

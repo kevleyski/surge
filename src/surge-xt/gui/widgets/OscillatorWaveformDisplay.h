@@ -4,7 +4,7 @@
  *
  * Learn more at https://surge-synthesizer.github.io/
  *
- * Copyright 2018-2023, various authors, as described in the GitHub
+ * Copyright 2018-2024, various authors, as described in the GitHub
  * transaction log.
  *
  * Surge XT is released under the GNU General Public Licence v3
@@ -49,6 +49,7 @@ struct OscillatorWaveformDisplay : public juce::Component,
                                    public Surge::Widgets::LongHoldMixin<OscillatorWaveformDisplay>,
                                    public Surge::GUI::Hoverable
 {
+  public:
     OscillatorWaveformDisplay();
     ~OscillatorWaveformDisplay();
 
@@ -70,6 +71,7 @@ struct OscillatorWaveformDisplay : public juce::Component,
     }
 
     bool isMuted{false};
+    bool forceWTRepaint{false};
 
     SurgeGUIEditor *sge{nullptr};
     void setSurgeGUIEditor(SurgeGUIEditor *s) { sge = s; }
@@ -79,12 +81,15 @@ struct OscillatorWaveformDisplay : public juce::Component,
 
     void repaintIfIdIsInRange(int id);
     void repaintBasedOnOscMuteState();
+    void repaintForceForWT() { forceWTRepaint = true; };
 
     ::Oscillator *setupOscillator();
     unsigned char oscbuffer alignas(16)[oscillator_buffer_size];
 
     void paint(juce::Graphics &g) override;
     void resized() override;
+
+    void setZoomFactor(int);
 
     pdata tp[n_scene_params];
     juce::Rectangle<float> leftJog, rightJog, waveTableName;
@@ -99,8 +104,10 @@ struct OscillatorWaveformDisplay : public juce::Component,
 
     bool keyPressed(const juce::KeyPress &key) override;
 
+    void handleWavetableLoad(int id);
     void loadWavetable(int id);
     void loadWavetableFromFile();
+
     void populateMenu(juce::PopupMenu &m, int selectedItem, bool singleCategory = false);
     bool populateMenuForCategory(juce::PopupMenu &parent, int categoryId, int selectedItem,
                                  bool intoTop = false);
@@ -108,6 +115,12 @@ struct OscillatorWaveformDisplay : public juce::Component,
     void createWTMenu(const bool useComponentBounds);
     void createWTMenuItems(juce::PopupMenu &contextMenu, bool centered = false,
                            bool add2D3Dswitch = false);
+
+    void createWTLoadMenu(juce::PopupMenu &contextMenu);
+    void createWTExportMenu(juce::PopupMenu &contextMenu);
+    void createWTRenameMenu(juce::PopupMenu &contextMenu);
+    void createOpenScriptEditorMenu(juce::PopupMenu &contextMenu);
+    void refreshWavetablesMenu(juce::PopupMenu &contextMenu);
 
     void createAliasOptionsMenu(const bool useComponentBounds = false,
                                 const bool onlyHelpEntry = false);
@@ -132,6 +145,11 @@ struct OscillatorWaveformDisplay : public juce::Component,
     std::unique_ptr<juce::Component> customEditorAccOverlay;
     std::unique_ptr<juce::AccessibilityHandler> createAccessibilityHandler() override;
     int lastWavetableId{-1};
+    std::string lastWavetableFilename;
+
+  private:
+    std::shared_ptr<juce::Drawable> wtFileIcon;
+    std::shared_ptr<juce::Drawable> wtScriptIcon;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(OscillatorWaveformDisplay);
 };

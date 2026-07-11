@@ -4,7 +4,7 @@
  *
  * Learn more at https://surge-synthesizer.github.io/
  *
- * Copyright 2018-2023, various authors, as described in the GitHub
+ * Copyright 2018-2024, various authors, as described in the GitHub
  * transaction log.
  *
  * Surge XT is released under the GNU General Public Licence v3
@@ -19,6 +19,9 @@
  * All source for Surge XT is available at
  * https://github.com/surge-synthesizer/surge
  */
+
+#include <juce_gui_basics/juce_gui_basics.h>
+#include <juce_gui_extra/juce_gui_extra.h>
 
 #include "SurgeJUCELookAndFeel.h"
 #include "RuntimeFont.h"
@@ -42,7 +45,7 @@ void SurgeJUCELookAndFeel::onSkinChanged()
     setColour(TextButton::buttonColourId, Colour(32, 32, 32));
     setColour(CaretComponent::caretColourId, skin->getColor(Colors::Dialog::Entry::Caret));
     setColour(TextEditor::backgroundColourId, Colour(32, 32, 32));
-    setColour(ListBox::backgroundColourId, Colour(32, 32, 32));
+    setColour(TextEditor::highlightColourId, Colour(96, 96, 96));
     setColour(ListBox::backgroundColourId, Colour(32, 32, 32));
     setColour(ScrollBar::thumbColourId, Colour(212, 212, 212));
     setColour(ScrollBar::trackColourId, Colour(128, 128, 128));
@@ -146,7 +149,7 @@ void SurgeJUCELookAndFeel::drawLabel(Graphics &graphics, Label &label)
 int SurgeJUCELookAndFeel::getTabButtonBestWidth(TabBarButton &b, int d)
 {
     auto f = skin->getFont(Fonts::Widgets::TabButtonFont);
-    auto r = f.getStringWidth(b.getButtonText()) + 20;
+    auto r = SST_STRING_WIDTH_INT(f, b.getButtonText()) + 20;
     return r;
 }
 
@@ -238,8 +241,8 @@ void SurgeJUCELookAndFeel::drawDocumentWindowTitleBar(DocumentWindow &window, Gr
         fontVersion = fontSurge;
     }
 
-    auto sw = fontSurge.getStringWidth(surgeLabel);
-    auto vw = fontVersion.getStringWidth(surgeVersion);
+    auto sw = SST_STRING_WIDTH_INT(fontSurge, surgeLabel);
+    auto vw = SST_STRING_WIDTH_INT(fontVersion, surgeVersion);
 
     auto icon = associatedBitmapStore->getImage(IDB_SURGE_ICON);
 
@@ -253,12 +256,12 @@ void SurgeJUCELookAndFeel::drawDocumentWindowTitleBar(DocumentWindow &window, Gr
         icon->drawAt(g, titleCenter - (titleTextWidth / 2) - 14 - textMargin, h / 2 - 7, 1.0);
     }
 
-    auto boxSurge = Rectangle<int>(titleCenter - (titleTextWidth / 2), 0, sw, h);
+    auto boxSurge = juce::Rectangle<int>(titleCenter - (titleTextWidth / 2), 0, sw, h);
     g.setFont(fontSurge);
     g.drawText(surgeLabel, boxSurge, Justification::centredLeft);
 
     auto boxVersion =
-        Rectangle<int>(titleCenter - (titleTextWidth / 2) + sw + textMargin, 0, vw, h);
+        juce::Rectangle<int>(titleCenter - (titleTextWidth / 2) + sw + textMargin, 0, vw, h);
     g.setFont(fontVersion);
     g.drawText(surgeVersion, boxVersion, Justification::centredLeft);
 }
@@ -284,11 +287,11 @@ class SurgeJUCELookAndFeel_DocumentWindowButton : public Button
         g.setColour(colour);
         auto &p = getToggleState() ? toggledShape : normalShape;
 
-        auto reducedRect =
-            Justification(Justification::centred)
-                .appliedToRectangle(Rectangle<int>(getHeight(), getHeight()), getLocalBounds())
-                .toFloat()
-                .reduced((float)getHeight() * 0.25f);
+        auto reducedRect = Justification(Justification::centred)
+                               .appliedToRectangle(juce::Rectangle<int>(getHeight(), getHeight()),
+                                                   getLocalBounds())
+                               .toFloat()
+                               .reduced((float)getHeight() * 0.25f);
 
         g.fillPath(p, p.getTransformToScaleToFit(reducedRect, true));
     }
@@ -360,7 +363,7 @@ juce::Font SurgeJUCELookAndFeel::getPopupMenuBoldFont()
 }
 
 // overridden here just to make the shortcut text same size as normal menu entry text
-void SurgeJUCELookAndFeel::drawPopupMenuItem(Graphics &g, const Rectangle<int> &area,
+void SurgeJUCELookAndFeel::drawPopupMenuItem(Graphics &g, const juce::Rectangle<int> &area,
                                              const bool isSeparator, const bool isActive,
                                              const bool isHighlighted, const bool isTicked,
                                              const bool hasSubMenu, const String &text,
@@ -479,7 +482,7 @@ void SurgeJUCELookAndFeel::updateDarkIfNeeded()
     }
 }
 void SurgeJUCELookAndFeel::drawPopupMenuSectionHeaderWithOptions(Graphics &graphics,
-                                                                 const Rectangle<int> &area,
+                                                                 const juce::Rectangle<int> &area,
                                                                  const String &sectionName,
                                                                  const PopupMenu::Options &options)
 {

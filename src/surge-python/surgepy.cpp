@@ -4,7 +4,7 @@
  *
  * Learn more at https://surge-synthesizer.github.io/
  *
- * Copyright 2018-2023, various authors, as described in the GitHub
+ * Copyright 2018-2024, various authors, as described in the GitHub
  * transaction log.
  *
  * Surge XT is released under the GNU General Public Licence v3
@@ -100,7 +100,7 @@ struct SurgePyControlGroup
     std::string name;
 
     SurgePyControlGroup() = default;
-    SurgePyControlGroup(ControlGroup id, std::string name) : id(id), name(std::move(name)){};
+    SurgePyControlGroup(ControlGroup id, std::string name) : id(id), name(std::move(name)) {};
 
     int getControlGroupId() const { return (int)id; }
     std::string getControlGroupName() const { return name; }
@@ -138,7 +138,7 @@ struct SurgePyModRouting
 class SurgePyPatchConverter
 {
   public:
-    explicit SurgePyPatchConverter(SurgeSynthesizer *synth) : synth(synth){};
+    explicit SurgePyPatchConverter(SurgeSynthesizer *synth) : synth(synth) {};
     ~SurgePyPatchConverter() = default;
 
     void addParam(py::dict &to, const std::string &at, const Parameter &from) const
@@ -617,6 +617,25 @@ class SurgeSynthesizerWithPythonExtensions : public SurgeSynthesizer
 
     void releaseNoteWithInts(int ch, int note, int vel) { releaseNote(ch, note, vel); }
 
+    bool loadWavetablePy(int scene, int osc, const std::string &s)
+    {
+        auto path = string_to_path(s);
+
+        if (scene < 0 || scene >= n_scenes || osc < 0 || osc >= n_oscs)
+        {
+            throw std::invalid_argument("OSC and SCENE out of range in loadWavetable");
+        }
+        if (!fs::exists(path))
+        {
+            throw std::invalid_argument((std::string("File not found: ") + s).c_str());
+        }
+        std::cout << "Would load " << scene << " " << osc << " with " << s << std::endl;
+        auto os = &(storage.getPatch().scene[scene].osc[osc]);
+        auto wt = &(os->wt);
+        storage.load_wt(s, wt, os);
+
+        return true;
+    }
     bool loadPatchPy(const std::string &s)
     {
         auto path = string_to_path(s);
@@ -626,7 +645,15 @@ class SurgeSynthesizerWithPythonExtensions : public SurgeSynthesizer
             throw std::invalid_argument((std::string("File not found: ") + s).c_str());
         }
 
-        return loadPatchByPath(s.c_str(), -1, path.filename().c_str());
+        bool result = loadPatchByPath(s.c_str(), -1, path.filename().u8string().c_str());
+
+        // update tempo if we want to change it on patch load
+        if (storage.unstreamedTempo > -1.f)
+        {
+            time_data.tempo = storage.unstreamedTempo;
+        }
+
+        return result;
     }
 
     void savePatchPy(const std::string &s) { savePatchToPath(string_to_path(s)); }
@@ -743,14 +770,120 @@ class SurgeSynthesizerWithPythonExtensions : public SurgeSynthesizer
         float *dL = ptr + startBlock * BLOCK_SIZE;
         float *dR = ptr + buf.shape[1] + startBlock * BLOCK_SIZE;
 
+        process_input = false;
+
         for (auto i = 0; i < blockIterations; ++i)
         {
             process();
+            time_data.ppqPos += (double)BLOCK_SIZE * time_data.tempo / (60. * storage.samplerate);
             memcpy((void *)dL, (void *)(output[0]), BLOCK_SIZE * sizeof(float));
             memcpy((void *)dR, (void *)(output[1]), BLOCK_SIZE * sizeof(float));
 
             dL += BLOCK_SIZE;
             dR += BLOCK_SIZE;
+        }
+    }
+
+    void processMultiBlockWithInput(const py::array_t<float> &in_arr,
+                                    const py::array_t<float> &out_arr, int startBlock = 0,
+                                    int nBlocks = -1)
+    {
+        auto in_buf = in_arr.request();
+        auto out_buf = out_arr.request(true);
+
+        /*
+         * Error condition checks
+         */
+        if (in_buf.itemsize != sizeof(float))
+        {
+            std::ostringstream oss;
+            oss << "Input numpy array must have dtype float; you provided an array with "
+                << in_buf.format << "/" << in_buf.size;
+            throw std::invalid_argument(oss.str().c_str());
+        }
+
+        if (out_buf.itemsize != sizeof(float))
+        {
+            std::ostringstream oss;
+            oss << "Output numpy array must have dtype float; you provided an array with "
+                << out_buf.format << "/" << out_buf.size;
+            throw std::invalid_argument(oss.str().c_str());
+        }
+
+        if (out_buf.ndim != 2)
+        {
+            std::ostringstream oss;
+            oss << "Output numpy array must have 2 dimensions (2, m*BLOCK_SIZE); you provided an "
+                   "array with "
+                << out_buf.ndim << " dimensions";
+            throw std::invalid_argument(oss.str().c_str());
+        }
+
+        if (out_buf.shape[0] != 2 || out_buf.shape[1] % BLOCK_SIZE != 0)
+        {
+            std::ostringstream oss;
+            oss << "Output numpy array must have dimensions (2, m*BLOCK_SIZE); you provided an "
+                   "array with "
+                << out_buf.shape[0] << "x" << out_buf.shape[1];
+            throw std::invalid_argument(oss.str().c_str());
+        }
+
+        if (in_buf.shape != out_buf.shape)
+        {
+            std::ostringstream oss;
+            oss << "Input numpy array dimensions must match output; you provided an "
+                   "array with "
+                << in_buf.shape[0] << "x" << in_buf.shape[1];
+            throw std::invalid_argument(oss.str().c_str());
+        }
+
+        size_t maxBlockStorage = out_buf.shape[1] / BLOCK_SIZE;
+
+        if (startBlock >= maxBlockStorage)
+        {
+            std::ostringstream oss;
+            oss << "Start block of " << startBlock << " is beyond the end of input storage with "
+                << maxBlockStorage << " blocks";
+            throw std::invalid_argument(oss.str().c_str());
+        }
+
+        int blockIterations = maxBlockStorage - startBlock;
+
+        if (nBlocks > 0)
+        {
+            blockIterations = nBlocks;
+        }
+
+        if (startBlock + blockIterations > maxBlockStorage)
+        {
+            std::ostringstream oss;
+            oss << "Start block / nBlock combo " << startBlock << " " << nBlocks
+                << " is beyond the end of input storage with " << maxBlockStorage << " blocks";
+            throw std::invalid_argument(oss.str().c_str());
+        }
+
+        process_input = true;
+
+        auto in_ptr = static_cast<float *>(in_buf.ptr);
+        float *iL = in_ptr + startBlock * BLOCK_SIZE;
+        float *iR = in_ptr + in_buf.shape[1] + startBlock * BLOCK_SIZE;
+        auto out_ptr = static_cast<float *>(out_buf.ptr);
+        float *oL = out_ptr + startBlock * BLOCK_SIZE;
+        float *oR = out_ptr + out_buf.shape[1] + startBlock * BLOCK_SIZE;
+
+        for (auto i = 0; i < blockIterations; ++i)
+        {
+            memcpy((void *)(input[0]), (void *)iL, BLOCK_SIZE * sizeof(float));
+            memcpy((void *)(input[1]), (void *)iR, BLOCK_SIZE * sizeof(float));
+            process();
+            time_data.ppqPos += (double)BLOCK_SIZE * time_data.tempo / (60. * storage.samplerate);
+            memcpy((void *)oL, (void *)(output[0]), BLOCK_SIZE * sizeof(float));
+            memcpy((void *)oR, (void *)(output[1]), BLOCK_SIZE * sizeof(float));
+
+            iL += BLOCK_SIZE;
+            iR += BLOCK_SIZE;
+            oL += BLOCK_SIZE;
+            oR += BLOCK_SIZE;
         }
     }
 
@@ -997,6 +1130,11 @@ PYBIND11_MODULE(surgepy, m)
         .def("savePatch", &SurgeSynthesizerWithPythonExtensions::savePatchPy,
              "Save the current state of Surge XT to an .fxp file.", py::arg("path"))
 
+        .def("loadWavetable", &SurgeSynthesizerWithPythonExtensions::loadWavetablePy,
+             "Load a wavetable file directly into a scene and oscillator immediately on this "
+             "thread.",
+             py::arg("scene"), py::arg("osc"), py::arg("path"))
+
         .def("getModSource", &SurgeSynthesizerWithPythonExtensions::getModSource,
              "Given a constant from surge.constants.ms_*, provide a modulator object",
              py::arg("modId"))
@@ -1034,6 +1172,14 @@ PYBIND11_MODULE(surgepy, m)
              "Either populate the\n"
              "entire array, or starting at startBlock position in the output, populate nBlocks.",
              py::arg("val"), py::arg("startBlock") = 0, py::arg("nBlocks") = -1)
+        .def("processMultiBlockWithInput",
+             &SurgeSynthesizerWithPythonExtensions::processMultiBlockWithInput,
+             "Run the Surge XT engine for multiple blocks using the input numpy array, "
+             "updating the value in the output numpy array. "
+             "Either populate the\n"
+             "entire array, or starting at startBlock position in the output, populate nBlocks.",
+             py::arg("inVal"), py::arg("outVal"), py::arg("startBlock") = 0,
+             py::arg("nBlocks") = -1)
 
         .def("getPatch", &SurgeSynthesizerWithPythonExtensions::getPatchAsPy,
              "Get a Python dictionary with the Surge XT parameters laid out in the logical patch "

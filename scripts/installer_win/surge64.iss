@@ -16,8 +16,8 @@
 #define BANNER_PATH SURGE_SRC + "\scripts\installer_win\assets\banner"
 
 [Setup]
-ArchitecturesInstallIn64BitMode=x64
-ArchitecturesAllowed=x64
+ArchitecturesInstallIn64BitMode=x64compatible
+ArchitecturesAllowed=x64compatible
 AppId={#MyID}
 AppName="{#MyAppName} {#MyAppVersion}"
 AppVersion={#MyAppVersion}
@@ -36,20 +36,29 @@ OutputBaseFilename=surge-xt-win64-{#MyAppVersion}-setup
 SetupIconFile={#SURGE_SRC}\scripts\installer_win\assets\surge.ico
 UninstallDisplayIcon={uninstallexe}
 UsePreviousAppDir=yes
-Compression=lzma
+Compression=lzma2/ultra64
+LZMAUseSeparateProcess=yes
+LZMANumFastBytes=273
+LZMADictionarySize=1048576
+LZMANumBlockThreads=6
 SolidCompression=yes
 UninstallFilesDir={commonappdata}\{#MyAppName}\uninstall
 CloseApplicationsFilter=*.exe,*.vst3,*.ttf
-WizardStyle=modern
-; replacing that gnarly old blue computer icon in top right with... nothing!
-WizardSmallImageFile={#SURGE_SRC}\scripts\installer_win\assets\empty.bmp
+WizardStyle=modern dynamic
+WizardSizePercent=100
 WizardImageAlphaFormat=defined
+; replacing that gnarly old blue computer icon in top right with... nothing!
+WizardSmallImageFile={#SURGE_SRC}\scripts\installer_win\assets\blank.png
+WizardSmallImageFileDynamicDark={#SURGE_SRC}\scripts\installer_win\assets\blank.png
 ; replacing the left side banner on the last page with something way more awesome!
 WizardImageFile={#BANNER_PATH}1.bmp,{#BANNER_PATH}2.bmp,{#BANNER_PATH}3.bmp,{#BANNER_PATH}4.bmp
+WizardImageFileDynamicDark={#BANNER_PATH}1.bmp,{#BANNER_PATH}2.bmp,{#BANNER_PATH}3.bmp,{#BANNER_PATH}4.bmp
 
 [InstallDelete]
 ; clean up factory data folders
 Type: filesandordirs; Name: "{commonappdata}\{#MyAppName}\fx_presets"
+Type: filesandordirs; Name: "{commonappdata}\{#MyAppName}\impulses_3rdparty"
+Type: filesandordirs; Name: "{commonappdata}\{#MyAppName}\impulses_factory"
 Type: filesandordirs; Name: "{commonappdata}\{#MyAppName}\modulator_presets"
 Type: filesandordirs; Name: "{commonappdata}\{#MyAppName}\patches_3rdparty"
 Type: filesandordirs; Name: "{commonappdata}\{#MyAppName}\patches_factory"
@@ -78,12 +87,14 @@ Name: VST3; Description: {#MyAppName} VST3 (64-bit); Types: full compact custom 
 Name: EffectsVST3; Description: {#MyAppName} Effects VST3 (64-bit); Types: full custom; Flags: checkablealone
 Name: SA; Description: {#MyAppName} Standalone (64-bit); Types: full compact custom; Flags: checkablealone
 Name: EffectsSA; Description: {#MyAppName} Effects Standalone (64-bit); Types: full custom; Flags: checkablealone
-Name: Data; Description: Data Files; Types: full compact custom minimal; Flags: fixed
-Name: Patches; Description: Patches; Types: full compact custom; Flags: checkablealone
-Name: Wavetables; Description: Wavetables; Types: full custom; Flags: checkablealone
+Name: Data; Description: Data Files; Types: full compact custom minimal; Flags: fixed disablenouninstallwarning
+Name: Patches; Description: Patches; Types: full compact custom; Flags: checkablealone disablenouninstallwarning
+Name: Wavetables; Description: Wavetables; Types: full custom; Flags: checkablealone disablenouninstallwarning
 
 [Files]
 Source: {#SURGE_SRC}\resources\data\fx_presets\*; DestDir: {commonappdata}\{#MyAppName}\fx_presets\; Components: Data; Flags: recursesubdirs
+Source: {#SURGE_SRC}\resources\data\impulses_3rdparty\*; DestDir: {commonappdata}\{#MyAppName}\impulses_3rdparty\; Components: Data; Flags: recursesubdirs
+Source: {#SURGE_SRC}\resources\data\impulses_factory\*; DestDir: {commonappdata}\{#MyAppName}\impulses_factory\; Components: Data; Flags: recursesubdirs
 Source: {#SURGE_SRC}\resources\data\modulator_presets\*; DestDir: {commonappdata}\{#MyAppName}\modulator_presets\; Components: Data; Flags: recursesubdirs
 Source: {#SURGE_SRC}\resources\data\skins\*; DestDir: {commonappdata}\{#MyAppName}\skins\; Components: Data; Flags: recursesubdirs
 Source: {#SURGE_SRC}\resources\data\tuning_library\*; DestDir: {commonappdata}\{#MyAppName}\tuning_library\; Components: Data; Flags: recursesubdirs
@@ -168,7 +179,7 @@ begin
     Result := Result + Space + 'Portable Junctions:' + NewLine
   else
     Result := Result + Space + 'Portable Junction:' + NewLine;
-  
+
   if IsSelected('clap') or IsSelected('effectsclap') then
     Result := Result + Space + Space + 'CLAP: ' + CF + '\CLAP\' + AppPublisher + '\' + AppNameCondensed + 'Data' + NewLine;
 

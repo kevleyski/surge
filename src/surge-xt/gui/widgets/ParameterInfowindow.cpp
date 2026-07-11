@@ -4,7 +4,7 @@
  *
  * Learn more at https://surge-synthesizer.github.io/
  *
- * Copyright 2018-2023, various authors, as described in the GitHub
+ * Copyright 2018-2024, various authors, as described in the GitHub
  * transaction log.
  *
  * Surge XT is released under the GNU General Public Licence v3
@@ -131,9 +131,9 @@ void ParameterInfowindow::setBoundsToAccompany(const juce::Rectangle<int> &contr
 
     if (name.empty())
     {
-        auto sl1 = font.getStringWidth(display);
-        auto sl2 = font.getStringWidth(displayAlt);
-        auto pad = font.getStringWidth("  ");
+        auto sl1 = SST_STRING_WIDTH_INT(font, display);
+        auto sl2 = SST_STRING_WIDTH_INT(font, displayAlt);
+        auto pad = SST_STRING_WIDTH_INT(font, "  ");
         desiredWidth = std::max(sl1 + sl2 + pad, desiredWidth);
     }
     else
@@ -144,16 +144,16 @@ void ParameterInfowindow::setBoundsToAccompany(const juce::Rectangle<int> &contr
         {
             lheight = font.getHeight() * 3 + 11;
             // row 2
-            auto r1l = font.getStringWidth(name);
-            auto r2l =
-                font.getStringWidth(mdiws.dvalminus + "  " + mdiws.val + "  " + mdiws.dvalplus);
-            auto r3l = font.getStringWidth(mdiws.valminus + "  " + mdiws.valplus);
+            auto r1l = SST_STRING_WIDTH_INT(font, name);
+            auto r2l = SST_STRING_WIDTH_INT(font, mdiws.dvalminus + "  " + mdiws.val + "  " +
+                                                      mdiws.dvalplus);
+            auto r3l = SST_STRING_WIDTH_INT(font, mdiws.valminus + "  " + mdiws.valplus);
             desiredWidth = std::max(std::max(std::max(r1l, r2l), r3l) + 8, desiredWidth);
         }
         else
         {
-            auto sln = font.getStringWidth(name);
-            auto sl1 = font.getStringWidth(display);
+            auto sln = SST_STRING_WIDTH_INT(font, name);
+            auto sl1 = SST_STRING_WIDTH_INT(font, display);
             desiredWidth = std::max(std::max(sln, sl1) + 8, desiredWidth);
             lheight = font.getHeight() * 2 + 9;
         }

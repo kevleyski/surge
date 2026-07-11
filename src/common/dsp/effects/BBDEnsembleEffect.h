@@ -4,7 +4,7 @@
  *
  * Learn more at https://surge-synthesizer.github.io/
  *
- * Copyright 2018-2023, various authors, as described in the GitHub
+ * Copyright 2018-2024, various authors, as described in the GitHub
  * transaction log.
  *
  * Surge XT is released under the GNU General Public Licence v3
@@ -22,10 +22,12 @@
 
 #ifndef SURGE_SRC_COMMON_DSP_EFFECTS_BBDENSEMBLEEFFECT_H
 #define SURGE_SRC_COMMON_DSP_EFFECTS_BBDENSEMBLEEFFECT_H
+
+#if !defined(_M_ARM64EC)
+
 #include "Effect.h"
 #include "BiquadFilter.h"
 #include "DSPUtils.h"
-#include "AllpassFilter.h"
 
 #include <vembertech/lipol.h>
 #include "ModControl.h"
@@ -56,6 +58,8 @@ class BBDEnsembleEffect : public Effect
         ens_width,
         ens_mix,
 
+        ens_output_filter,
+
         ens_num_ctrls,
     };
 
@@ -74,6 +78,7 @@ class BBDEnsembleEffect : public Effect
     virtual ~BBDEnsembleEffect();
     virtual const char *get_effectname() override { return "Ensemble"; }
     virtual void init() override;
+    virtual void sampleRateReset() override;
     virtual void process(float *dataL, float *dataR) override;
     virtual void suspend() override;
     void setvars(bool init);
@@ -81,6 +86,8 @@ class BBDEnsembleEffect : public Effect
     virtual void init_default_values() override;
     virtual const char *group_label(int id) override;
     virtual int group_label_ypos(int id) override;
+    virtual void handleStreamingMismatches(int streamingRevision,
+                                           int currentSynthStreamingRevision) override;
 
   private:
     float getFeedbackGain(bool bbd) const noexcept;
@@ -100,7 +107,10 @@ class BBDEnsembleEffect : public Effect
 
     float fbStateL, fbStateR;
     BiquadFilter dc_blocker[2];
+    BiquadFilter reconstrFilter[2];
     BiquadFilter sincInputFilter;
 };
+
+#endif
 
 #endif // SURGE_SRC_COMMON_DSP_EFFECTS_BBDENSEMBLEEFFECT_H

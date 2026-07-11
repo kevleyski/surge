@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-#
-# A tool for creating, destructing, and querying surge WT files
+
+# A tool for creating, exploding, and inspecting Surge XT's WT files
 # Run wt-tool.py --help for instructions
 
 from optparse import OptionParser
@@ -40,7 +40,8 @@ def read_wt_header(fn):
     flags = {}
     flags["is_sample"] = (fl[0] & 0x01 != 0)
     flags["loop_sample"] = (fl[0] & 0x02 != 0)
-    flags["format"] = "int16" if (fl[0] & 0x04 != 0) else "float32"
+
+    flags["format"] = "int16-full-range" if (fl[0] == 0xC) else "int16" if (fl[0] & 0x04 != 0) else "float32"
     flags["samplebytes"] = 2 if (fl[0] & 0x04 != 0) else 4
 
     header["flags"] = flags
@@ -54,7 +55,7 @@ def explode(fn, wav_dir):
     print("Exploding '" + fn + "' into '" + wav_dir + "'")
     header = read_wt_header(fn)
     if(header["flags"]["samplebytes"] != 2):
-        raise RuntimeError("Can only handle 16 bit wt files right now")
+        raise RuntimeError("This tool Can only handle 16-bit WT files!")
 
     with open(fn, "rb") as f:
         f.read(12)
@@ -74,7 +75,7 @@ def explode(fn, wav_dir):
                 wav_file.writeframes(bdata)
 
 
-def create(fn, wavdir, norm):
+def create(fn, wavdir, norm, intform):
     onlyfiles = [f for f in listdir(wavdir) if (isfile(join(wavdir, f)) and f.endswith(".wav"))]
     onlyfiles.sort()
 
@@ -85,19 +86,21 @@ def create(fn, wavdir, norm):
         nf = wf.getnframes()
 
     if (c0 != 1):
-        raise RuntimeError("wt-tool only processes mono inputs")
+        raise RuntimeError("Please use 44.1k, 16-bit, mono WAV files! This file has more than one audio channel.")
     if (fr != 44100):
-        raise RuntimeError("Please use 44.1k mono 16bit PCM wav files")
+        raise RuntimeError("Please use 44.1k, 16-bit, mono WAV files! This file has a different sample rate.")
     if (sw != 2):
-        raise RuntimeError("Please use 44.1k mono 16bit PCM wav files")
+        raise RuntimeError("Please use 44.1k, 16-bit, mono WAV files. This file is not 16-bit.")
 
     print("Creating '{0}' with {1} tables of length {2}".format(fn, len(onlyfiles), nf))
 
     databuffer = []
+
     for inf in onlyfiles:
         with wave.open(join(wavdir, inf), "rb") as wav_file:
             content = wav_file.readframes(nf * sw)
             databuffer.append(content)
+
     if (norm == "half"):
         print("Normalizing by half")
         newdb = []
@@ -122,44 +125,66 @@ def create(fn, wavdir, norm):
                 newrec[2 * i + 1] = nms
             newdb.append(newrec)
         databuffer = newdb
-    elif (norm == "peak"):
-        print("Normalizing to peak")
+    elif (norm == "peak" or norm == "peak16"):
+        print("Normalizing to " + norm)
+
         peakp = 0
         peakm = 0
+
         for d in databuffer:
             for i in range(int(len(d) / 2)):
                 ls = d[2 * i]
                 ms = d[2 * i + 1]
+
                 if(ms >= 128):
                     ms -= 256
+
                 r = int(ls + ms * 256)
+
                 if(r > peakp):
                     peakp = r
+
                 if(r < peakm):
                     peakm = r
+
         if(-peakm > peakp):
             peakp = -peakm
+
         print("Peak value is ", peakp)
+
         newdb = []
+
+        den = 16384.0
+
+        if (norm == "peak16"):
+            den = den * 2
+
         for d in databuffer:
             newrec = bytearray(len(d))
 
             for i in range(int(len(d) / 2)):
                 ls = d[2 * i]
                 ms = d[2 * i + 1]
+
                 if(ms >= 128):
                     ms -= 256
-                r = int((ls + ms * 256) * 16384.0 / peakp)
+
+                r = int((ls + ms * 256) * den / peakp)
 
                 nls = int(r % 256)
                 nms = int(r / 256)
+
                 if(r < 0 and nls != 0):
                     nms -= 1
+
                 if(nms < 0):
                     nms += 256
+
                 newrec[2 * i] = nls
                 newrec[2 * i + 1] = nms
+
             newdb.append(newrec)
+
         databuffer = newdb
 
     else:
@@ -169,7 +194,8 @@ def create(fn, wavdir, norm):
         outf.write(b'vawt')
         outf.write(nf.to_bytes(4, byteorder='little'))
         outf.write((len(onlyfiles)).to_bytes(2, byteorder='little'))
-        outf.write(bytes([4, 0]))
+        outf.write(bytes([4 if (intform == "i15") else 12, 0]))
+
         for d in databuffer:
             outf.write(d)
 
@@ -189,41 +215,44 @@ def info(fn):
 def main():
     parser = OptionParser(usage="usage: % prog [options]")
     parser.add_option("-a", "--action", dest="action",
-                      help="undertake action. One of 'info', 'create' or 'explode'", metavar="ACTION")
+                      help="Choose an action to perform. Can be 'info', 'create' or 'explode'", metavar="ACTION")
     parser.add_option("-f", "--file", dest="file",
-                      help="wt_file being inspected or created", metavar="FILE")
+                      help="File being inspected, created or exploded", metavar="FILE")
     parser.add_option("-d", "--wav_dir", dest="wav_dir",
-                      help="Directory containing or receiving wav files for wt", metavar="DIR")
+                      help="Directory containing WAV files for WT creation, or receiving WAV files for WT extraction", metavar="DIR")
     parser.add_option("-n", "--normalize", dest="normalize", default="none", metavar="MODE",
-                      help="""(Create only) how to normalize input.
-Modes are 'none' leave input untouched;
-'half' input wav are divided by 2 (so 2^16 range becomes 2^15 range);
-'peak' input wav are scanned and re-peaked to 2^15.
+                      help="""(Create only) Sets how the input should be normalized. Options are:
+'none' leave input untouched
+'half' input WAV is divided by 2 (so 2^16 range becomes 2^15 range)
+'peak' input WAV is scanned and normalized to -6 dBFS
+'peak16' input WAV is scanned and normalized to 0 dBFS
 """)
+    parser.add_option("-i", "--int-range", dest="intrange", default="i15", metavar="INTRANGE",
+                      help = "Integer range for creating int16 files. Can be 'i15' or 'i16'")
     (options, args) = parser.parse_args()
 
     act = options.action
     if act == "create":
         if(options.file is None or options.wav_dir is None):
             parser.print_help()
-            print("\nYou must specify a file and wav_dir for create")
+            print("\nYou must specify --file and --wav_dir for this action!")
         else:
-            create(options.file, options.wav_dir, options.normalize)
+            create(options.file, options.wav_dir, options.normalize, options.intrange)
     elif act == "explode":
         if(options.file is None or options.wav_dir is None):
             parser.print_help()
-            print("\nYou must specify a file and wav_dir for explode")
+            print("\nYou must specify --file and --wav_dir for this action!")
         else:
             explode(options.file, options.wav_dir)
     elif act == "info":
         if(options.file is None):
             parser.print_help()
-            print("\nYou must specify a file for info")
+            print("\nYou must specify --file for this action!")
         else:
             info(options.file)
     else:
         parser.print_help()
-        print("\nUnknown action '{0}'".format(act))
+        print("\nUnknown action!")
 
 
 if __name__ == "__main__":

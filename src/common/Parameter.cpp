@@ -4,7 +4,7 @@
  *
  * Learn more at https://surge-synthesizer.github.io/
  *
- * Copyright 2018-2023, various authors, as described in the GitHub
+ * Copyright 2018-2024, various authors, as described in the GitHub
  * transaction log.
  *
  * Surge XT is released under the GNU General Public Licence v3
@@ -219,6 +219,7 @@ Parameter *Parameter::assign(ParameterIDCounter::promise_t idp, int pid, const c
     per_voice_processing = scene ? true : false;
     midictrl = -1;
     midichan = -1;
+    miditakeover_status = sts_waiting_for_first_look;
 
     clear_flags();
 
@@ -256,10 +257,12 @@ bool Parameter::can_temposync() const
     case ct_lforate:
     case ct_lforate_deactivatable:
     case ct_envtime:
+    case ct_envtime_deformable:
     case ct_envtime_deactivatable:
     case ct_envtime_linkable_delay:
     case ct_envtime_lfodecay:
     case ct_reverbpredelaytime:
+    case ct_floaty_delay_time:
         return true;
     }
     return false;
@@ -274,6 +277,7 @@ bool Parameter::can_extend_range() const
     case ct_pitch_semi7bp:
     case ct_pitch_semi7bp_absolutable:
     case ct_pitch_extendable_very_low_minval:
+    case ct_freq_fm2_offset:
     case ct_freq_reson_band1:
     case ct_freq_reson_band2:
     case ct_freq_reson_band3:
@@ -296,6 +300,7 @@ bool Parameter::can_extend_range() const
     case ct_percent_oscdrift:
     case ct_twist_aux_mix:
     case ct_countedset_percent_extendable:
+    case ct_countedset_percent_extendable_wtdeform:
     case ct_dly_fb_clippingmodes:
     case ct_bonsai_bass_boost:
     case ct_detuning:
@@ -372,8 +377,10 @@ bool Parameter::has_deformoptions() const
     case ct_noise_color:
     case ct_amplitude_ringmod:
     case ct_bonsai_bass_boost:
+    case ct_envtime_deformable:
     case ct_filter_feedback:
     case ct_osc_feedback_negative:
+    case ct_countedset_percent_extendable_wtdeform:
         return true;
     default:
         break;
@@ -412,6 +419,7 @@ bool Parameter::is_bipolar() const
     case ct_percent_bipolar_w_dynamic_unipolar_formatting:
     case ct_noise_color:
     case ct_twist_aux_mix:
+    case ct_freq_fm2_offset:
     case ct_freq_shift:
     case ct_filter_feedback:
     case ct_osc_feedback_negative:
@@ -421,6 +429,7 @@ bool Parameter::is_bipolar() const
     case ct_pitch4oct:
     case ct_modern_trimix:
     case ct_oscspread_bipolar:
+    case ct_floaty_delay_playrate:
     case ct_bonsai_bass_boost:
         res = true;
         break;
@@ -522,6 +531,7 @@ void Parameter::set_user_data(ParamUserData *ud)
     {
     case ct_countedset_percent:
     case ct_countedset_percent_extendable:
+    case ct_countedset_percent_extendable_wtdeform:
         if (dynamic_cast<CountedSetUserData *>(ud))
         {
             user_data = ud;
@@ -701,6 +711,7 @@ void Parameter::set_type(int ctrltype)
         val_default.f = 0; // semitones
         moverate = 0.5f;
         break;
+    case ct_freq_fm2_offset:
     case ct_freq_shift:
         valtype = vt_float;
         val_min.f = -10;   // Hz
@@ -775,6 +786,7 @@ void Parameter::set_type(int ctrltype)
         val_default.f = -8;
         break;
     case ct_envtime:
+    case ct_envtime_deformable:
     case ct_envtime_deactivatable:
     case ct_envtime_linkable_delay:
     case ct_envtime_lfodecay:
@@ -782,6 +794,18 @@ void Parameter::set_type(int ctrltype)
         val_min.f = -8;
         val_max.f = 5;
         val_default.f = 0;
+        break;
+    case ct_floaty_warp_time:
+        valtype = vt_float;
+        val_min.f = -3;
+        val_max.f = 4;
+        val_default.f = 0;
+        break;
+    case ct_floaty_delay_time:
+        valtype = vt_float;
+        val_min.f = -5.64386;     // 20ms
+        val_max.f = 3;            // 8s
+        val_default.f = -1.73697; // 300ms
         break;
     case ct_delaymodtime:
     case ct_chorusmodtime:
@@ -1062,13 +1086,13 @@ void Parameter::set_type(int ctrltype)
         break;
     case ct_sineoscmode:
         val_min.i = 0;
-        val_max.i = 27;
+        val_max.i = 27 + 4; // In surge 1.4 added 4 corrected shapes
         valtype = vt_int;
         val_default.i = 0;
         break;
     case ct_ringmod_sineoscmode:
         val_min.i = 0;
-        val_max.i = 28; // above sineosc + 1 for audio in
+        val_max.i = 28 + 4; // above sineosc + 1 for audio in
         valtype = vt_int;
         val_default.i = 0;
         break;
@@ -1116,6 +1140,7 @@ void Parameter::set_type(int ctrltype)
         break;
     case ct_countedset_percent:
     case ct_countedset_percent_extendable:
+    case ct_countedset_percent_extendable_wtdeform:
         val_min.f = 0;
         val_max.f = 1;
         valtype = vt_float;
@@ -1153,11 +1178,18 @@ void Parameter::set_type(int ctrltype)
         break;
     case ct_ensemble_stages:
     {
+#if defined(_M_ARM64EC)
+        valtype = vt_int;
+        val_min.i = 0;
+        val_max.i = 1;
+        val_default.i = 0;
+#else
         extern int ensemble_stage_count();
         valtype = vt_int;
         val_min.i = 0;
         val_max.i = ensemble_stage_count() - 1;
         val_default.i = 0;
+#endif
         break;
     }
     case ct_stringosc_excitation_model:
@@ -1333,22 +1365,36 @@ void Parameter::set_type(int ctrltype)
     case ct_bonsai_sat_filter:
         valtype = vt_int;
         val_min.i = 0;
-        val_default.i = 0;
         val_max.i = 1;
+        val_default.i = 0;
         break;
 
     case ct_bonsai_sat_mode:
         valtype = vt_int;
         val_min.i = 0;
-        val_default.i = 1;
         val_max.i = 3;
+        val_default.i = 1;
         break;
 
     case ct_bonsai_noise_mode:
         valtype = vt_int;
         val_min.i = 0;
-        val_default.i = 0;
         val_max.i = 1;
+        val_default.i = 0;
+        break;
+
+    case ct_floaty_delay_playrate:
+        valtype = vt_float;
+        val_min.f = -5.f;
+        val_max.f = 5.f;
+        val_default.f = 1.f;
+        break;
+
+    case ct_convolution_delay:
+        valtype = vt_float;
+        val_min.f = 0.f;
+        val_max.f = 1.f;
+        val_default.f = 0.f;
         break;
 
     case ct_none:
@@ -1391,21 +1437,25 @@ void Parameter::set_type(int ctrltype)
     case ct_rotarydrive:
     case ct_countedset_percent:
     case ct_countedset_percent_extendable:
+    case ct_countedset_percent_extendable_wtdeform:
     case ct_lfoamplitude:
     case ct_lfophaseshuffle:
     case ct_reson_res_extendable:
     case ct_modern_trimix:
+    case ct_floaty_warp_time:
+    case ct_floaty_delay_time:
+    case ct_floaty_delay_playrate:
     case ct_alias_mask:
     case ct_tape_drive:
         displayType = LinearWithScale;
         snprintf(displayInfo.unit, DISPLAYINFO_TXT_SIZE, "%%");
-        displayInfo.scale = 100;
+        displayInfo.scale = 100.f;
         break;
     case ct_percent_bipolar_w_dynamic_unipolar_formatting:
     case ct_twist_aux_mix:
         displayType = LinearWithScale;
         snprintf(displayInfo.unit, DISPLAYINFO_TXT_SIZE, "%%");
-        displayInfo.scale = 100;
+        displayInfo.scale = 100.f;
         displayInfo.customFeatures = ParamDisplayFeatures::kScaleBasedOnIsBiPolar;
         break;
     case ct_percent_bipolar_stereo:
@@ -1418,7 +1468,7 @@ void Parameter::set_type(int ctrltype)
         snprintf(displayInfo.minLabel, DISPLAYINFO_TXT_SIZE, "-100.00 %% (Left)");
         snprintf(displayInfo.defLabel, DISPLAYINFO_TXT_SIZE, "0.00 %% (Stereo)");
         snprintf(displayInfo.maxLabel, DISPLAYINFO_TXT_SIZE, "100.00 %% (Right)");
-        displayInfo.scale = 100;
+        displayInfo.scale = 100.f;
         break;
     case ct_percent_bipolar_pan:
         displayType = LinearWithScale;
@@ -1430,7 +1480,7 @@ void Parameter::set_type(int ctrltype)
         snprintf(displayInfo.minLabel, DISPLAYINFO_TXT_SIZE, "-100.00 %% (Left)");
         snprintf(displayInfo.defLabel, DISPLAYINFO_TXT_SIZE, "0.00 %% (Center)");
         snprintf(displayInfo.maxLabel, DISPLAYINFO_TXT_SIZE, "100.00 %% (Right)");
-        displayInfo.scale = 100;
+        displayInfo.scale = 100.f;
         break;
     case ct_percent_bipolar_stringbal:
         displayType = LinearWithScale;
@@ -1442,18 +1492,18 @@ void Parameter::set_type(int ctrltype)
         snprintf(displayInfo.minLabel, DISPLAYINFO_TXT_SIZE, "-100.00 %% (String 1)");
         snprintf(displayInfo.defLabel, DISPLAYINFO_TXT_SIZE, "0.00 %% (Strings 1+2)");
         snprintf(displayInfo.maxLabel, DISPLAYINFO_TXT_SIZE, "100.00 %% (String 2)");
-        displayInfo.scale = 100;
+        displayInfo.scale = 100.f;
         break;
 
         /*
           Again the missing breaks here are on purpose but we pick out a few for Tuning later
          */
     case ct_pitch_semi7bp_absolutable:
-        displayInfo.absoluteFactor = 10.0;
+        displayInfo.absoluteFactor = 10.f;
         snprintf(displayInfo.absoluteUnit, DISPLAYINFO_TXT_SIZE, "Hz");
     case ct_pitch_semi7bp:
     case ct_flangerspacing:
-        displayInfo.extendFactor = 12.0;
+        displayInfo.extendFactor = 12.f;
     case ct_pitch:
     case ct_pitch4oct:
     case ct_pitch_extendable_very_low_minval:
@@ -1484,26 +1534,42 @@ void Parameter::set_type(int ctrltype)
     case ct_freq_ringmod:
         displayType = ATwoToTheBx;
         snprintf(displayInfo.unit, DISPLAYINFO_TXT_SIZE, "Hz");
-        displayInfo.a = (ctrltype == ct_freq_ringmod) ? 8.175798 : 440.0;
+        if (ctrltype == ct_freq_ringmod)
+        {
+            displayInfo.a = 8.175798;
+        }
+        else if (ctrltype == ct_freq_audible_fm3_extendable)
+        {
+            displayInfo.a = 440 * pow(2.f, -9.f / 12.f);
+        }
+        else
+        {
+            displayInfo.a = 440.0;
+        }
         displayInfo.b = 1.0f / 12.0f;
         displayInfo.decimals = 2;
         displayInfo.modulationCap = 880.f * powf(2.0, (val_max.f) / 12.0f);
         displayInfo.supportsNoteName = true;
         displayInfo.customFeatures = ParamDisplayFeatures::kAllowsModulationsInNotesAndCents;
         break;
-
+    case ct_freq_fm2_offset:
+        displayType = LinearWithScale;
+        snprintf(displayInfo.unit, DISPLAYINFO_TXT_SIZE, "Hz");
+        displayInfo.extendFactor = 100.f;
+        break;
     case ct_freq_shift:
         displayType = LinearWithScale;
         snprintf(displayInfo.unit, DISPLAYINFO_TXT_SIZE, "Hz");
-        displayInfo.extendFactor = 100.0;
+        displayInfo.scale = 10.f;
+        displayInfo.extendFactor = 100.f;
         break;
-
     case ct_envtime_lfodecay:
         snprintf(displayInfo.maxLabel, DISPLAYINFO_TXT_SIZE, "Forever");
         displayInfo.customFeatures = ParamDisplayFeatures::kHasCustomMaxString;
         // THERE IS NO BREAK HERE ON PURPOSE so we group to the others
     case ct_portatime:
     case ct_envtime:
+    case ct_envtime_deformable:
     case ct_envtime_deactivatable:
     case ct_envtime_linkable_delay:
     case ct_reverbtime:
@@ -1532,19 +1598,19 @@ void Parameter::set_type(int ctrltype)
     case ct_decibel_extendable:
         displayType = LinearWithScale;
         snprintf(displayInfo.unit, DISPLAYINFO_TXT_SIZE, "dB");
-        displayInfo.extendFactor = 3;
+        displayInfo.extendFactor = 3.f;
         break;
 
     case ct_decibel_narrow_extendable:
         displayType = LinearWithScale;
         snprintf(displayInfo.unit, DISPLAYINFO_TXT_SIZE, "dB");
-        displayInfo.extendFactor = 5;
+        displayInfo.extendFactor = 5.f;
         break;
 
     case ct_decibel_narrow_short_extendable:
         displayType = LinearWithScale;
         snprintf(displayInfo.unit, DISPLAYINFO_TXT_SIZE, "dB");
-        displayInfo.extendFactor = 2;
+        displayInfo.extendFactor = 2.f;
         break;
 
     case ct_decibel:
@@ -1560,7 +1626,7 @@ void Parameter::set_type(int ctrltype)
     case ct_decibel_extra_narrow_deactivatable:
     case ct_bonsai_bass_boost:
         displayType = LinearWithScale;
-        displayInfo.extendFactor = 3;
+        displayInfo.extendFactor = 3.f;
         snprintf(displayInfo.unit, DISPLAYINFO_TXT_SIZE, "dB");
         break;
 
@@ -1571,35 +1637,35 @@ void Parameter::set_type(int ctrltype)
 
     case ct_detuning:
         displayType = LinearWithScale;
-        displayInfo.scale = 100.0;
-        displayInfo.extendFactor = 6;
+        displayInfo.scale = 100.f;
+        displayInfo.extendFactor = 6.f;
         snprintf(displayInfo.unit, DISPLAYINFO_TXT_SIZE, "cents");
         break;
 
     case ct_stereowidth:
         displayType = LinearWithScale;
-        displayInfo.scale = 1.0;
+        displayInfo.scale = 1.f;
         snprintf(displayInfo.unit, DISPLAYINFO_TXT_SIZE, "º");
         break;
 
     case ct_oscspread:
     case ct_oscspread_bipolar:
         displayType = LinearWithScale;
-        displayInfo.scale = 100.0;
+        displayInfo.scale = 100.f;
         snprintf(displayInfo.unit, DISPLAYINFO_TXT_SIZE, "cents");
         snprintf(displayInfo.absoluteUnit, DISPLAYINFO_TXT_SIZE, "Hz");
         displayInfo.absoluteFactor =
             0.16; // absolute factor also takes scale into account hence the /100
-        displayInfo.extendFactor = 12;
+        displayInfo.extendFactor = 12.f;
         break;
 
     case ct_filter_feedback:
     case ct_osc_feedback:
     case ct_osc_feedback_negative:
         displayType = LinearWithScale;
-        displayInfo.scale = 100.0;
+        displayInfo.scale = 100.f;
         snprintf(displayInfo.unit, DISPLAYINFO_TXT_SIZE, "%%");
-        displayInfo.extendFactor = 4;
+        displayInfo.extendFactor = 4.f;
         break;
 
     case ct_amplitude:
@@ -1614,7 +1680,7 @@ void Parameter::set_type(int ctrltype)
     case ct_airwindows_param_bipolar:
     case ct_airwindows_param_integral:
         displayType = DelegatedToFormatter;
-        displayInfo.scale = 1.0;
+        displayInfo.scale = 1.f;
         displayInfo.unit[0] = 0;
         displayInfo.decimals = 3;
         break;
@@ -1649,14 +1715,14 @@ void Parameter::set_type(int ctrltype)
 
     case ct_tape_microns:
         displayType = LinearWithScale;
-        displayInfo.scale = 1.0f;
+        displayInfo.scale = 1.f;
         displayInfo.decimals = 2;
         snprintf(displayInfo.unit, DISPLAYINFO_TXT_SIZE, "μm");
         break;
 
     case ct_tape_speed:
         displayType = LinearWithScale;
-        displayInfo.scale = 1.0f;
+        displayInfo.scale = 1.f;
         displayInfo.decimals = 2;
         snprintf(displayInfo.unit, DISPLAYINFO_TXT_SIZE, "ips");
         break;
@@ -1675,11 +1741,18 @@ void Parameter::set_type(int ctrltype)
         break;
 
     case ct_float_toggle:
-        displayInfo.scale = 100.0f;
+        displayInfo.scale = 100.f;
         displayInfo.decimals = 2;
         snprintf(displayInfo.unit, DISPLAYINFO_TXT_SIZE, "%%");
         snprintf(displayInfo.minLabel, DISPLAYINFO_TXT_SIZE, "Off");
         snprintf(displayInfo.maxLabel, DISPLAYINFO_TXT_SIZE, "On");
+        break;
+
+    case ct_convolution_delay:
+        displayType = LinearWithScale;
+        displayInfo.customFeatures |= ParamDisplayFeatures::kSwitchesFromSecToMillisec;
+        displayInfo.decimals = 2;
+        snprintf(displayInfo.unit, DISPLAYINFO_TXT_SIZE, "s");
         break;
     }
 
@@ -1864,6 +1937,7 @@ void Parameter::bound_value(bool force_integer)
         }
         case ct_portatime:
         case ct_envtime:
+        case ct_envtime_deformable:
         case ct_envtime_deactivatable:
         case ct_envtime_linkable_delay:
         case ct_envtime_lfodecay:
@@ -1904,20 +1978,23 @@ void Parameter::bound_value(bool force_integer)
             val.f = floor(val.f * 10) / 10.0;
             break;
         }
+        case ct_freq_fm2_offset:
         case ct_freq_shift:
         {
             if (extend_range)
             {
-                val.f = floor(val.f * 100) / 100.0;
+                val.f = floor((val.f * 1000.f) / 10.f) * 0.01f;
             }
             else
             {
-                val.f = floor(val.f + 0.5f);
+                val.f = floor((val.f * 10.f) + 0.5f) * 0.1f;
             }
+
             break;
         }
         case ct_countedset_percent:
         case ct_countedset_percent_extendable:
+        case ct_countedset_percent_extendable_wtdeform:
         {
             CountedSetUserData *cs = reinterpret_cast<CountedSetUserData *>(user_data);
             if (cs)
@@ -2100,11 +2177,7 @@ void Parameter::set_extend_range(bool er)
 {
     bool prior_extend = extend_range;
 
-#if DEBUG_WRITABLE_EXTEND_RANGE
-    extend_range_internal = er;
-#else
     extend_range = er;
-#endif
 
     if (!extend_range)
     {
@@ -2123,37 +2196,75 @@ void Parameter::set_extend_range(bool er)
             {
                 val.f = val_min.f;
             }
+            else if (val.f > val_max.f)
+            {
+                val.f = val_max.f;
+            }
 
             displayType = LinearWithScale;
             snprintf(displayInfo.unit, DISPLAYINFO_TXT_SIZE, "semitones");
             displayInfo.supportsNoteName = false;
-            displayInfo.customFeatures = ParamDisplayFeatures::kUnitsAreSemitonesOrKeys;
-            displayInfo.customFeatures |= kAllowsTuningFractionTypein;
+            displayInfo.customFeatures = ParamDisplayFeatures::kUnitsAreSemitonesOrKeys |
+                                         ParamDisplayFeatures::kAllowsTuningFractionTypein;
         }
         break;
         case ct_freq_audible_fm3_extendable:
         {
             val_min.f = -60; // 13.75 Hz
+
+            if (val.f < val_min.f)
+            {
+                val.f = val_min.f;
+            }
         }
         break;
         case ct_freq_reson_band1:
         {
             // Why the heck are we modifying this here?
             val_max.f = -6.6305f; // 300 Hz
+
+            if (val.f > val_max.f)
+            {
+                val.f = val_max.f;
+            }
         }
         break;
         case ct_freq_reson_band2:
         {
             val_min.f = -6.6305f;  // 300 Hz
             val_max.f = 21.23265f; // 1500 Hz
+
+            if (val.f < val_min.f)
+            {
+                val.f = val_min.f;
+            }
+            else if (val.f > val_max.f)
+            {
+                val.f = val_max.f;
+            }
         }
         break;
         case ct_freq_reson_band3:
         {
             val_min.f = 21.23265f; // 1500 Hz
+
+            if (val.f < val_min.f)
+            {
+                val.f = val_min.f;
+            }
         }
         break;
         case ct_dly_fb_clippingmodes:
+        case ct_lfoamplitude:
+        {
+            val_min.f = 0.f;
+
+            if (val.f < val_min.f)
+            {
+                val.f = val_min.f;
+            }
+        }
+        break;
         case ct_lfophaseshuffle:
         {
             val_default.f = 0.f;
@@ -2207,6 +2318,11 @@ void Parameter::set_extend_range(bool er)
         }
         break;
         case ct_dly_fb_clippingmodes:
+        case ct_lfoamplitude:
+        {
+            val_min.f = -1.f;
+        }
+        break;
         case ct_lfophaseshuffle:
         {
             val_default.f = 0.5f;
@@ -2234,6 +2350,7 @@ float Parameter::get_extended(float f) const
 
     switch (ctrltype)
     {
+    case ct_freq_fm2_offset:
     case ct_freq_shift:
         return 100.f * f;
     case ct_pitch_semi7bp:
@@ -2256,8 +2373,6 @@ float Parameter::get_extended(float f) const
     case ct_filter_feedback:
     case ct_osc_feedback_negative:
         return 4.f * f;
-    case ct_lfoamplitude:
-        return (2.f * f) - 1.f;
     case ct_lfophaseshuffle:
     {
         return (2.f * f) - 1.f;
@@ -2390,18 +2505,13 @@ void Parameter::get_display_of_modulation_depth(char *txt, float modulationDepth
 {
 #define ITXT_SIZE 1024
 
-    int detailedMode = false;
-
-    if (storage)
-    {
-        detailedMode =
-            Surge::Storage::getUserDefaultValue(storage, Surge::Storage::HighPrecisionReadouts, 0);
-    }
+    const auto isHighPrecision = Surge::Storage::getValueDisplayIsHighPrecision(storage);
+    const auto displayPrecision = Surge::Storage::getValueDisplayPrecision(storage);
 
     if (basicBlocksParamMetaData.has_value() && basicBlocksParamMetaData->supportsStringConversion)
     {
         auto fs = sst::basic_blocks::params::ParamMetaData::FeatureState()
-                      .withHighPrecision(detailedMode)
+                      .withHighPrecision(isHighPrecision)
                       .withTemposync(can_temposync() && temposync)
                       .withAbsolute(can_be_absolute() && absolute)
                       .withExtended(can_extend_range() && extend_range);
@@ -2411,10 +2521,10 @@ void Parameter::get_display_of_modulation_depth(char *txt, float modulationDepth
         if (res.has_value())
         {
 #if DEBUG_MOD_STRINGS
-            std::cout << "  value  : " << res->value << std::endl;
-            std::cout << "  summm  : " << res->summary << std::endl;
-            std::cout << "  change : " << res->changeUp << " | " << res->changeDown << std::endl;
-            std::cout << "  vUpDn  : " << res->valUp << " | " << res->valDown << std::endl;
+            std::cout << "  value   : " << res->value << std::endl;
+            std::cout << "  summary : " << res->summary << std::endl;
+            std::cout << "  change  : " << res->changeUp << " | " << res->changeDown << std::endl;
+            std::cout << "  valUpDn : " << res->valUp << " | " << res->valDown << std::endl;
 #endif
             switch (displaymode)
             {
@@ -2442,7 +2552,7 @@ void Parameter::get_display_of_modulation_depth(char *txt, float modulationDepth
         }
     }
 
-    int dp = (detailedMode ? 6 : displayInfo.decimals);
+    int dp = (isHighPrecision ? 6 : displayInfo.decimals);
 
     const char *lowersep = "<", *uppersep = ">";
 
@@ -2549,7 +2659,7 @@ void Parameter::get_display_of_modulation_depth(char *txt, float modulationDepth
     {
         if (temposync)
         {
-            dp = (detailedMode ? 6 : 2);
+            dp = (isHighPrecision ? 6 : 2);
 
             switch (displaymode)
             {
@@ -2606,13 +2716,21 @@ void Parameter::get_display_of_modulation_depth(char *txt, float modulationDepth
             int vdp = dp;
             std::string vu = u;
 
+            // Display modulation values
+            float dmp = mp;
+            float dmn = mn;
+            float diffFac{1.f};
+
             if (displayInfo.customFeatures & ParamDisplayFeatures::kSwitchesFromSecToMillisec)
             {
                 if (dval < 1.f)
                 {
                     dval *= 1000.f;
                     vu = "ms";
-                    vdp = detailedMode ? 2 : 1;
+                    vdp = isHighPrecision ? 2 : 1;
+                    dmp *= 1000.f;
+                    dmn *= 1000.f;
+                    diffFac = 1000.f;
                 }
             }
 
@@ -2641,13 +2759,15 @@ void Parameter::get_display_of_modulation_depth(char *txt, float modulationDepth
                         char itxt[ITXT_SIZE];
                         snprintf(itxt, ITXT_SIZE, "%.*f %s", vdp, dval, vu.c_str());
                         iw->val = itxt;
-                        snprintf(itxt, ITXT_SIZE, "%.*f", dp, mp);
+                        snprintf(itxt, ITXT_SIZE, "%.*f", dp, dmp);
                         iw->valplus = itxt;
-                        snprintf(itxt, ITXT_SIZE, "%.*f", dp, mn);
+                        snprintf(itxt, ITXT_SIZE, "%.*f", dp, dmn);
                         iw->valminus = itxt;
-                        snprintf(itxt, ITXT_SIZE, "%s%.*f", (mp - v > 0 ? "+" : ""), dp, mp - v);
+                        snprintf(itxt, ITXT_SIZE, "%s%.*f", (mp - v > 0 ? "+" : ""), dp,
+                                 diffFac * (mp - v));
                         iw->dvalplus = itxt;
-                        snprintf(itxt, ITXT_SIZE, "%s%.*f", (mn - v > 0 ? "+" : ""), dp, mn - v);
+                        snprintf(itxt, ITXT_SIZE, "%s%.*f", (mn - v > 0 ? "+" : ""), dp,
+                                 diffFac * (mn - v));
                         iw->dvalminus = itxt;
 
                         if (displayInfo.customFeatures & ParamDisplayFeatures::kHasCustomMaxString)
@@ -2665,8 +2785,8 @@ void Parameter::get_display_of_modulation_depth(char *txt, float modulationDepth
                         }
                     }
 
-                    snprintf(txt, TXT_SIZE, "%.*f %s %.*f %s %.*f %s", dp, mn, lowersep, vdp, dval,
-                             uppersep, dp, mp, vu.c_str());
+                    snprintf(txt, TXT_SIZE, "%.*f %s %.*f %s %.*f %s", dp, dmn, lowersep, vdp, dval,
+                             uppersep, dp, dmp, vu.c_str());
                 }
                 else
                 {
@@ -2675,15 +2795,16 @@ void Parameter::get_display_of_modulation_depth(char *txt, float modulationDepth
                         char itxt[ITXT_SIZE];
                         snprintf(itxt, ITXT_SIZE, "%.*f %s", vdp, dval, vu.c_str());
                         iw->val = itxt;
-                        snprintf(itxt, ITXT_SIZE, "%.*f", dp, mn);
+                        snprintf(itxt, ITXT_SIZE, "%.*f", dp, dmp);
                         iw->valplus = itxt;
                         iw->valminus = "";
-                        snprintf(itxt, ITXT_SIZE, "%s%.*f", (mp - v > 0 ? "+" : ""), dp, mp - v);
+                        snprintf(itxt, ITXT_SIZE, "%s%.*f", (mp - v > 0 ? "+" : ""), dp,
+                                 diffFac * (mp - v));
                         iw->dvalplus = itxt;
                         iw->dvalminus = "";
                     }
 
-                    snprintf(txt, TXT_SIZE, "%.*f %s %.*f %s", vdp, dval, uppersep, dp, mp,
+                    snprintf(txt, TXT_SIZE, "%.*f %s %.*f %s", vdp, dval, uppersep, dp, dmp,
                              vu.c_str());
                 }
                 break;
@@ -2816,7 +2937,7 @@ void Parameter::get_display_of_modulation_depth(char *txt, float modulationDepth
             auto freq = 440.0 * pow(2.0, (note - 69.0) / 12);
             auto frequp = 440.0 * pow(2.0, (noteup - 69.0) / 12);
             auto freqdn = 440.0 * pow(2.0, (notedn - 69.0) / 12);
-            int dp = (detailedMode ? 6 : 2);
+            int dp = (isHighPrecision ? 6 : 2);
 
             switch (displaymode)
             {
@@ -2867,7 +2988,7 @@ void Parameter::get_display_of_modulation_depth(char *txt, float modulationDepth
         }
 
         float exmf = qq;
-        int dp = (detailedMode ? 6 : 2);
+        int dp = (isHighPrecision ? 6 : 2);
 
         switch (displaymode)
         {
@@ -2984,7 +3105,7 @@ void Parameter::get_display_of_modulation_depth(char *txt, float modulationDepth
     {
         if (temposync)
         {
-            dp = (detailedMode ? 6 : 2);
+            dp = (isHighPrecision ? 6 : 2);
 
             auto mp = modulationDepth;
             auto mn = -modulationDepth;
@@ -3085,8 +3206,8 @@ float Parameter::quantize_modulation(float inputval) const
         // fall back
     case LinearWithScale:
     {
-        float ext_mul = (can_extend_range() && extend_range) ? displayInfo.extendFactor : 1.0;
-        float abs_mul = (can_be_absolute() && absolute) ? displayInfo.absoluteFactor : 1.0;
+        float ext_mul = (can_extend_range() && extend_range) ? displayInfo.extendFactor : 1.f;
+        float abs_mul = (can_be_absolute() && absolute) ? displayInfo.absoluteFactor : 1.f;
         float factor = ext_mul * abs_mul;
         float tempval = (val_max.f - val_min.f) * displayInfo.scale * factor;
 
@@ -3226,9 +3347,37 @@ void Parameter::get_display_alt(char *txt, bool external, float ef) const
         }
     }
 
+    const auto isHighPrecision = Surge::Storage::getValueDisplayIsHighPrecision(storage);
+    const auto displayPrecision = Surge::Storage::getValueDisplayPrecision(storage);
+
     txt[0] = 0;
     switch (ctrltype)
     {
+    case ct_lforate:
+    case ct_lforate_deactivatable:
+    {
+        float f = val.f;
+        float fInv = 0.f;
+        int dec = isHighPrecision ? 6 : displayInfo.decimals;
+        std::string u = "s";
+
+        fInv = 1.f / (displayInfo.a * powf(2.0f, f * displayInfo.b));
+
+        if (temposync)
+        {
+            fInv *= storage->temposyncratio_inv;
+        }
+
+        if (fInv < 1.f)
+        {
+            fInv *= 1000.f;
+            u = "ms";
+        }
+
+        snprintf(txt, TXT_SIZE, "%.*f %s", dec, fInv, u.c_str());
+
+        break;
+    }
     case ct_pitch_extendable_very_low_minval:
     case ct_freq_hpf:
     case ct_freq_audible:
@@ -3258,7 +3407,20 @@ void Parameter::get_display_alt(char *txt, bool external, float ef) const
             f = 69 * ((f - 16.0) / 16.0);
         }
 
-        int i_value = round(f) + ((ctrltype != ct_freq_ringmod) ? 69 : 0);
+        int i_value = round(f);
+        if (ctrltype == ct_freq_ringmod)
+        {
+            i_value += 0;
+        }
+        else if (ctrltype == ct_freq_audible_fm3_extendable)
+        {
+            i_value += 60;
+        }
+        else
+        {
+            i_value += 69;
+        }
+
         int oct_offset = 1;
 
         if (storage)
@@ -3290,8 +3452,21 @@ void Parameter::get_display_alt(char *txt, bool external, float ef) const
 
         break;
     }
+    case ct_floaty_delay_playrate:
+    {
+        int dec = isHighPrecision ? 6 : displayInfo.decimals;
+
+        if (val.f == 0.f)
+            snprintf(txt, TXT_SIZE, "N/A");
+        else
+            snprintf(txt, TXT_SIZE, "%.*f semitones", dec,
+                     -12.f * std::log2f(1.f / std::abs(val.f)));
+
+        break;
+    }
     case ct_countedset_percent:
     case ct_countedset_percent_extendable:
+    case ct_countedset_percent_extendable_wtdeform:
         if (user_data != nullptr)
         {
             // We check when set so the reinterpret cast is safe and fast
@@ -3365,13 +3540,8 @@ std::string Parameter::get_display(bool external, float ef) const
     float f;
     bool b;
 
-    int detailedMode = 0;
-
-    if (storage)
-    {
-        detailedMode =
-            Surge::Storage::getUserDefaultValue(storage, Surge::Storage::HighPrecisionReadouts, 0);
-    }
+    const auto isHighPrecision = Surge::Storage::getValueDisplayIsHighPrecision(storage);
+    const auto displayPrecision = Surge::Storage::getValueDisplayPrecision(storage);
 
     if (basicBlocksParamMetaData.has_value() && basicBlocksParamMetaData->supportsStringConversion)
     {
@@ -3384,7 +3554,7 @@ std::string Parameter::get_display(bool external, float ef) const
             bbf = basicBlocksParamMetaData->normalized01ToNatural(ef);
 
         auto fs = sst::basic_blocks::params::ParamMetaData::FeatureState()
-                      .withHighPrecision(detailedMode)
+                      .withHighPrecision(isHighPrecision)
                       .withTemposync(can_temposync() && temposync)
                       .withAbsolute(can_be_absolute() && absolute)
                       .withExtended(can_extend_range() && extend_range);
@@ -3453,7 +3623,7 @@ std::string Parameter::get_display(bool external, float ef) const
             }
 
             txt = fmt::format("{:.{}f} {:s}", displayInfo.scale * f,
-                              (detailedMode ? 6 : displayInfo.decimals), u);
+                              (isHighPrecision ? 6 : displayInfo.decimals), u);
 
             if (f >= val_max.f &&
                 (displayInfo.customFeatures & ParamDisplayFeatures::kHasCustomMaxString))
@@ -3494,7 +3664,7 @@ std::string Parameter::get_display(bool external, float ef) const
             getSemitonesOrKeys(u);
 
             float dval = displayInfo.a * powf(2.0f, f * displayInfo.b);
-            int dec = detailedMode ? 6 : displayInfo.decimals;
+            int dec = isHighPrecision ? 6 : displayInfo.decimals;
 
             if (displayInfo.customFeatures & ParamDisplayFeatures::kSwitchesFromSecToMillisec)
             {
@@ -3502,7 +3672,7 @@ std::string Parameter::get_display(bool external, float ef) const
                 {
                     dval *= 1000.f;
                     u = "ms";
-                    dec = detailedMode ? 2 : 1;
+                    dec = isHighPrecision ? 3 : 1;
                 }
             }
 
@@ -3546,7 +3716,7 @@ std::string Parameter::get_display(bool external, float ef) const
             }
             else
             {
-                txt = fmt::format("{:.{}f} dB", amp_to_db(f), (detailedMode ? 6 : 2));
+                txt = fmt::format("{:.{}f} dB", amp_to_db(f), (isHighPrecision ? 6 : 2));
             }
 
             return txt;
@@ -3564,7 +3734,7 @@ std::string Parameter::get_display(bool external, float ef) const
                 auto note = 69 + 69 * bpv;
                 auto freq = 440.0 * pow(2.0, (note - 69.0) / 12);
 
-                txt = fmt::format("{:.{}f} Hz", freq, (detailedMode ? 6 : 2));
+                txt = fmt::format("{:.{}f} Hz", freq, (isHighPrecision ? 6 : 2));
             }
             else
             {
@@ -3572,18 +3742,19 @@ std::string Parameter::get_display(bool external, float ef) const
 
                 if (extend_range && q < 0)
                 {
-                    txt = fmt::format("C : 1 / {:.{}f}", -get_extended(f), (detailedMode ? 6 : 2));
+                    txt =
+                        fmt::format("C : 1 / {:.{}f}", -get_extended(f), (isHighPrecision ? 6 : 2));
                 }
                 else
                 {
-                    txt = fmt::format("C : {:.{}f}", get_extended(f), (detailedMode ? 6 : 2));
+                    txt = fmt::format("C : {:.{}f}", get_extended(f), (isHighPrecision ? 6 : 2));
                 }
             }
             break;
         }
         case ct_chow_ratio:
         {
-            txt = fmt::format("1 : {:.{}f}", f, (detailedMode ? 6 : 2));
+            txt = fmt::format("1 : {:.{}f}", f, (isHighPrecision ? 6 : 2));
             break;
         }
         case ct_float_toggle:
@@ -3592,7 +3763,7 @@ std::string Parameter::get_display(bool external, float ef) const
             break;
         }
         default:
-            txt = fmt::format("{:.{}f}", f, (detailedMode ? 6 : 2));
+            txt = fmt::format("{:.{}f}", f, (isHighPrecision ? 6 : 2));
             break;
         }
         break;
@@ -3755,12 +3926,14 @@ std::string Parameter::get_display(bool external, float ef) const
                             case FilterType::fut_none:
                             case FilterType::fut_lp12:
                             case FilterType::fut_lp24:
-                            case FilterType::fut_bp12:
                             case FilterType::fut_bp24:
                             case FilterType::fut_hp12:
                             case FilterType::fut_hp24:
                             case FilterType::fut_SNH:
                                 txt = sst::filters::fut_def_subtypes[i];
+                                break;
+                            case FilterType::fut_bp12:
+                                txt = sst::filters::fut_bp12_subtypes[i];
                                 break;
                             case FilterType::fut_tripole:
                                 // "i & 3" selects the lower two bits that represent the filter mode
@@ -3770,6 +3943,10 @@ std::string Parameter::get_display(bool external, float ef) const
                                     "{:s}, {:s}", sst::filters::fut_tripole_subtypes[i & 3],
                                     sst::filters::fut_tripole_output_stage[(i >> 2) & 3]);
                                 break;
+                            case FilterType::fut_cytomic_svf:
+                                return sst::filters::fut_cytomic_subtypes[i];
+                            case FilterType::fut_obxd_xpander:
+                                return sst::filters::fut_obxd_xpander_subtypes[i];
                             case FilterType::num_filter_types:
                                 txt = "ERROR";
                                 break;
@@ -3868,7 +4045,13 @@ std::string Parameter::get_display(bool external, float ef) const
             case 7:
                 txt = fmt::format("Wave {:d} (TX {:d})", i + 1, i + 1);
                 break;
-            case 28: // only hit in ringmod_sineoscmode
+            case 28:
+            case 29:
+            case 30:
+            case 31:
+                txt = fmt::format("Wave {:d} (Legacy TX {:d})", i + 1, (i - 27) * 2);
+                break;
+            case 32: // only hit in ringmod_sineoscmode
                 txt = "Audio In";
                 break;
             default:
@@ -3982,8 +4165,12 @@ std::string Parameter::get_display(bool external, float ef) const
         break;
         case ct_ensemble_stages:
         {
+#if defined(_M_ARM64EC)
+            txt = "name";
+#else
             extern std::string ensemble_stage_name(int);
             txt = ensemble_stage_name(i);
+#endif
         }
         break;
         case ct_reson_mode:
@@ -4343,7 +4530,6 @@ bool Parameter::can_setvalue_from_string() const
     case ct_decibel_fmdepth:
     case ct_decibel_extendable:
     case ct_decibel_deactivatable:
-    case ct_envtime_linkable_delay:
     case ct_freq_audible:
     case ct_freq_audible_deactivatable:
     case ct_freq_audible_deactivatable_hp:
@@ -4354,13 +4540,16 @@ bool Parameter::can_setvalue_from_string() const
     case ct_freq_reson_band1:
     case ct_freq_reson_band2:
     case ct_freq_reson_band3:
+    case ct_freq_fm2_offset:
     case ct_freq_shift:
     case ct_freq_hpf:
     case ct_freq_vocoder_low:
     case ct_freq_vocoder_high:
     case ct_bandwidth:
     case ct_envtime:
+    case ct_envtime_deformable:
     case ct_envtime_deactivatable:
+    case ct_envtime_linkable_delay:
     case ct_envtime_lfodecay:
     case ct_delaymodtime:
     case ct_reverbtime:
@@ -4377,6 +4566,7 @@ bool Parameter::can_setvalue_from_string() const
     case ct_oscspread_bipolar:
     case ct_countedset_percent:
     case ct_countedset_percent_extendable:
+    case ct_countedset_percent_extendable_wtdeform:
     case ct_flangerpitch:
     case ct_flangervoices:
     case ct_flangerspacing:
@@ -4409,6 +4599,9 @@ bool Parameter::can_setvalue_from_string() const
     case ct_tape_speed:
     case ct_spring_decay:
     case ct_bonsai_bass_boost:
+    case ct_floaty_warp_time:
+    case ct_floaty_delay_time:
+    case ct_floaty_delay_playrate:
     {
         return true;
     }
@@ -4492,13 +4685,13 @@ bool Parameter::set_value_from_string_onto(const std::string &s, pdata &ontoThis
             switch (valtype)
             {
             case vt_int:
-                val.i = (int)std::round(*res);
+                ontoThis.i = (int)std::round(*res);
                 break;
             case vt_float:
-                val.f = *res;
+                ontoThis.f = *res;
                 break;
             case vt_bool:
-                val.b = (*res > 0.5);
+                ontoThis.b = (*res > 0.5);
                 break;
             }
             return true;
@@ -4581,7 +4774,7 @@ bool Parameter::set_value_from_string_onto(const std::string &s, pdata &ontoThis
         }
         case ct_pbdepth:
         {
-            if (extend_range && s.find("/") != std::string::npos)
+            if (extend_range && s.find('/') != std::string::npos)
             {
                 if (!supports_tuning_value_from_string(s, errMsg))
                     return false;
@@ -4711,10 +4904,37 @@ bool Parameter::set_value_from_string_onto(const std::string &s, pdata &ontoThis
     }
     case LinearWithScale:
     {
-        if (displayInfo.customFeatures & ParamDisplayFeatures::kAllowsTuningFractionTypein)
+        if (displayInfo.customFeatures & ParamDisplayFeatures::kAllowsLinearFractionTypein)
         {
             // Check for a fraction
-            if (s.find("/") != std::string::npos)
+            if (s.find('/') != std::string::npos)
+            {
+                auto slashPos = s.find('/');
+                float nom, den;
+
+                if (slashPos == std::string::npos)
+                {
+                    nom = atoll(s.c_str());
+                    den = 1;
+                }
+                else
+                {
+                    nom = atoll(s.substr(0, slashPos).c_str());
+                    den = atoll(s.substr(slashPos + 1).c_str());
+                }
+
+                if (nom == 0 || den == 0)
+                {
+                    return false;
+                }
+
+                nv = nom / den;
+            }
+        }
+        else if (displayInfo.customFeatures & ParamDisplayFeatures::kAllowsTuningFractionTypein)
+        {
+            // Check for a fraction
+            if (s.find('/') != std::string::npos)
             {
                 if (!supports_tuning_value_from_string(s, errMsg))
                     return false;
@@ -4734,8 +4954,8 @@ bool Parameter::set_value_from_string_onto(const std::string &s, pdata &ontoThis
             }
         }
 
-        float ext_mul = (can_extend_range() && extend_range) ? displayInfo.extendFactor : 1.0;
-        float abs_mul = (can_be_absolute() && absolute) ? displayInfo.absoluteFactor : 1.0;
+        float ext_mul = (can_extend_range() && extend_range) ? displayInfo.extendFactor : 1.f;
+        float abs_mul = (can_be_absolute() && absolute) ? displayInfo.absoluteFactor : 1.f;
         float factor = ext_mul * abs_mul;
         float res = nv / displayInfo.scale / factor;
         float minval = val_min.f;
@@ -4917,7 +5137,7 @@ bool Parameter::set_value_from_string_onto(const std::string &s, pdata &ontoThis
             // OK so do we contain a /?
             const char *slp;
 
-            if ((slp = strstr(strip, "/")) != nullptr)
+            if ((slp = strchr(strip, '/')) != nullptr)
             {
                 float num = std::atof(strip);
                 float den = std::atof(slp + 1);
@@ -5018,10 +5238,37 @@ float Parameter::calculate_modulation_value_from_string(const std::string &s, st
     case DelegatedToFormatter:
     case LinearWithScale:
     {
-        if (displayInfo.customFeatures & ParamDisplayFeatures::kAllowsTuningFractionTypein)
+        if (displayInfo.customFeatures & ParamDisplayFeatures::kAllowsLinearFractionTypein)
         {
             // Check for a fraction
-            if (s.find("/") != std::string::npos)
+            if (s.find('/') != std::string::npos)
+            {
+                auto slashPos = s.find('/');
+                float nom, den;
+
+                if (slashPos == std::string::npos)
+                {
+                    nom = atoll(s.c_str());
+                    den = 1;
+                }
+                else
+                {
+                    nom = atoll(s.substr(0, slashPos).c_str());
+                    den = atoll(s.substr(slashPos + 1).c_str());
+                }
+
+                if (nom == 0 || den == 0)
+                {
+                    return false;
+                }
+
+                mv = nom / den;
+            }
+        }
+        else if (displayInfo.customFeatures & ParamDisplayFeatures::kAllowsTuningFractionTypein)
+        {
+            // Check for a fraction
+            if (s.find('/') != std::string::npos)
             {
                 if (!supports_tuning_value_from_string(s, errMsg))
                     return false;
@@ -5336,7 +5583,7 @@ float Parameter::calculate_modulation_value_from_string(const std::string &s, st
             // OK so do we contain a /?
             const char *slp;
 
-            if ((slp = strstr(strip, "/")) != nullptr)
+            if ((slp = strchr(strip, '/')) != nullptr)
             {
                 float num = std::atof(strip);
                 float den = std::atof(slp + 1);

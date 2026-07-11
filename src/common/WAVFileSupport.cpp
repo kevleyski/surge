@@ -4,7 +4,7 @@
  *
  * Learn more at https://surge-synthesizer.github.io/
  *
- * Copyright 2018-2023, various authors, as described in the GitHub
+ * Copyright 2018-2024, various authors, as described in the GitHub
  * transaction log.
  *
  * Surge XT is released under the GNU General Public Licence v3
@@ -44,9 +44,11 @@ bool four_chars(char *v, char a, char b, char c, char d)
     return v[0] == a && v[1] == b && v[2] == c && v[3] == d;
 }
 
-bool SurgeStorage::load_wt_wav_portable(std::string fn, Wavetable *wt)
+bool SurgeStorage::load_wt_wav_portable(std::string fn, Wavetable *wt, std::string &metadata)
 {
     std::string uitag = "Wavetable Import Error";
+
+    metadata = {};
 
 #if WAV_STDOUT_INFO
     std::cout << "Loading wt_wav_portable" << std::endl;
@@ -279,6 +281,12 @@ bool SurgeStorage::load_wt_wav_portable(std::string fn, Wavetable *wt)
             datasamples = cs * 8 / bitsPerSample / numChannels;
             wavdata = data;
         }
+        else if (four_chars(chunkType, 'w', 't', 'm', 'd'))
+        {
+            datasz = cs;
+            metadata = std::string(data);
+            free(data);
+        }
         else if (four_chars(chunkType, 's', 'm', 'p', 'l'))
         {
             char *dp = data;
@@ -474,7 +482,9 @@ bool SurgeStorage::load_wt_wav_portable(std::string fn, Wavetable *wt)
             windowSize = windowSize / 2;
 
         wh.n_samples = windowSize;
-        wh.n_tables = (int)(sample_length / windowSize);
+        // Clamp so BuildWT stays within the fixed-size tables. Samples are built
+        // with AppendSilence, which adds 3 frames, so leave room for those.
+        wh.n_tables = std::min(max_subtables - 3, (int)(sample_length / windowSize));
     }
 
     int channels = 1;
@@ -544,7 +554,8 @@ bool SurgeStorage::load_wt_wav_portable(std::string fn, Wavetable *wt)
     return true;
 }
 
-std::string SurgeStorage::export_wt_wav_portable(std::string fbase, Wavetable *wt)
+std::string SurgeStorage::export_wt_wav_portable(const std::string &fbase, Wavetable *wt,
+                                                 const std::string &metadata)
 {
     auto path = userDataPath / "Wavetables" / "Exported";
     fs::create_directories(path);
@@ -559,8 +570,14 @@ std::string SurgeStorage::export_wt_wav_portable(std::string fbase, Wavetable *w
         fnamePre = fbase + "_" + std::to_string(fnum) + ".wav";
         fnum++;
     }
+    return export_wt_wav_portable(fname, wt, metadata);
+}
 
+std::string SurgeStorage::export_wt_wav_portable(const fs::path &fname, Wavetable *wt,
+                                                 const std::string &metadata, bool exportForSerum)
+{
     std::string errorMessage = "Unknown error!";
+    std::string clm_string;
 
     {
         std::filebuf wfp;
@@ -570,7 +587,7 @@ std::string SurgeStorage::export_wt_wav_portable(std::string fbase, Wavetable *w
             errorMessage = "Unable to open file " + fname.u8string() + "!";
             errorMessage += std::strerror(errno);
 
-            reportError(errorMessage, "Wavetable Export");
+            reportError(errorMessage, "Export Error");
 
             return "";
         }
@@ -608,12 +625,25 @@ std::string SurgeStorage::export_wt_wav_portable(std::string fbase, Wavetable *w
 
         // OK so how much data do I have.
         unsigned int tableSize = nChannels * bitsPerSample / 8 * wt->n_tables * wt->size;
-        unsigned int dataSize = 4 +          // 'WAVE'
-                                4 + 4 + 18 + // fmt chunk
-                                4 + 4 + tableSize;
+        unsigned int dataSize = 4 +                 // 'WAVE'
+                                4 + 4 + 18 +        // fmt chunk
+                                4 + 4 + tableSize + // data chunk
+                                4 + 4 + 8;          // srgo/srge chunk
 
-        if (!isSample)
-            dataSize += 4 + 4 + 8; // srge chunk
+        // Serum's clm chunk description:
+        // https://www.kvraudio.com/forum/viewtopic.php?p=7266103&sid=708f193e517d29fe94c1c974e911af97#p7266103
+        if (exportForSerum)
+        {
+            std::ostringstream clm_string_stream;
+            clm_string_stream
+                << "<!>" << wt->size << " 10000000" // Flag set for linear interpolation
+                << " wavetable Surge-XT"; // No space and hyphen to keep string length even
+            clm_string = clm_string_stream.str();
+            dataSize += 4 + 4 + clm_string.length() + 1; // null term
+        }
+
+        if (!metadata.empty())
+            dataSize += 4 + 4 + metadata.length() + 1; // null term
 
         w4i(dataSize);
         wfp.sputn("WAVE", 4);
@@ -643,6 +673,13 @@ std::string SurgeStorage::export_wt_wav_portable(std::string fbase, Wavetable *w
             w4i(wt->size);
         }
 
+        if (exportForSerum)
+        {
+            wfp.sputn("clm ", 4);
+            w4i(clm_string.length() + 1);
+            wfp.sputn(clm_string.c_str(), clm_string.length() + 1);
+        }
+
         wfp.sputn("data", 4);
         w4i(tableSize);
 
@@ -651,9 +688,14 @@ std::string SurgeStorage::export_wt_wav_portable(std::string fbase, Wavetable *w
             wfp.sputn(reinterpret_cast<char *>(wt->TableF32WeakPointers[0][i]),
                       wt->size * bitsPerSample / 8);
         }
-    }
 
-    refresh_wtlist();
+        if (!metadata.empty())
+        {
+            wfp.sputn("wtmd", 4);
+            w4i(metadata.length() + 1);
+            wfp.sputn(metadata.c_str(), metadata.length() + 1);
+        }
+    }
 
     return path_to_string(fname);
 }

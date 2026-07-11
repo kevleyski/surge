@@ -4,7 +4,7 @@
  *
  * Learn more at https://surge-synthesizer.github.io/
  *
- * Copyright 2018-2023, various authors, as described in the GitHub
+ * Copyright 2018-2024, various authors, as described in the GitHub
  * transaction log.
  *
  * Surge XT is released under the GNU General Public Licence v3
@@ -30,6 +30,7 @@
 #include "tinyxml/tinyxml.h"
 #include "filesystem/import.h"
 #include "sst/cpputils.h"
+#include "sst/basic-blocks/dsp/RNG.h"
 
 #include <vector>
 #include <memory>
@@ -41,10 +42,13 @@
 #include <functional>
 #include <unordered_map>
 #include <map>
+#include <optional>
+#include <span>
 #include <utility>
 #include <type_traits>
 #include <random>
 #include <chrono>
+#include <array>
 
 #include "Tunings.h"
 #include "PatchDB.h"
@@ -70,7 +74,7 @@ const int n_oscs = 3;
 const int n_lfos_voice = 6;
 const int n_lfos_scene = 6;
 const int n_lfos = n_lfos_voice + n_lfos_scene;
-const int max_lfo_indices = 8;
+const int max_lfo_indices = 16;
 const int n_osc_params = 7;
 const int n_egs = 2;
 const int n_fx_params = 12;
@@ -87,53 +91,66 @@ const int FIRoffsetI16 = FIRipolI16_N >> 1;
 
 // clang-format off
 // XML file format revision history
-// 0 -> 1                      new filter/amp EG attack shapes (0 -> 1, 1 -> 2, 2 -> 2)
-// 1 -> 2                      new LFO EG stages (if (decay == max) sustain = max else sustain = min)
-// 2 -> 3                      filter subtypes added: Comb defaults to 1, Legacy Ladder defaults to 3
-// 3 -> 4                      Comb+ and Comb- are now combined into one filter type
-//                             (type, subtype: +, 0 -> 0 | +, 1 -> 1 | -, 0 -> 2 | -, 1 -> 3)
-// 4 -> 5                      Stereo filter configuration has separate pan controls now
-// 5 -> 6                      (1.2.0 release) filter resonance response changed (same parameters, different sound)
-// 6 -> 7                      custom controller state now stored in DAW recall
-// 7 -> 8                      larger resonance range (old filters are set to subtype 1)
-//                             Pan 2 -> Width
-// 8 -> 9                      macros extended to 8 (offset IDs larger than ctrl7 by 1)
-//                             macros can now be named (guess the name for older patches)
-// 9 -> 10                     added Character parameter
-// 10 -> 11 (1.6.2 release)    added DAW extra state
-// 11 -> 12 (1.6.3 release)    added new parameters to Distortion effect
-// 12 -> 13 (1.7.0 release)    added slider deactivation facility
-//                             Sine LP/HP filters
-//                             Sine/FM2/FM3 feedback extension/bipolar
-// 13 -> 14 (1.8.0 nightlies)  add Phaser Stages/Center/Spread parameters
-//                             add ability to configure Vocoder modulator input (monosum/L/R/stereo)
-//                             add comb filter tuning and compatibility block
-// 14 -> 15 (1.8.0 release)    the great remapping of filter types (GitHub issue #3006, PR #3329)
-// 15 -> 16 (1.9.0 release)    oscillator retrigger is consistent now (GitHub issue #3171, PR #3785)
-//                             added tuningApplicationMode to patch
-//                             added disable toggle to Low/High Cut filters in various effects
-//                             added disable toggle to Phaser Rate, and different waveform options
-// 16 -> 17 (XT 1.0 release)   added continuous morph toggle to Window oscillator
-//                             added (a lot of) new waveshapers
-//                             added two additional FX slots to all FX chains
-//                             added new Conditioner parameter (Side Low Cut)
-//                             read Global Volume from the patch (it was always stored just never read)
-// 17 -> 18 (XT 1.1 nightlies) added clipping options to Delay Feedback parameter (via deform)
-//                             added Tone parameter to Phaser effect
-// 18 -> 19 (XT 1.1 nightlies) added String deform options (interpolation, bipolar Decay params, Stiffness options)
-//                             added Extend to Delay Feedback parameter (allows negative delay)
-// 19 -> 20 (XT 1.1 release)   added voice envelope mode, but super late so don't break 19
-// 20 -> 21 (XT 1.2 nightlies) added absolutable mode for Combulator Offset 1/2 (to match the behavior of Center parameter)
-//                             added oddsound_as_mts_main
-// 21 -> 22 (XT 1.3 nighlies)  added new ring modulator modes in the mixer
-//                             added bonsai distortion effect
-//                             changed MIDI mapping behavior
-//                             added capability to deactivate scenes
-//                             added Vintage FM feedback mode to FM2, FM3 and Sine oscillator types
-//                             added extend mode to Delay Crossfeed and Mod Depth parameters
+// 0 -> 1                        new filter/amp EG attack shapes (0 -> 1, 1 -> 2, 2 -> 2)
+// 1 -> 2                        new LFO EG stages (if (decay == max) sustain = max else sustain = min)
+// 2 -> 3                        filter subtypes added: Comb defaults to 1, Legacy Ladder defaults to 3
+// 3 -> 4                        Comb+ and Comb- are now combined into one filter type
+//                               (type, subtype: +, 0 -> 0 | +, 1 -> 1 | -, 0 -> 2 | -, 1 -> 3)
+// 4 -> 5                        Stereo filter configuration has separate pan controls now
+// 5 -> 6                        (1.2.0 release) filter resonance response changed (same parameters, different sound)
+// 6 -> 7                        custom controller state now stored in DAW recall
+// 7 -> 8                        larger resonance range (old filters are set to subtype 1)
+//                               Pan 2 -> Width
+// 8 -> 9                        macros extended to 8 (offset IDs larger than ctrl7 by 1)
+//                               macros can now be named (guess the name for older patches)
+// 9 -> 10                       added Character parameter
+// 10 -> 11 (1.6.2 release)      added DAW extra state
+// 11 -> 12 (1.6.3 release)      added new parameters to Distortion effect
+// 12 -> 13 (1.7.0 release)      added slider deactivation facility
+//                               Sine LP/HP filters
+//                               Sine/FM2/FM3 feedback extension/bipolar
+// 13 -> 14 (1.8.0 nightlies)    added Phaser Stages/Center/Spread parameters
+//                               added ability to configure Vocoder modulator input (monosum/L/R/stereo)
+//                               added comb filter tuning and compatibility block
+// 14 -> 15 (1.8.0 release)      the great remapping of filter types (GitHub issue #3006, PR #3329)
+// 15 -> 16 (1.9.0 release)      oscillator retrigger is consistent now (GitHub issue #3171, PR #3785)
+//                               added tuningApplicationMode to patch
+//                               added disable toggle to Low/High Cut filters in various effects
+//                               added disable toggle to Phaser Rate, and different waveform options
+// 16 -> 17 (XT 1.0 release)     added continuous morph toggle to Window oscillator
+//                               added (a lot of) new waveshapers
+//                               added two additional FX slots to all FX chains
+//                               added new Conditioner parameter (Side Low Cut)
+//                               read Global Volume from the patch (it was always stored just never read)
+// 17 -> 18 (XT 1.1 nightlies)   added clipping options to Delay Feedback parameter (via deform)
+//                               added Tone parameter to Phaser effect
+// 18 -> 19 (XT 1.1 nightlies)   added String deform options (interpolation, bipolar Decay params, Stiffness options)
+//                               added Extend to Delay Feedback parameter (allows negative delay)
+// 19 -> 20 (XT 1.1 release)     added voice envelope mode, but super late so don't break 19
+// 20 -> 21 (XT 1.2 nightlies)   added absolutable mode for Combulator Offset 1/2 (to match the behavior of Center parameter)
+//                               added oddsound_as_mts_main
+// 21 -> 22 (XT 1.3 nighlies)    added new ring modulator modes in the mixer
+//                               added Bonsai distortion effect
+//                               changed MIDI mapping behavior
+//                               added capability to deactivate scenes
+//                               added Vintage FM feedback mode to FM2, FM3 and Sine oscillator types
+//                               added extend mode to Delay Crossfeed and Mod Depth parameters
+// 22 -> 23 (XT 1.3.2 release)   added storing of Tempo parameter to the patch (will be loaded in Standalone only if option enabled)
+//                               added output filter to the Ensemble effect
+//                               added deform option for Release parameter of Filter/Amp EG, which only produces an open gate for the release stage
+// 23 -> 24 (XT 1.3.3 nightlies) added actually functioning extend mode to FM2 oscillator's M1/2 Offset parameter
+//                                     (old patches load with extend disabled even if they had it enabled)
+// 24 -> 25 (XT 1.3.4 nightlies) added storing of Wavetable Script Editor window state
+// 25 -> 26 (XT 1.4.* nightlies) added WT Deform for new WT features
+//                               changed how extend-to-bipolar works for LFO Amplitude parameter
+//                               added DAWExtraState members for saving the state of Lua code editors, and variable group states in debugger
+// 26 -> 27 (XT 1.4.* nightlies) fixed OB-Xd and BP12 legacy streaming for sst-filters upgrade
+//                               fixed extendable parameters not extending in Waveshaper effect
+// 27 -> 28 (XT 1.4.* nightlies) added corrected TX shapes to Sine oscillator
+// 28 -> 29 (XT 1.4.* nightlies) save/load size of ArbitraryBlockStorage segment
 // clang-format on
 
-const int ff_revision = 22;
+const int ff_revision = 29;
 
 const int n_scene_params = 273;
 const int n_global_params = 11 + n_fx_slots * (n_fx_params + 1); // each param plus a type
@@ -142,6 +159,7 @@ const int n_total_params = n_global_params + 2 * n_scene_params + n_global_postp
 const int n_scenes = 2;
 const int n_filterunits_per_scene = 2;
 const int n_max_filter_subtypes = 16;
+const int n_wt_snapshots = 2;
 
 enum scene_mode
 {
@@ -203,12 +221,20 @@ enum NoiseColorChannels
     MONO = 1
 };
 
+enum NoiseColorValue
+{
+    LEGACY = 0,
+    TILT = 1,
+};
+
 enum CombinatorMode
 {
     cxm_ring = 0,
     cxm_cxor43_0,
     cxm_cxor43_1,
     cxm_cxor43_2,
+    cxm_cxor43_3_legacy,
+    cxm_cxor43_4_legacy,
     cxm_cxor43_3,
     cxm_cxor43_4,
     cxm_cxor93_0,
@@ -221,8 +247,9 @@ enum CombinatorMode
 };
 
 const char combinator_mode_names[n_cxm_modes][20] = {
-    "Ring Modulation", "Continuous XOR", "Type 1", "Type 2", "Type 3", "Type 4",
-    "Type 5",          "Type 6",         "Type 7", "Type 8", "Type 9",
+    "Ring Modulation", "Continuous XOR",                                         //
+    "Mode 1",          "Mode 2",         "Mode 3", "Mode 4", "Mode 5", "Mode 6", // SILM 4 gradients
+    "Mode 1",          "Mode 2",         "Mode 3", "Mode 4", "Mode 5",           // SILM 9 gradients
 };
 
 enum lfo_trigger_mode
@@ -277,9 +304,9 @@ enum osc_type
     n_osc_types,
 };
 
-const char osc_type_names[n_osc_types][24] = {"Classic",  "Sine",   "Wavetable", "S&H Noise",
-                                              "Audio In", "FM3",    "FM2",       "Window",
-                                              "Modern",   "String", "Twist",     "Alias",
+const char osc_type_names[n_osc_types][24] = {"Classic",     "Sine",   "Wavetable", "S&H Noise",
+                                              "Audio Input", "FM3",    "FM2",       "Window",
+                                              "Modern",      "String", "Twist",     "Alias",
                                               /*, "Phase Distortion", "Chaos", "FM4"*/};
 
 const char osc_type_shortnames[n_osc_types][24] = {"Classic",  "Sine",   "WT",    "S&H Noise",
@@ -337,6 +364,13 @@ enum fxchains
     fxc_sceneb,
     fxc_send,
     fxc_global,
+};
+
+const char fxchain_names[n_fx_chains][NAMECHARS] = {
+    "Scene A Insert FX Chain",
+    "Scene B Insert FX Chain",
+    "Send FX Chain",
+    "Global FX Chain",
 };
 
 const char fxslot_names[n_fx_slots][NAMECHARS] = {
@@ -406,6 +440,8 @@ enum fx_type
     fxt_spring_reverb,
     fxt_bonsai,
     fxt_audio_input,
+    fxt_floaty_delay,
+    fxt_convolution,
 
     n_fx_types,
 };
@@ -439,19 +475,22 @@ const char fx_type_names[n_fx_types][32] = {"Off",
                                             "Mid-Side Tool",
                                             "Spring Reverb",
                                             "Bonsai",
-                                            "Audio Input"};
+                                            "Audio Input",
+                                            "Floaty Delay",
+                                            "Convolution"};
 
 const char fx_type_shortnames[n_fx_types][16] = {
-    "Off",         "Delay",      "Reverb 1",      "Phaser",        "Rotary",     "Distortion",
-    "EQ",          "Freq Shift", "Conditioner",   "Chorus",        "Vocoder",    "Reverb 2",
-    "Flanger",     "Ring Mod",   "Airwindows",    "Neuron",        "Graphic EQ", "Resonator",
-    "CHOW",        "Exciter",    "Ensemble",      "Combulator",    "Nimbus",     "Tape",
-    "Treemonster", "Waveshaper", "Mid-Side Tool", "Spring Reverb", "Bonsai",     "Audio In"};
+    "Off",          "Delay",      "Reverb 1",      "Phaser",        "Rotary",     "Distortion",
+    "EQ",           "Freq Shift", "Conditioner",   "Chorus",        "Vocoder",    "Reverb 2",
+    "Flanger",      "Ring Mod",   "Airwindows",    "Neuron",        "Graphic EQ", "Resonator",
+    "CHOW",         "Exciter",    "Ensemble",      "Combulator",    "Nimbus",     "Tape",
+    "Treemonster",  "Waveshaper", "Mid-Side Tool", "Spring Reverb", "Bonsai",     "Audio In",
+    "Floaty Delay", "Convolution"};
 
 const char fx_type_acronyms[n_fx_types][8] = {
-    "OFF", "DLY", "RV1", "PH",   "ROT", "DIST", "EQ",  "FRQ", "DYN", "CH",
-    "VOC", "RV2", "FL",  "RM",   "AW",  "NEU",  "GEQ", "RES", "CHW", "XCT",
-    "ENS", "CMB", "NIM", "TAPE", "TM",  "WS",   "M-S", "SRV", "BON", "IN"};
+    "OFF", "DLY",  "RV1", "PH", "ROT", "DIST", "EQ",  "FRQ", "DYN", "CH",  "VOC",
+    "RV2", "FL",   "RM",  "AW", "NEU", "GEQ",  "RES", "CHW", "XCT", "ENS", "CMB",
+    "NIM", "TAPE", "TM",  "WS", "M-S", "SRV",  "BON", "IN",  "FDL", "IR"};
 
 enum fx_bypass
 {
@@ -539,6 +578,13 @@ const int lt_num_deforms[n_lfo_types] = {
     3, // lt_formula
 };
 
+// Special path tokens.
+constexpr std::string_view pt_user_ir("%UserIR%");            // Refers to userIRsPath
+constexpr std::string_view pt_extra_user_ir("%ExtraUserIR%"); // Refers to extraUserIRsPath
+constexpr std::string_view
+    pt_extra_3p_user_ir("%Extra3pUserIR%");            // Refers to extraThirdPartyIRsPath
+constexpr std::string_view pt_sys_data("%SurgeData%"); // Refers to datapath
+
 /*
  * With 1.8 for compactness all the filter names and stuff went to a separate header
  */
@@ -621,6 +667,55 @@ struct MidiChannelState
     float timbre;
 };
 
+// Arbitrary block storage helpers.
+// Arbitrary block storage can be used to save/load arbitrary blocks from the
+// patch and is available in particular places like the FX storage. An arbitrary block storage is
+// a vector<uint8_t>. This class captures that vector and provides helpers for working with it.
+struct ArbitraryBlockStorage
+{
+    std::vector<std::uint8_t> &data;
+
+    ArbitraryBlockStorage(std::vector<std::uint8_t> &v) : data(v) {}
+
+    // These will return an empty span if T is invalid size for the vector.
+    template <typename T> std::span<T> as()
+    {
+        if (data.size() % sizeof(T))
+            return std::span<T>();
+        return std::span<T>(reinterpret_cast<T *>(data.data()), data.size() / sizeof(T));
+    }
+
+    template <typename T> std::span<const T> as() const
+    {
+        if (data.size() % sizeof(T))
+            return std::span<const T>();
+        return std::span<const T>(reinterpret_cast<T *>(data.data()), data.size() / sizeof(T));
+    }
+
+    template <typename T> static std::span<T> as(std::vector<std::uint8_t> &v)
+    {
+        if (v.size() % sizeof(T))
+            return std::span<T>();
+        return std::span<T>(reinterpret_cast<T *>(v.data()), v.size() / sizeof(T));
+    }
+
+    template <typename T> static std::span<const T> as(const std::vector<std::uint8_t> &v)
+    {
+        if (v.size() % sizeof(T))
+            return std::span<const T>();
+        return std::span<const T>(reinterpret_cast<T *>(v.data()), v.size() / sizeof(T));
+    }
+
+    // These will all throw invalid_argument if there's an issue with size.
+    float to_float() const;
+    std::string to_string() const;
+
+    // Helpers for creating the vector v for the map.
+    static std::shared_ptr<std::vector<std::uint8_t>> from_float(const float f);
+    static std::shared_ptr<std::vector<std::uint8_t>> from_floats(std::span<const float> fs);
+    static std::shared_ptr<std::vector<std::uint8_t>> from_string(const std::string &s);
+};
+
 // I have used the ordering here in SurgeGUIEditor to iterate. Be careful if type or retrigger move
 // from first/last position.
 struct OscillatorStorage : public CountedSetUserData // The counted set is the wavetables
@@ -632,9 +727,10 @@ struct OscillatorStorage : public CountedSetUserData // The counted set is the w
     Wavetable wt;
 
     std::string wavetable_display_name;
-    std::string wavetable_formula = "";
-    int wavetable_formula_res_base = 5, // 32 * 2^this
-        wavetable_formula_nframes = 10;
+    std::string wavetable_script = "";
+    int wavetable_script_res_base = 5, // 32 * 2^this
+        wavetable_script_nframes = 10;
+    std::array<std::unique_ptr<Wavetable>, n_wt_snapshots> wtSnapshots;
 
     void *queue_xmldata;
     int queue_type;
@@ -704,6 +800,21 @@ struct FxStorage
 
     // like this one!
     fxslot_positions fxslot;
+
+    // Storage of arbitrary data for the FX. This storage should be considered
+    // read-only in realtime code (such as the audio thread), since
+    // modifications can result in allocations. This data is saved out as part
+    // of the patch. The string keys must be a maximum of 255 characters, for
+    // patch-saving purposes; otherwise, they will not be saved out.
+    //
+    // The value of this map is shared, to make undo/redo significantly cheaper.
+    // This means that as a consumer you must be *very careful* about this and
+    // either (1) treat it as read-only, or (2) update a copy when changing, as
+    // appropriate.
+    std::unordered_map<std::string, std::shared_ptr<std::vector<std::uint8_t>>> user_data;
+
+    // Construct helper for a given user data key.
+    inline const ArbitraryBlockStorage by_key(const std::string &key) { return *user_data[key]; }
 };
 
 struct SurgeSceneStorage
@@ -880,8 +991,8 @@ struct DAWExtraStateStorage
      * 1. Add it here with a reasonable default.
      * 2. In the SurgeGUIEditor constructor, read off the value
      * 3. In SurgeGUIEditor::populateDawExtraState write it
-     * 4. In SurgeGUIEditor::loadDawExtraState read it (this will probably be pretty similar to
-     *    the constructor code in step 4, but this is the step when restoring, as opposed to
+     * 4. In SurgeGUIEditor::loadFromDawExtraState read it (this will probably be pretty similar to
+     *    the constructor code in step 2, but this is the step when restoring, as opposed to
      *    creating an object).
      * 5. In SurgePatch load_xml()/save_xml() read and write it
      *
@@ -902,16 +1013,145 @@ struct DAWExtraStateStorage
             int timeEditMode = 0;
         } msegEditState[n_scenes][n_lfos];
 
+        struct ModulationSourceButtonState
+        {
+            int index{0};
+        } modulationSourceButtonState[n_scenes][n_lfos];
+
+        void clearAllModulationSourceButtonStates()
+        {
+            for (int s = 0; s < n_scenes; s++)
+            {
+                for (int o = 0; o < n_lfos; o++)
+                {
+                    modulationSourceButtonState[s][o].index = 0;
+                }
+            }
+        }
+
+        /*
+         * Window state parameters for Formula Editor overlay
+         * codeOrPrelude: Code editor selected tab
+         * debuggerOpen: Debug panel toggle
+         */
+
+        struct CodeEditorState
+        {
+            int scroll{0};
+            int caretPosition{0};
+            int selectStart{0};
+            int selectEnd{0};
+
+            bool popupOpen{false};
+            int popupType{0};
+            bool popupCaseSensitive{false};
+            bool popupWholeWord{false};
+            int popupCurrentResult{0};
+
+            std ::string popupText1{""};
+            std ::string popupText2{""};
+        };
+
         struct FormulaEditState
         {
             int codeOrPrelude{0};
+
             bool debuggerOpen{false};
+            bool debuggerUserVariablesOpen{true};
+            bool debuggerBuiltInVariablesOpen{true};
+            bool debuggerGroupState[8]{true, true, true, true, true, true, true, true};
+            std::string debuggerFilterText{""};
+            CodeEditorState codeEditor;
+
         } formulaEditState[n_scenes][n_lfos];
+
+        FormulaEditState originalState;
+
+        void clearCodeEditorState(CodeEditorState &codeEditor)
+        {
+            codeEditor.scroll = originalState.codeEditor.scroll;
+            codeEditor.caretPosition = originalState.codeEditor.caretPosition;
+
+            codeEditor.selectStart = originalState.codeEditor.selectStart;
+            codeEditor.selectEnd = originalState.codeEditor.selectEnd;
+
+            codeEditor.popupOpen = originalState.codeEditor.popupOpen;
+            codeEditor.popupType = originalState.codeEditor.popupType;
+            codeEditor.popupCaseSensitive = originalState.codeEditor.popupCaseSensitive;
+            codeEditor.popupWholeWord = originalState.codeEditor.popupWholeWord;
+            codeEditor.popupText1 = originalState.codeEditor.popupText1;
+            codeEditor.popupCurrentResult = originalState.codeEditor.popupCurrentResult;
+            codeEditor.popupText2 = originalState.codeEditor.popupText2;
+        }
+
+        void clearAllFormulaStatesInScene(int sc)
+        {
+            for (int i = 0; i < n_lfos; i++)
+            {
+                clearFormulaStateInScene(sc, i);
+            }
+        }
+
+        void clearFormulaStateInScene(int sc, int id)
+        {
+            formulaEditState[sc][id].debuggerFilterText = originalState.debuggerFilterText;
+            formulaEditState[sc][id].debuggerBuiltInVariablesOpen =
+                originalState.debuggerBuiltInVariablesOpen;
+            formulaEditState[sc][id].debuggerUserVariablesOpen =
+                originalState.debuggerUserVariablesOpen;
+
+            for (int i = 0; i < 8; i++)
+            {
+                formulaEditState[sc][id].debuggerGroupState[i] = true;
+            }
+            formulaEditState[sc][id].debuggerOpen = originalState.debuggerOpen;
+
+            clearCodeEditorState(formulaEditState[sc][id].codeEditor);
+        }
+
+        void clearAllFormulaStates()
+        {
+            for (int i = 0; i < n_scenes; i++)
+            {
+                clearAllFormulaStatesInScene(i);
+            }
+        }
+
+        void clearAllWTSEStateInScene(int sc)
+        {
+            for (int i = 0; i < n_oscs; i++)
+            {
+                clearWTSEStateInScene(sc, i);
+            }
+        }
+
+        void clearWTSEStateInScene(int sc, int i)
+        {
+            clearCodeEditorState(wavetableScriptEditState[sc][i].codeEditor);
+        }
+
+        void clearAllWTSEStates()
+        {
+            for (int i = 0; i < n_scenes; i++)
+            {
+                clearAllWTSEStateInScene(i);
+            }
+        }
 
         struct
         {
             bool hasCustomEditor = false;
         } oscExtraEditState[n_scenes][n_lfos];
+
+        /*
+         * Window state parameters for WTSE overlay
+         * codeOrPrelude: Code editor selected tab
+         */
+        struct WavetableScriptEditState
+        {
+            int codeOrPrelude{0};
+            CodeEditorState codeEditor;
+        } wavetableScriptEditState[n_scenes][n_oscs];
 
         struct OverlayState
         {
@@ -957,6 +1197,7 @@ struct DAWExtraStateStorage
 
     bool mpeEnabled = false;
     int mpePitchBendRange = -1;
+    bool mpeTimbreIsUnipolar = false;
 
     bool hasScale = false;
     std::string scaleContents = "";
@@ -966,6 +1207,7 @@ struct DAWExtraStateStorage
     std::string mappingName = "";
 
     bool mapChannelToOctave = false;
+    bool transposeByTuningPeriod = false;
 
     std::map<int, int> midictrl_map;           // param -> midictrl
     std::map<int, int> midichan_map;           // param -> midichan
@@ -975,15 +1217,20 @@ struct DAWExtraStateStorage
     int monoPedalMode = 0;
     int oddsoundRetuneMode = 0;
 
+    int tuningApplicationMode = 1; // RETUNE_MIDI_ONLY
+
     bool isDirty{false};
 
     bool disconnectFromOddSoundMTS{false};
 
     int oscPortIn{DEFAULT_OSC_PORT_IN};
+    int oscPortInLastBound{0}; // Tracks bound port for restoration, 0 = never bound
     int oscPortOut{DEFAULT_OSC_PORT_OUT};
     std::string oscIPAddrOut{DEFAULT_OSC_IPADDR_OUT};
     bool oscStartIn{false};
     bool oscStartOut{false};
+
+    fs::path lastLoadedPatch{};
 };
 
 struct PatchTuningStorage
@@ -996,6 +1243,12 @@ struct PatchTuningStorage
 
 class SurgeStorage;
 
+// Forward declare binn to avoid including binn.h into this header
+#ifndef BINN_H
+struct binn_struct;
+typedef struct binn_struct binn;
+#endif
+
 class SurgePatch
 {
   public:
@@ -1004,7 +1257,7 @@ class SurgePatch
     void init_default_values();
     void update_controls(bool init = false, void *init_osc = 0, bool from_stream = false);
     void do_morph();
-    void copy_scenedata(pdata *, int scene);
+    void copy_scenedata(pdata *, pdata *, int scene);
     void copy_globaldata(pdata *);
 
     // load/save
@@ -1023,8 +1276,15 @@ class SurgePatch
     void formulaFromXMLElement(FormulaModulatorStorage *ms, TiXmlElement *parent) const;
 
     void load_patch(const void *data, int size, bool preset);
+    unsigned int load_arbitrary_block_storage(const void *data, std::size_t remainder);
+    void load_arbitrary_block_storage_xml(const TiXmlElement *patch);
+    bool hasAnySnapshots() const;
     unsigned int save_patch(void **data);
+    std::vector<std::uint8_t> save_arbitrary_block_storage();
+    static bool writeOscSnapshotsToBinn(binn *oscmap, const OscillatorStorage &osc);
+    static bool readOscSnapshotsFromBinn(binn *oscmap, OscillatorStorage &osc);
     Parameter *parameterFromOSCName(std::string stName);
+    void captureWavetableSnapshot(int scene, int srcOsc, int dstOsc, int slot);
 
     // data
     SurgeSceneStorage scene[n_scenes], morphscene;
@@ -1052,6 +1312,7 @@ class SurgePatch
     FormulaModulatorStorage formulamods[n_scenes][n_lfos];
 
     PatchTuningStorage patchTuning;
+    bool snapshotsStoredInPatch = false;
     DAWExtraStateStorage dawExtraState;
 
     std::vector<Parameter *> param_ptr;
@@ -1059,6 +1320,7 @@ class SurgePatch
 
     std::vector<ModulationRouting> modulation_global;
     pdata scenedata[n_scenes][n_scene_params];
+    pdata scenedataOrig[n_scenes][n_scene_params];
     pdata globaldata[n_global_params];
     void *patchptr;
     SurgeStorage *storage;
@@ -1110,6 +1372,7 @@ class SurgePatch
     int32_t paramModulationCount{0};
     static constexpr int maxMonophonicParamModulations = 256;
     std::array<MonophonicParamModulation, maxMonophonicParamModulations> monophonicParamModulations;
+    int claimedArbitraryBlockStorageSize{0};
 };
 
 struct Patch
@@ -1172,6 +1435,7 @@ struct ScenesOutputData
 };
 
 struct FxUserPreset;
+struct FxChainUserPreset;
 struct ModulatorPreset;
 } // namespace Storage
 namespace Memory
@@ -1207,6 +1471,7 @@ class alignas(16) SurgeStorage
     float samplerate{0}, samplerate_inv{1};
     double dsamplerate{0}, dsamplerate_inv{1};
     double dsamplerate_os{0}, dsamplerate_os_inv{1};
+    fs::path lastLoadedPatch{};
     // Ring buffer that holds the audio output, used for the oscilloscope. Will hold a bit under 1/4
     // second of data, assuming the sample rate is 48k.
     sst::cpputils::StereoRingBuffer<float, 8192> audioOut;
@@ -1312,6 +1577,7 @@ class alignas(16) SurgeStorage
 
     float vu_falloff;
     float temposyncratio, temposyncratio_inv; // 1.f is 120 BPM
+    float unstreamedTempo{120.f};             // this one is in actual BPM
     double songpos;
     void init_tables();
     float nyquist_pitch;
@@ -1327,15 +1593,37 @@ class alignas(16) SurgeStorage
     void setSamplerate(float sr);
     float cpu_falloff;
 
-    bool oscListenerRunning{false};
+    bool oscReceiving{false};
     bool oscSending{false};
+
+    /*
+     * A bit of a cheat - this isn't really the storage, but is updated by the synth at render time.
+     * We put it here so LFOS can get it, which formula needs
+     */
+    std::atomic<int> activeVoiceCount{0};
 
     bool getOverrideDataHome(std::string &value);
     void createUserDirectory();
 
+    // Recompute userDataPathValid, userDefaultFilePath and all userDataPath-derived
+    // sub-paths (Patches, Wavetables, Skins, etc) from the current userDataPath.
+    // Call after any change to userDataPath.
+    void initializeUserDataPaths();
+
+    // Methods for handling user data path override stored in a separate file
+    // This returns path.empty() if there's no override, or if the configured
+    // override is invalid (in which case an error is also reported).
+    fs::path getOverridenUserPath();
+    void setOverridenUserPath(const fs::path *path);
+
+    fs::path resolvePathTokens(fs::path path);
+
     void refresh_wtlist();
     void refresh_wtlistAddDir(bool userDir, const std::string &subdir);
     void refresh_wtlistFrom(bool isUser, const fs::path &from, const std::string &subdir);
+    void refresh_irlist();
+    void refresh_irlistAddDir(bool userDir, const std::string &subdir);
+    void refresh_irlistFrom(bool isUser, const fs::path &from, const std::string &subdir);
     void refresh_patchlist();
     void refreshPatchlistAddDir(bool userDir, std::string subdir);
 
@@ -1348,10 +1636,23 @@ class alignas(16) SurgeStorage
 
     void load_wt(int id, Wavetable *wt, OscillatorStorage *);
     void load_wt(std::string filename, Wavetable *wt, OscillatorStorage *);
-    bool load_wt_wt(std::string filename, Wavetable *wt);
+    bool load_wt_wt(std::string filename, Wavetable *wt, std::string &metadata);
     bool load_wt_wt_mem(const char *data, const size_t dataSize, Wavetable *wt);
-    bool load_wt_wav_portable(std::string filename, Wavetable *wt);
-    std::string export_wt_wav_portable(std::string fbase, Wavetable *wt);
+    bool load_wt_wav_portable(std::string filename, Wavetable *wt, std::string &metadata);
+    std::string export_wt_wav_portable(const std::string &fbase, Wavetable *wt,
+                                       const std::string &metadata);
+    std::string export_wt_wav_portable(const fs::path &fpath, Wavetable *wt,
+                                       const std::string &metadata, bool exportForSerum = false);
+    bool export_wt_wt_portable(const fs::path &fpath, Wavetable *wt, const std::string &metadata);
+
+    std::string make_wt_metadata(OscillatorStorage *);
+    bool parse_wt_metadata(const std::string &, OscillatorStorage *);
+
+    // This allocates vectors, so be careful when/where you call it.
+    // Provided by the UI.
+    using AudioFileInput = std::tuple<std::int64_t, std::vector<std::vector<float>>>;
+    std::function<AudioFileInput(std::string)> load_audio_file{nullptr};
+
     void clipboard_copy(int type, int scene, int entry, modsources ms = ms_original);
     // this function is a bit of a hack to stop me having a reference to SurgeSynth here
     // and also to stop me having to move all of isValidModulation and its buddies onto SurgeStorage
@@ -1365,6 +1666,7 @@ class alignas(16) SurgeStorage
     int get_clipboard_type() const;
     // direction: false for previous, true for next
     int getAdjacentWaveTable(int id, bool direction) const;
+    std::string getCurrentWavetableName(OscillatorStorage *);
 
     // The in-memory patch database
     std::vector<Patch> patch_list;
@@ -1373,6 +1675,7 @@ class alignas(16) SurgeStorage
     int firstUserCategory;
     std::vector<int> patchOrdering;
     std::vector<int> patchCategoryOrdering;
+    std::vector<int> favoritesOrdering;
     std::array<std::array<int, 128>, 128> patchIdToMidiBankAndProgram;
 
     // The in-memory wavetable database
@@ -1383,23 +1686,42 @@ class alignas(16) SurgeStorage
     std::vector<int> wtOrdering;
     std::vector<int> wtCategoryOrdering;
 
+    // The in-memory IR database
+    std::vector<Patch> ir_list;
+    std::vector<PatchCategory> ir_category;
+    int firstThirdPartyIRCategory;
+    int firstUserIRCategory;
+    std::vector<int> irOrdering;
+    std::vector<int> irCategoryOrdering;
+
     std::unique_ptr<Surge::Storage::FxUserPreset> fxUserPreset;
+    std::unique_ptr<Surge::Storage::FxChainUserPreset> fxChainUserPreset;
     std::unique_ptr<Surge::Storage::ModulatorPreset> modulatorPreset;
 
     bool datapathOverriden{false};
     fs::path datapath;
     fs::path userDefaultFilePath;
     fs::path userDataPath;
+    fs::path localAppDataPath; // Path for storing app-level config like user data path override
     fs::path userPatchesPath;
     fs::path userPatchesMidiProgramChangePath;
     fs::path userWavetablesPath;
+    fs::path userIRsPath;
     fs::path userModulatorSettingsPath;
     fs::path userFXPath;
+    fs::path userFXChainPath;
     fs::path userWavetablesExportPath;
+    fs::path userWavetableScriptsPath;
     fs::path userSkinsPath;
     fs::path userMidiMappingsPath;
     fs::path extraThirdPartyWavetablesPath; // used by rack
     fs::path extraUserWavetablesPath;       // used by rack
+    fs::path extraThirdPartyIRsPath;
+    fs::path extraUserIRsPath;
+
+    fs::path calculateStandardUserDataPath(const std::string &sxt) const;
+
+    std::atomic<bool> userDataPathValid{false};
 
     std::string midiProgramChangePatchesSubdir{"MIDI Programs"};
 
@@ -1468,14 +1790,19 @@ class alignas(16) SurgeStorage
     bool hasPatchStoredTuning{false};
 
     std::atomic<bool> mapChannelToOctave; // When other midi modes come along, clean this up.
+    std::atomic<bool> transposeByTuningPeriod{false};
+
+    std::atomic<bool> useSustainAsModulatorOnly{false};
 
     bool mpeEnabled{false};
 
     int oscPortIn{DEFAULT_OSC_PORT_IN};
+    int oscPortInLastBound{0}; // Tracks bound port for restoration, 0 = never bound
     int oscPortOut{DEFAULT_OSC_PORT_OUT};
     std::string oscOutIP{"127.0.0.1"};
     bool oscStartIn{false};
     bool oscStartOut{false};
+    bool echoMIDIctrlToOSC{true}; // This may be made UI- or OSC-switchable in future
 
     static constexpr double MIDI_0_FREQ = Tunings::MIDI_0_FREQ;
     // this value needs to be passed along to FilterCoefficientMaker
@@ -1583,6 +1910,7 @@ class alignas(16) SurgeStorage
     float remapKeyInMidiOnlyMode(float inKey);
 
     void setTuningApplicationMode(const TuningApplicationMode m);
+    TuningApplicationMode getTuningApplicationMode() const;
 
 #ifndef SURGE_SKIP_ODDSOUND_MTS
     void initialize_oddsound();
@@ -1593,6 +1921,7 @@ class alignas(16) SurgeStorage
     void disconnect_as_oddsound_main();
     uint64_t lastSentTuningUpdate{0}; // since tuning update starts at 2
     void send_tuning_update();
+    std::atomic<bool> uiThreadChecksTunings{false};
 #endif
     MTSClient *oddsound_mts_client = nullptr;
     std::atomic<bool> oddsound_mts_active_as_client{false};
@@ -1603,6 +1932,17 @@ class alignas(16) SurgeStorage
         RETUNE_CONSTANT = 0,
         RETUNE_NOTE_ON_ONLY = 1
     } oddsoundRetuneMode = RETUNE_CONSTANT;
+
+    /*
+     * tuningPeriodSemitones returns the number of pitch units that correspond to one
+     * period of the current tuning. The meaning of "pitch units" depends on context:
+     * - In MTS mode: pitch is in semitone space; MTS_GetPeriodSemitones gives the period.
+     * - In RETUNE_ALL mode: pitch is in scale-note-index space; scale.count steps = one period.
+     * - In RETUNE_MIDI_ONLY mode: pitch is in semitone space; cents of last tone / 100 = one
+     * period.
+     * - Standard tuning: always 12 (one octave = 12 semitones).
+     */
+    float tuningPeriodSemitones() const;
 
     /*
      * If we tune at keyboard or with MTS, we don't reset the internal tuning table.
@@ -1627,9 +1967,11 @@ class alignas(16) SurgeStorage
         return res;
     }
 
-    Modulator::SmoothingMode smoothingMode = Modulator::SmoothingMode::LEGACY;
-    Modulator::SmoothingMode pitchSmoothingMode = Modulator::SmoothingMode::LEGACY;
+    Modulator::SmoothingMode smoothingMode = Modulator::SmoothingMode::FAST_LINE;
+    Modulator::SmoothingMode pitchSmoothingMode = Modulator::SmoothingMode::FAST_LINE;
+
     float mpePitchBendRange = -1.0f;
+    bool mpeTimbreIsUnipolar = false;
 
     std::atomic<int> otherscene_clients;
 
@@ -1658,7 +2000,16 @@ class alignas(16) SurgeStorage
         clipboard_modulation_global;
     Wavetable clipboard_wt[n_oscs];
     std::array<std::string, n_oscs> clipboard_wt_names;
+    std::array<std::string, n_oscs> clipboard_wavetable_script;
+    std::array<int, n_oscs> clipboard_wavetable_script_res_base;
+    std::array<int, n_oscs> clipboard_wavetable_script_nframes;
+    std::array<std::array<std::unique_ptr<Wavetable>, n_wt_snapshots>, n_oscs>
+        clipboard_wtSnapshots;
+
     char clipboard_modulator_names[n_lfos][max_lfo_indices][CUSTOM_CONTROLLER_LABEL_SIZE + 1];
+
+    bool clipboard_useSustainAsModulatorOnly = false;
+
     MonoVoicePriorityMode clipboard_primode = NOTE_ON_LATEST_RETRIGGER_HIGHEST;
     MonoVoiceEnvelopeMode clipboard_envmode = RESTART_FROM_ZERO;
 
@@ -1693,6 +2044,8 @@ class alignas(16) SurgeStorage
         std::uniform_real_distribution<float> pm1, z1;
         std::uniform_int_distribution<uint32_t> u32;
     } rngGen;
+
+    sst::basic_blocks::dsp::RNG noiseRng;
 
 #define DEBUG_RNG_THREADING 0
 #if DEBUG_RNG_THREADING
@@ -1760,6 +2113,17 @@ bool isValidUTF8(const std::string &testThis);
 
 std::string findReplaceSubstring(std::string &source, const std::string &from,
                                  const std::string &to);
+
+bool is_base64(unsigned char c);
+std::string base64_encode(unsigned char const *bytes_to_encode, unsigned int in_len);
+std::string base64_decode(std::string const &encoded_string);
+
+int getValueDisplayPrecision(SurgeStorage *storage);
+bool getValueDisplayIsHighPrecision(SurgeStorage *storage);
+
+// Fetch a resource bundled into the surge-common-binary CMakeRC archive.
+// Returns nullopt if the resource is missing. Never throws.
+std::optional<std::vector<char>> getSurgeCommonBinaryResource(const std::string &filename) noexcept;
 
 } // namespace Storage
 } // namespace Surge

@@ -4,7 +4,7 @@
  *
  * Learn more at https://surge-synthesizer.github.io/
  *
- * Copyright 2018-2023, various authors, as described in the GitHub
+ * Copyright 2018-2024, various authors, as described in the GitHub
  * transaction log.
  *
  * Surge XT is released under the GNU General Public Licence v3
@@ -23,31 +23,70 @@
 #ifndef SURGE_SRC_COMMON_DSP_WAVETABLESCRIPTEVALUATOR_H
 #define SURGE_SRC_COMMON_DSP_WAVETABLESCRIPTEVALUATOR_H
 
+#include "LuaSupport.h"
 #include "SurgeStorage.h"
-#include "StringOps.h"
 #include "Wavetable.h"
+#include "filesystem/import.h"
+
+#include <cstdint>
+#include <memory>
+#include <optional>
+#include <string>
+#include <vector>
 
 namespace Surge
 {
 namespace WavetableScript
 {
-/*
- * Unlike the LFO modulator this is called at render time of the wavetable
- * not at the evaluation or synthesis time. As such I expect you call it from
- * one thread at a time and just you know generally be careful.
- */
-std::vector<float> evaluateScriptAtFrame(const std::string &eqn, int resolution, int frame,
-                                         int nFrames);
+struct LuaWTEvaluator
+{
+    struct Details;
+    std::unique_ptr<Details> details;
+    LuaWTEvaluator();
+    ~LuaWTEvaluator();
 
-/*
- * Generate all the data required to call BuildWT. The wavdata here is data you
- * must free with delete[]
- */
-bool constructWavetable(const std::string &eqn, int resolution, int frames, wt_header &wh,
-                        float **wavdata);
+    static constexpr uint64_t wtsFeatures = Surge::LuaSupport::EnvironmentFeatures::BASE |
+                                            Surge::LuaSupport::EnvironmentFeatures::HAS_FFT;
 
-std::string defaultWavetableFormula();
+    void setStorage(SurgeStorage *);
+    void setOscillatorStorage(int scene, int osc);
+    void setScript(const std::string &);
+    void setResolution(size_t);
+    void setFrameCount(size_t);
+    void forceInvalidate();
+
+    using validFrame_t = std::vector<float>;
+    using frame_t = std::optional<validFrame_t>;
+
+    /*
+     * Generate all the data required to call BuildWT. The wavdata here is data you
+     * must free with delete[]
+     */
+    bool populateWavetable(wt_header &wh, float **wavdata);
+    void generateWavetable(SurgeStorage *storage, OscillatorStorage *oscdata, Wavetable *wt,
+                           bool exportMode = false);
+
+    void loadWtscript(const fs::path &filename, SurgeStorage *storage, OscillatorStorage *oscdata);
+    void loadWtscriptForTesting(const fs::path &filename, SurgeStorage *storage,
+                                OscillatorStorage *oscdata);
+
+    frame_t getFrame(size_t frame);
+
+    std::string getSuggestedWavetableName();
+
+    static std::string defaultWavetableScript();
+
+  private:
+    struct WtscriptData
+    {
+        std::string script;
+        int nframes = 0;
+        int res_base = 0;
+    };
+    std::optional<WtscriptData> parseWtscript(const fs::path &filename, SurgeStorage *storage,
+                                              OscillatorStorage *oscdata);
+};
 
 } // namespace WavetableScript
 } // namespace Surge
-#endif // SURGE_XT_WAVETABLESCRIPTEVALUATOR_H
+#endif // SURGE_SRC_COMMON_DSP_WAVETABLESCRIPTEVALUATOR_H

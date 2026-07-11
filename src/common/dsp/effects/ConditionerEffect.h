@@ -4,7 +4,7 @@
  *
  * Learn more at https://surge-synthesizer.github.io/
  *
- * Copyright 2018-2023, various authors, as described in the GitHub
+ * Copyright 2018-2024, various authors, as described in the GitHub
  * transaction log.
  *
  * Surge XT is released under the GNU General Public Licence v3
@@ -25,7 +25,6 @@
 #include "Effect.h"
 #include "BiquadFilter.h"
 #include "DSPUtils.h"
-#include "AllpassFilter.h"
 
 #include <vembertech/lipol.h>
 
@@ -48,8 +47,6 @@ class ConditionerEffect : public Effect
     void setvars(bool init);
     virtual void init_ctrltypes() override;
     virtual void init_default_values() override;
-    virtual Surge::ParamConfig::VUType vu_type(int id) override;
-    virtual int vu_ypos(int id) override;
     virtual const char *group_label(int id) override;
     virtual int group_label_ypos(int id) override;
 
@@ -67,6 +64,11 @@ class ConditionerEffect : public Effect
         cond_gain,
         cond_hpwidth,
     };
+
+    float vu[3][2]; // stereo pairs, just use first only when mono
+
+    static Surge::ParamConfig::VUType vu_type(int id);
+    static int vu_ypos(int id); // In half-hslider amount.
 
   private:
     BiquadFilter band1, band2, hp;

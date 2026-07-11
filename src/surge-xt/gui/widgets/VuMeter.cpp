@@ -4,7 +4,7 @@
  *
  * Learn more at https://surge-synthesizer.github.io/
  *
- * Copyright 2018-2023, various authors, as described in the GitHub
+ * Copyright 2018-2024, various authors, as described in the GitHub
  * transaction log.
  *
  * Surge XT is released under the GNU General Public Licence v3
@@ -53,6 +53,10 @@ void VuMeter::mouseDown(const juce::MouseEvent &event)
 
     mouseDownLongHold(event);
 }
+
+void VuMeter::mouseUp(const juce::MouseEvent &event) { mouseUpLongHold(event); }
+
+void VuMeter::mouseMove(const juce::MouseEvent &event) { mouseMoveLongHold(event); }
 
 void VuMeter::paint(juce::Graphics &g)
 {

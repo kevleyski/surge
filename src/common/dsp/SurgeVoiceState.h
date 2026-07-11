@@ -4,7 +4,7 @@
  *
  * Learn more at https://surge-synthesizer.github.io/
  *
- * Copyright 2018-2023, various authors, as described in the GitHub
+ * Copyright 2018-2024, various authors, as described in the GitHub
  * transaction log.
  *
  * Surge XT is released under the GNU General Public Licence v3
@@ -29,13 +29,14 @@ struct SurgeVoiceState
 {
     bool gate;
     bool keep_playing, uberrelease;
-    float pitch, scenepbpitch, fvel, pkey, priorpkey, detune, freleasevel;
+    float pitch, scenepbpitch, fvel, pkey, priorpkey, detune, freleasevel, tunedkey;
     MidiKeyState *keyState;
     MidiChannelState *mainChannelState;
     MidiChannelState *voiceChannelState;
-    int key, velocity, channel, scene_id, releasevelocity;
+    int key, velocity, channel, scene_id, releasevelocity, polylimit, scenemode, polymode,
+        splitpoint;
     float portasrc_key, portaphase;
-    bool porta_doretrigger;
+    bool porta_doretrigger{false};
 
     // These items support the tuning-snap mode in MTS mode
     float keyRetuning;
@@ -50,6 +51,7 @@ struct SurgeVoiceState
     int64_t voiceOrderAtCreate{-1};
 
     float getPitch(SurgeStorage *storage);
+    float MTS_RetuningForBentKey(SurgeStorage *storage, float key);
 };
 
 #endif // SURGE_SRC_COMMON_DSP_SURGEVOICESTATE_H

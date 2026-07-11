@@ -4,7 +4,7 @@
  *
  * Learn more at https://surge-synthesizer.github.io/
  *
- * Copyright 2018-2023, various authors, as described in the GitHub
+ * Copyright 2018-2024, various authors, as described in the GitHub
  * transaction log.
  *
  * Surge XT is released under the GNU General Public Licence v3
@@ -27,6 +27,7 @@
 #include "SurgeImage.h"
 #include "OverlayUtils.h"
 #include "SurgeGUIEditor.h"
+#include "SurgeGUIUtils.h"
 
 namespace Surge
 {
@@ -46,14 +47,15 @@ struct MultiLineSkinLabel : juce::Label, public Surge::GUI::SkinConsumingCompone
 
         g.setColour(skin->getColor(Colors::Dialog::Label::Text));
         g.setFont(skin->fontManager->getLatoAtSize(9));
-        g.drawFittedText(getText(), getLocalBounds(), juce::Justification::centredTop, 4);
+        g.drawFittedText(getText(), getLocalBounds(), juce::Justification::centred, maxTextLines);
     }
 
     void onSkinChanged() override { repaint(); }
 };
 
-Alert::Alert()
+Alert::Alert(uint16_t extraH)
 {
+    extraHeight = extraH;
     setAccessible(true);
     setFocusContainerType(juce::Component::FocusContainerType::focusContainer);
     setWantsKeyboardFocus(true);
@@ -75,10 +77,10 @@ Alert::Alert()
 
 Alert::~Alert() {}
 
-void Alert::addToggleButtonAndSetText(const std::string &t)
+void Alert::addDontAskAgainButtonAndSetText(const std::string &t)
 {
-    toggleButton = std::make_unique<juce::ToggleButton>(t);
-    addAndMakeVisible(*toggleButton);
+    dontAskAgainButton = std::make_unique<juce::ToggleButton>(t);
+    addAndMakeVisible(*dontAskAgainButton);
 }
 
 void Alert::resetAccessibility()
@@ -91,11 +93,10 @@ void Alert::resetAccessibility()
 
 juce::Rectangle<int> Alert::getDisplayRegion()
 {
-    if (toggleButton)
-    {
-        return juce::Rectangle<int>(0, 0, 360, 111).withCentre(getBounds().getCentre());
-    }
-    return juce::Rectangle<int>(0, 0, 360, 95).withCentre(getBounds().getCentre());
+    return juce::Rectangle<int>(0, 0, windowWidth,
+                                108 + (dontAskAgainButton ? btnHeight + windowMargin : 0) +
+                                    extraHeight)
+        .withCentre(getBounds().getCentre());
 }
 
 void Alert::paint(juce::Graphics &g)
@@ -107,13 +108,17 @@ void Alert::paint(juce::Graphics &g)
 
 void Alert::resized()
 {
-    auto margin = 2, btnHeight = 17, btnWidth = 50, buttonVertTranslate = toggleButton ? 86 : 70;
+    auto margin = 2;
 
     auto fullRect = getDisplayRegion();
     auto dialogCenter = fullRect.getWidth() / 2;
-    auto buttonRow = fullRect.withHeight(btnHeight).translated(0, buttonVertTranslate);
 
-    labelComponent->setBounds(fullRect.withTrimmedTop(18).withTrimmedBottom(btnHeight).reduced(6));
+    labelComponent->setBounds(
+        fullRect.withTrimmedTop(18).withHeight(68 + extraHeight).reduced(windowMargin));
+
+    auto buttonRow =
+        fullRect.withY(fullRect.getY() + fullRect.getHeight() - btnHeight - windowMargin)
+            .withHeight(btnHeight);
 
     if (singleButton)
     {
@@ -130,9 +135,9 @@ void Alert::resized()
         cancelButton->setBounds(canRect);
     }
 
-    if (toggleButton)
+    if (dontAskAgainButton)
     {
-        toggleButton->setBounds(fullRect.withHeight(16).translated(10, 70));
+        dontAskAgainButton->setBounds(buttonRow.translated(10, 0));
     }
 }
 
@@ -147,7 +152,7 @@ void Alert::onSkinChanged()
 
 void Alert::buttonClicked(juce::Button *button)
 {
-    if (!toggleButton)
+    if (!dontAskAgainButton)
     {
         if (button == okButton.get() && onOk)
         {
@@ -162,11 +167,11 @@ void Alert::buttonClicked(juce::Button *button)
     {
         if (button == okButton.get() && onOkForToggleState)
         {
-            onOkForToggleState(toggleButton->getToggleState());
+            onOkForToggleState(dontAskAgainButton->getToggleState());
         }
         else if (button == cancelButton.get() && onCancelForToggleState)
         {
-            onCancelForToggleState(toggleButton->getToggleState());
+            onCancelForToggleState(dontAskAgainButton->getToggleState());
         }
     }
 
@@ -176,7 +181,26 @@ void Alert::buttonClicked(juce::Button *button)
 void Alert::visibilityChanged()
 {
     if (isVisible())
-        grabKeyboardFocus();
+    {
+        Surge::GUI::grabKeyboardFocusIfAllowed(this);
+    }
+}
+
+bool Alert::keyPressed(const juce::KeyPress &press)
+{
+    if (press == juce::KeyPress::escapeKey)
+    {
+        buttonClicked(cancelButton.get());
+        return true;
+    }
+
+    if (press == juce::KeyPress::returnKey)
+    {
+        buttonClicked(okButton.get());
+        return true;
+    }
+
+    return false;
 }
 
 void Alert::setWindowTitle(const std::string &t)
@@ -184,9 +208,10 @@ void Alert::setWindowTitle(const std::string &t)
     title = t;
     setTitle(title);
 }
-void Alert::setLabel(const std::string &t)
+
+void Alert::setLabel(const std::string &l)
 {
-    label = t;
+    label = l;
     labelComponent->setText(label, juce::NotificationType::dontSendNotification);
 }
 } // namespace Overlays

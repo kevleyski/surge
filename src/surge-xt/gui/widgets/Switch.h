@@ -4,7 +4,7 @@
  *
  * Learn more at https://surge-synthesizer.github.io/
  *
- * Copyright 2018-2023, various authors, as described in the GitHub
+ * Copyright 2018-2024, various authors, as described in the GitHub
  * transaction log.
  *
  * Surge XT is released under the GNU General Public Licence v3
@@ -45,7 +45,10 @@ namespace Widgets
  *
  * The rough contract is:
  */
-struct Switch : public juce::Component, public WidgetBaseMixin<Switch>, public LongHoldMixin<Switch>
+struct Switch : public juce::Component,
+                public juce::SettableTooltipClient,
+                public WidgetBaseMixin<Switch>,
+                public LongHoldMixin<Switch>
 {
     Switch();
     ~Switch();
@@ -79,6 +82,7 @@ struct Switch : public juce::Component, public WidgetBaseMixin<Switch>, public L
 
     void paint(juce::Graphics &g) override;
     void mouseDown(const juce::MouseEvent &event) override;
+    void mouseUp(const juce::MouseEvent &event) override;
     void mouseEnter(const juce::MouseEvent &event) override;
     void mouseExit(const juce::MouseEvent &event) override;
 

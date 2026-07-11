@@ -4,7 +4,7 @@
  *
  * Learn more at https://surge-synthesizer.github.io/
  *
- * Copyright 2018-2023, various authors, as described in the GitHub
+ * Copyright 2018-2024, various authors, as described in the GitHub
  * transaction log.
  *
  * Surge XT is released under the GNU General Public Licence v3
@@ -39,6 +39,7 @@ namespace Widgets
 struct PatchDBTypeAheadProvider;
 
 struct PatchSelector : public juce::Component,
+                       public juce::SettableTooltipClient,
                        public WidgetBaseMixin<PatchSelector>,
                        public TypeAhead::TypeAheadListener
 {
@@ -67,11 +68,7 @@ struct PatchSelector : public juce::Component,
     }
 
     bool isFavorite{false};
-    void setIsFavorite(bool b)
-    {
-        isFavorite = b;
-        repaint();
-    }
+    void setIsFavorite(bool b);
 
     bool isUser{false};
     void setIsUser(bool b)
@@ -108,12 +105,22 @@ struct PatchSelector : public juce::Component,
 
         repaint();
     }
-    void setComment(const std::string &c) { comment = c; }
+
+    void setComment(const std::string &c)
+    {
+        comment = c;
+        setTooltip(comment);
+    }
+
+    juce::String getTooltip() override
+    {
+        return typeAhead->isVisible() ? "" : juce::SettableTooltipClient::getTooltip();
+    }
 
     void setTags(const std::vector<SurgePatch::Tag> &itag) { tags = itag; }
 
     /// TypeAhead API
-    void itemSelected(int providerIndex) override;
+    void itemSelected(int providerIndex, bool dontCloseTypeAhead) override;
     void itemFocused(int providerIndex) override;
     void typeaheadCanceled() override;
 
@@ -134,8 +141,7 @@ struct PatchSelector : public juce::Component,
         browserHover = false;
         favoritesHover = false;
         searchHover = false;
-        tooltipCountdown = -1;
-        // toggleCommentTooltip(false);
+
         repaint();
     }
 
@@ -150,6 +156,7 @@ struct PatchSelector : public juce::Component,
     void paint(juce::Graphics &g) override;
 
     void loadPatch(int id);
+    void loadPatch(int id, bool fromFavorites);
     void loadInitPatch();
     int sel_id = 0, enqueue_sel_id = 0;
 
@@ -163,6 +170,7 @@ struct PatchSelector : public juce::Component,
     void toggleTypeAheadSearch(bool);
     void enableTypeAheadIfReady();
     void searchUpdated();
+    void typeaheadButtonPressed();
     uint32_t outstandingSearches{0};
     std::unique_ptr<Surge::Widgets::TypeAhead> typeAhead;
     std::unique_ptr<PatchDBTypeAheadProvider> patchDbProvider;
@@ -182,12 +190,6 @@ struct PatchSelector : public juce::Component,
     std::vector<SurgePatch::Tag> tags;
     int current_category = 0, current_patch = 0;
 
-    int tooltipCountdown{-1};
-    void toggleCommentTooltip(bool b);
-    void shouldTooltip();
-    juce::Point<float> tooltipMouseLocation;
-    bool tooltipShowing{false};
-
     /**
      * populatePatchMenuForCategory
      *
@@ -197,25 +199,17 @@ struct PatchSelector : public juce::Component,
     bool populatePatchMenuForCategory(int index, juce::PopupMenu &contextMenu, bool single_category,
                                       int &main_e, bool rootCall);
 
+    // a little transparent button to alow ally and focus over find and fav
+    struct TB;
+    std::unique_ptr<TB> searchButton, favoriteButton;
+    void showFavoritesMenu();
+    void toggleFavoriteStatus();
+
   private:
     std::unique_ptr<juce::AccessibilityHandler> createAccessibilityHandler() override;
 
   protected:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PatchSelector);
-};
-
-struct PatchSelectorCommentTooltip : public juce::Component,
-                                     public Surge::GUI::SkinConsumingComponent
-{
-    PatchSelectorCommentTooltip(){};
-    void paint(juce::Graphics &g) override;
-
-    std::string comment;
-    void positionForComment(const juce::Point<int> &centerPoint, const std::string &comment,
-                            const int maxTooltipWidth);
-
-  protected:
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PatchSelectorCommentTooltip);
 };
 } // namespace Widgets
 } // namespace Surge
