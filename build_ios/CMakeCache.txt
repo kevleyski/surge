@@ -379,7 +379,7 @@ FMT_INSTALL:BOOL=OFF
 //Value Computed by CMake
 FMT_IS_TOP_LEVEL:STATIC=OFF
 
-//Build a module instead of a traditional library.
+//Build a module library.
 FMT_MODULE:BOOL=OFF
 
 //Include OS-specific APIs.
@@ -421,7 +421,7 @@ JUCE_ENABLE_MODULE_SOURCE_GROUPS:BOOL=OFF
 
 //The location, relative to the install prefix, where the JUCE
 // config file will be installed
-JUCE_INSTALL_DESTINATION:STRING=lib/cmake/JUCE-8.0.12
+JUCE_INSTALL_DESTINATION:STRING=lib/cmake/JUCE-6.1.0
 
 //Value Computed by CMake
 JUCE_IS_TOP_LEVEL:STATIC=OFF
@@ -434,11 +434,7 @@ JUCE_SOURCE_DIR:STATIC=/Users/klambert/workspace_KJSL/github_kevleyski/surge/lib
 
 //The location, relative to the install prefix, where juceaide
 // will be installed
-JUCE_TOOL_INSTALL_DIR:STRING=bin/JUCE-8.0.12
-
-//Location that overrides the default directory where our FindWebView2
-// script is looking for the *Microsoft.Web.WebView2* directory
-JUCE_WEBVIEW2_PACKAGE_LOCATION:BOOL=OFF
+JUCE_TOOL_INSTALL_DIR:STRING=bin/JUCE-6.1.0
 
 //Value Computed by CMake
 LuaJIT_BINARY_DIR:STATIC=/Users/klambert/workspace_KJSL/github_kevleyski/surge/build_ios/libs/luajitlib
@@ -489,7 +485,7 @@ SURGE_EXPOSE_PRESETS:BOOL=OFF
 SURGE_INCLUDE_MELATONIN_INSPECTOR:BOOL=OFF
 
 //Apple Development Team ID for iOS builds
-SURGE_IOS_DEV_TEAM:STRING=
+SURGE_IOS_DEV_TEAM:STRING=B973YVS5A5
 
 //Path to JUCE library source tree
 SURGE_JUCE_PATH:STRING=/Users/klambert/workspace_KJSL/github_kevleyski/surge/src/../libs/JUCE
@@ -566,11 +562,8 @@ ZSTD_BUILD_TESTS:BOOL=OFF
 //Build as Apple Framework
 ZSTD_FRAMEWORK:BOOL=OFF
 
-//Legacy support level
-ZSTD_LEGACY_LEVEL:STRING=5
-
 //Enable legacy format support
-ZSTD_LEGACY_SUPPORT:BOOL=ON
+ZSTD_LEGACY_SUPPORT:BOOL=OFF
 
 //LZ4 SUPPORT
 ZSTD_LZ4_SUPPORT:BOOL=OFF

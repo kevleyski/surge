@@ -49,10 +49,28 @@ unset(_cmake_expected_targets)
 # Create imported target juce_tools::juceaide
 add_executable(juce_tools::juceaide IMPORTED)
 
-# Import target "juce_tools::juceaide" for configuration "Custom"
-set_property(TARGET juce_tools::juceaide APPEND PROPERTY IMPORTED_CONFIGURATIONS CUSTOM)
+# Import target "juce_tools::juceaide" for configuration "Debug"
+set_property(TARGET juce_tools::juceaide APPEND PROPERTY IMPORTED_CONFIGURATIONS DEBUG)
 set_target_properties(juce_tools::juceaide PROPERTIES
-  IMPORTED_LOCATION_CUSTOM "/Users/klambert/workspace_KJSL/github_kevleyski/surge/build_ios/JUCE/tools/extras/Build/juceaide/juceaide_artefacts/Custom/juceaide"
+  IMPORTED_LOCATION_DEBUG "/Users/klambert/workspace_KJSL/github_kevleyski/surge/build_ios/JUCE/tools/extras/Build/juceaide/juceaide_artefacts/Debug/juceaide"
+  )
+
+# Import target "juce_tools::juceaide" for configuration "Release"
+set_property(TARGET juce_tools::juceaide APPEND PROPERTY IMPORTED_CONFIGURATIONS RELEASE)
+set_target_properties(juce_tools::juceaide PROPERTIES
+  IMPORTED_LOCATION_RELEASE "/Users/klambert/workspace_KJSL/github_kevleyski/surge/build_ios/JUCE/tools/extras/Build/juceaide/juceaide_artefacts/Release/juceaide"
+  )
+
+# Import target "juce_tools::juceaide" for configuration "MinSizeRel"
+set_property(TARGET juce_tools::juceaide APPEND PROPERTY IMPORTED_CONFIGURATIONS MINSIZEREL)
+set_target_properties(juce_tools::juceaide PROPERTIES
+  IMPORTED_LOCATION_MINSIZEREL "/Users/klambert/workspace_KJSL/github_kevleyski/surge/build_ios/JUCE/tools/extras/Build/juceaide/juceaide_artefacts/MinSizeRel/juceaide"
+  )
+
+# Import target "juce_tools::juceaide" for configuration "RelWithDebInfo"
+set_property(TARGET juce_tools::juceaide APPEND PROPERTY IMPORTED_CONFIGURATIONS RELWITHDEBINFO)
+set_target_properties(juce_tools::juceaide PROPERTIES
+  IMPORTED_LOCATION_RELWITHDEBINFO "/Users/klambert/workspace_KJSL/github_kevleyski/surge/build_ios/JUCE/tools/extras/Build/juceaide/juceaide_artefacts/RelWithDebInfo/juceaide"
   )
 
 # This file does not depend on other imported targets which have

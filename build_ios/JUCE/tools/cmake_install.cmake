@@ -12,7 +12,7 @@ if(NOT DEFINED CMAKE_INSTALL_CONFIG_NAME)
     string(REGEX REPLACE "^[^A-Za-z0-9_]+" ""
            CMAKE_INSTALL_CONFIG_NAME "${BUILD_TYPE}")
   else()
-    set(CMAKE_INSTALL_CONFIG_NAME "Custom")
+    set(CMAKE_INSTALL_CONFIG_NAME "Release")
   endif()
   message(STATUS "Install configuration: \"${CMAKE_INSTALL_CONFIG_NAME}\"")
 endif()
@@ -50,25 +50,20 @@ if(NOT CMAKE_INSTALL_LOCAL_ONLY)
 endif()
 
 if(CMAKE_INSTALL_COMPONENT STREQUAL "Unspecified" OR NOT CMAKE_INSTALL_COMPONENT)
-  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/cmake/JUCE-8.0.12" TYPE FILE FILES
+  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/cmake/JUCE-6.1.0" TYPE FILE FILES
     "/Users/klambert/workspace_KJSL/github_kevleyski/surge/build_ios/JUCE/tools/JUCEConfigVersion.cmake"
     "/Users/klambert/workspace_KJSL/github_kevleyski/surge/build_ios/JUCE/tools/JUCEConfig.cmake"
-    "/Volumes/KJSL/workspace/github_kevleyski/surge/libs/JUCE/extras/Build/CMake/JUCECheckAtomic.cmake"
     "/Volumes/KJSL/workspace/github_kevleyski/surge/libs/JUCE/extras/Build/CMake/JUCEHelperTargets.cmake"
-    "/Volumes/KJSL/workspace/github_kevleyski/surge/libs/JUCE/extras/Build/CMake/JUCEModuleSupport.cmake"
+    "/Volumes/KJSL/workspace/github_kevleyski/surge/libs/JUCE/extras/Build/CMake/JUCECheckAtomic.cmake"
     "/Volumes/KJSL/workspace/github_kevleyski/surge/libs/JUCE/extras/Build/CMake/JUCEUtils.cmake"
-    "/Volumes/KJSL/workspace/github_kevleyski/surge/libs/JUCE/extras/Build/CMake/JuceLV2Defines.h.in"
     "/Volumes/KJSL/workspace/github_kevleyski/surge/libs/JUCE/extras/Build/CMake/LaunchScreen.storyboard"
     "/Volumes/KJSL/workspace/github_kevleyski/surge/libs/JUCE/extras/Build/CMake/PIPAudioProcessor.cpp.in"
-    "/Volumes/KJSL/workspace/github_kevleyski/surge/libs/JUCE/extras/Build/CMake/PIPAudioProcessorWithARA.cpp.in"
     "/Volumes/KJSL/workspace/github_kevleyski/surge/libs/JUCE/extras/Build/CMake/PIPComponent.cpp.in"
     "/Volumes/KJSL/workspace/github_kevleyski/surge/libs/JUCE/extras/Build/CMake/PIPConsole.cpp.in"
     "/Volumes/KJSL/workspace/github_kevleyski/surge/libs/JUCE/extras/Build/CMake/RecentFilesMenuTemplate.nib"
     "/Volumes/KJSL/workspace/github_kevleyski/surge/libs/JUCE/extras/Build/CMake/UnityPluginGUIScript.cs.in"
-    "/Volumes/KJSL/workspace/github_kevleyski/surge/libs/JUCE/extras/Build/CMake/checkBundleSigning.cmake"
     "/Volumes/KJSL/workspace/github_kevleyski/surge/libs/JUCE/extras/Build/CMake/copyDir.cmake"
     "/Volumes/KJSL/workspace/github_kevleyski/surge/libs/JUCE/extras/Build/CMake/juce_runtime_arch_detection.cpp"
-    "/Volumes/KJSL/workspace/github_kevleyski/surge/libs/JUCE/extras/Build/CMake/juce_LinuxSubprocessHelper.cpp"
     )
 endif()
 

@@ -1,7 +1,7 @@
 # ==============================================================================
 #
 #  This file is part of the JUCE library.
-#  Copyright (c) - Raw Material Software Limited
+#  Copyright (c) 2020 - Raw Material Software Limited
 #
 #  JUCE is an open source library subject to commercial or open-source
 #  licensing.
@@ -44,31 +44,26 @@ endmacro()
 
 ####################################################################################
 
-include("${CMAKE_CURRENT_LIST_DIR}/LV2_HELPER.cmake")
-
 if(NOT TARGET juce::juceaide)
     add_executable(juce::juceaide IMPORTED)
     set_target_properties(juce::juceaide PROPERTIES
-        IMPORTED_LOCATION "${PACKAGE_PREFIX_DIR}/bin/JUCE-8.0.12/juceaide")
+        IMPORTED_LOCATION "${PACKAGE_PREFIX_DIR}/bin/JUCE-6.1.0/juceaide")
 endif()
 
 check_required_components("JUCE")
 
-set(JUCE_MODULES_DIR "${PACKAGE_PREFIX_DIR}/include/JUCE-8.0.12/modules" CACHE INTERNAL
+set(JUCE_MODULES_DIR "${PACKAGE_PREFIX_DIR}/include/JUCE-6.1.0/modules" CACHE INTERNAL
     "The path to JUCE modules")
 
-include("${PACKAGE_PREFIX_DIR}/lib/cmake/JUCE-8.0.12/JUCEModuleSupport.cmake")
-include("${PACKAGE_PREFIX_DIR}/lib/cmake/JUCE-8.0.12/JUCEUtils.cmake")
+include("${PACKAGE_PREFIX_DIR}/lib/cmake/JUCE-6.1.0/JUCEUtils.cmake")
 
 set(_juce_modules
     juce_analytics
-    juce_animation
     juce_audio_basics
     juce_audio_devices
     juce_audio_formats
     juce_audio_plugin_client
     juce_audio_processors
-    juce_audio_processors_headless
     juce_audio_utils
     juce_box2d
     juce_core
@@ -79,8 +74,6 @@ set(_juce_modules
     juce_graphics
     juce_gui_basics
     juce_gui_extra
-    juce_javascript
-    juce_midi_ci
     juce_opengl
     juce_osc
     juce_product_unlocking
@@ -114,7 +107,7 @@ unset(_targets_defined)
 unset(_targets_expected)
 
 foreach(_juce_module IN LISTS _juce_modules)
-    juce_add_module("${PACKAGE_PREFIX_DIR}/include/JUCE-8.0.12/modules/${_juce_module}" ALIAS_NAMESPACE juce)
+    juce_add_module("${PACKAGE_PREFIX_DIR}/include/JUCE-6.1.0/modules/${_juce_module}" ALIAS_NAMESPACE juce)
 endforeach()
 
 unset(_juce_modules)
