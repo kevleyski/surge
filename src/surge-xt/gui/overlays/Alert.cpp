@@ -27,7 +27,6 @@
 #include "SurgeImage.h"
 #include "OverlayUtils.h"
 #include "SurgeGUIEditor.h"
-#include "SurgeGUIUtils.h"
 
 namespace Surge
 {
@@ -182,7 +181,7 @@ void Alert::visibilityChanged()
 {
     if (isVisible())
     {
-        Surge::GUI::grabKeyboardFocusIfAllowed(this);
+        grabKeyboardFocus();
     }
 }
 

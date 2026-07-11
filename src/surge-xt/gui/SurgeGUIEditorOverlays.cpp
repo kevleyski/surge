@@ -21,7 +21,6 @@
  */
 
 #include "SurgeGUIEditor.h"
-#include "SurgeGUIUtils.h"
 
 #include "overlays/ModulationEditor.h"
 #include "overlays/PatchDBViewer.h"
@@ -556,7 +555,7 @@ void SurgeGUIEditor::showOverlay(OverlayTags olt,
 
     if (wantsInitialKeyboardFocus)
     {
-        Surge::GUI::grabKeyboardFocusIfAllowed(getOverlayIfOpen(olt));
+        getOverlayIfOpen(olt)->grabKeyboardFocus();
     }
 }
 

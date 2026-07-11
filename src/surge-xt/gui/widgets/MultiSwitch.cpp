@@ -495,7 +495,7 @@ void MultiSwitch::updateAccessibleStateOnUserValueChange()
     {
         return;
     }
-    Surge::GUI::grabKeyboardFocusIfAllowed(selectionComponents[getIntegerValue()].get());
+    selectionComponents[getIntegerValue()]->grabKeyboardFocus();
 }
 
 template <> struct DiscreteAHRange<MultiSwitch>

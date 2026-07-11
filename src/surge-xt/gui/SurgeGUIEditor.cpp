@@ -357,6 +357,8 @@ SurgeGUIEditor::SurgeGUIEditor(SurgeSynthEditor *jEd, SurgeSynthesizer *synth)
 {
     jassert(Surge::GUI::ModulationGrid::getModulationGrid());
 
+    juce::Desktop::getInstance().addGlobalMouseListener(&twoFingerTapDetector);
+
     assert(n_paramslots >= n_total_params);
     synth->storage.addErrorListener(this);
     synth->storage.okCancelProvider = [this](const std::string &msg, const std::string &title,
@@ -406,11 +408,6 @@ SurgeGUIEditor::SurgeGUIEditor(SurgeSynthEditor *jEd, SurgeSynthesizer *synth)
     Surge::GUI::setHostRequiresShowCursor(juce::PluginHostType().isLogic() ||
                                           juce::PluginHostType().isGarageBand());
 
-    // Mirror the "never move keyboard focus" preference into the GUI layer so
-    // deep widget code can honor it without needing a storage reference.
-    Surge::GUI::setNeverMoveKeyboardFocus(Surge::Storage::getUserDefaultValue(
-        &(this->synth->storage), Surge::Storage::NeverMoveKeyboardFocus, false));
-
     currentSkin = Surge::GUI::SkinDB::get()->defaultSkin(&(this->synth->storage));
 
     // init the size of the plugin
@@ -422,10 +419,13 @@ SurgeGUIEditor::SurgeGUIEditor(SurgeSynthEditor *jEd, SurgeSynthesizer *synth)
         float baseW = getWindowSizeX();
         float baseH = getWindowSizeY();
 
+#if JUCE_IOS
+        auto correctedZf = 125.0f;
+#else
         int maxScreenUsage = 70;
-
         auto correctedZf =
             findLargestFittingZoomBetween(100.0, 250.0, 25, maxScreenUsage, baseW, baseH);
+#endif
 
         /*
          * If there's nothing, probably a fresh install but may be no default. So be careful if
@@ -505,6 +505,7 @@ SurgeGUIEditor::~SurgeGUIEditor()
 {
     juce::PopupMenu::dismissAllActiveMenus();
     juce::Desktop::getInstance().removeFocusChangeListener(this);
+    juce::Desktop::getInstance().removeGlobalMouseListener(&twoFingerTapDetector);
     synth->removeModulationAPIListener(this);
     synth->storage.clearOkCancelProvider();
     auto isPop = synth->storage.getPatch().dawExtraState.isPopulated;
@@ -670,7 +671,7 @@ void SurgeGUIEditor::idle()
             if (!(alert && alert->isVisible()))
             {
                 componentToFocusAfterAlertDismissal->setWantsKeyboardFocus(true);
-                Surge::GUI::grabKeyboardFocusIfAllowed(componentToFocusAfterAlertDismissal);
+                componentToFocusAfterAlertDismissal->grabKeyboardFocus();
             }
         }
 
@@ -2414,7 +2415,7 @@ void SurgeGUIEditor::openOrRecreateEditor()
 
     if (!somethingHasFocus && patchSelector && patchSelector->isShowing())
     {
-        Surge::GUI::grabKeyboardFocusIfAllowed(patchSelector.get());
+        patchSelector->grabKeyboardFocus();
     }
 
     sendStructureChangeIn = 120;
@@ -3051,13 +3052,26 @@ bool SurgeGUIEditor::doesZoomFitToScreen(float zf, float &correctedZf)
     ** Keep these as integers to be consistent with the other zoom factors, and to make
     ** the error message cleaner.
     */
+#if JUCE_IOS
+    int maxScreenUsage = 100;
+#else
     int maxScreenUsage = 90;
+#endif
 
     /*
     ** In the startup path we may not have a clean window yet to give us a trustworthy
     ** screen dimension; so allow callers to suppress this check with an optional
     ** variable and set it only in the constructor of SurgeGUIEditor
     */
+#if JUCE_IOS
+    if (screenDim.getHeight() > 0 && screenDim.getWidth() > 0 &&
+        ((baseW * zf / 100.0) > maxScreenUsage * screenDim.getWidth() / 100.0 ||
+         (baseH * zf / 100.0) > maxScreenUsage * screenDim.getHeight() / 100.0))
+    {
+        correctedZf = findLargestFittingZoomBetween(minimumZoom, zf, 5, maxScreenUsage, baseW, baseH);
+        return false;
+    }
+#else
     if (zf != 100.0 && zf > 100 && screenDim.getHeight() > 0 && screenDim.getWidth() > 0 &&
         ((baseW * zf / 100.0) > maxScreenUsage * screenDim.getWidth() / 100.0 ||
          (baseH * zf / 100.0) > maxScreenUsage * screenDim.getHeight() / 100.0))
@@ -3065,6 +3079,7 @@ bool SurgeGUIEditor::doesZoomFitToScreen(float zf, float &correctedZf)
         correctedZf = findLargestFittingZoomBetween(100.0, zf, 5, maxScreenUsage, baseW, baseH);
         return false;
     }
+#endif
     else
     {
         correctedZf = zf;
@@ -3218,14 +3233,7 @@ void SurgeGUIEditor::setRecommendedAccessibility()
                                            Surge::Storage::ExpandModMenusWithSubMenus, true);
     Surge::Storage::updateUserDefaultValue(
         &(this->synth->storage), Surge::Storage::FocusModEditorAfterAddModulationFrom, true);
-    oss << "Expanded Modulation Menus and Modulation Focus; ";
-
-    // Accessibility relies on Surge moving keyboard focus, so make sure the
-    // "never move keyboard focus" preference is off.
-    Surge::Storage::updateUserDefaultValue(&(this->synth->storage),
-                                           Surge::Storage::NeverMoveKeyboardFocus, false);
-    Surge::GUI::setNeverMoveKeyboardFocus(false);
-    oss << "Keyboard focus movement on.";
+    oss << "Expanded Modulation Menus and Modulation Focus.";
 
     enqueueAccessibleAnnouncement(oss.str());
 }
@@ -6094,7 +6102,7 @@ bool SurgeGUIEditor::keyPressed(const juce::KeyPress &key, juce::Component *orig
                     // So now focus the first element of focusThis
                     if (focusThis->getWantsKeyboardFocus())
                     {
-                        Surge::GUI::grabKeyboardFocusIfAllowed(focusThis);
+                        focusThis->grabKeyboardFocus();
 
                         return true;
                     }
@@ -6103,7 +6111,7 @@ bool SurgeGUIEditor::keyPressed(const juce::KeyPress &key, juce::Component *orig
                     {
                         if (c->getWantsKeyboardFocus() && c->isShowing())
                         {
-                            Surge::GUI::grabKeyboardFocusIfAllowed(c);
+                            c->grabKeyboardFocus();
 
                             return true;
                         }
@@ -6145,7 +6153,7 @@ bool SurgeGUIEditor::keyPressed(const juce::KeyPress &key, juce::Component *orig
                         {
                             if (c->getWantsKeyboardFocus() && c->isShowing())
                             {
-                                Surge::GUI::grabKeyboardFocusIfAllowed(c);
+                                c->grabKeyboardFocus();
 
                                 return true;
                             }

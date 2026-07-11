@@ -1,0 +1,7 @@
+/Users/klambert/workspace_KJSL/github_kevleyski/surge-ios/build-xcode/JUCE/tools/CMakeFiles/install.dir
+/Users/klambert/workspace_KJSL/github_kevleyski/surge-ios/build-xcode/JUCE/tools/CMakeFiles/ALL_BUILD.dir
+/Users/klambert/workspace_KJSL/github_kevleyski/surge-ios/build-xcode/JUCE/tools/CMakeFiles/ZERO_CHECK.dir
+/Users/klambert/workspace_KJSL/github_kevleyski/surge-ios/build-xcode/JUCE/tools/modules/CMakeFiles/install.dir
+/Users/klambert/workspace_KJSL/github_kevleyski/surge-ios/build-xcode/JUCE/tools/extras/Build/CMakeFiles/install.dir
+/Users/klambert/workspace_KJSL/github_kevleyski/surge-ios/build-xcode/JUCE/tools/extras/Build/juceaide/CMakeFiles/juceaide.dir
+/Users/klambert/workspace_KJSL/github_kevleyski/surge-ios/build-xcode/JUCE/tools/extras/Build/juceaide/CMakeFiles/install.dir

@@ -57,6 +57,10 @@
 
 #include "sst/basic-blocks/mechanics/endian-ops.h"
 
+#if MAC
+#include <TargetConditionals.h>
+#endif
+
 CMRC_DECLARE(surge_common_binary);
 
 namespace mech = sst::basic_blocks::mechanics;
@@ -188,12 +192,40 @@ SurgeStorage::SurgeStorage(const SurgeStorage::SurgeStorageConfig &config) : oth
     std::string sxt = "Surge XT";
     std::string sxtlower = "surge-xt";
 
+#if MAC && (TARGET_OS_IPHONE || TARGET_OS_IOS)
+    // iOS does not expose the macOS-style Application Support locations in the way Surge expects.
+    localAppDataPath =
+        sst::plugininfra::paths::bestDocumentsVendorFolderPathFor("Surge Synth Team", "Surge XT");
+#else
     // Set up the local app data path for storing app-level config
     localAppDataPath = sst::plugininfra::paths::bestLibrarySharedVendorFolderPathFor(
         "Surge Synth Team", "Surge XT", true);
+#endif
     userDataPath = getOverridenUserPath();
 
 #if MAC
+#if TARGET_OS_IPHONE || TARGET_OS_IOS
+    if (!hasSuppliedDataPath)
+    {
+        auto shareddp =
+            sst::plugininfra::paths::sharedLibraryBinaryPath().parent_path() / "SurgeXTData";
+        auto userdp = sst::plugininfra::paths::bestDocumentsFolderPathFor(sxt);
+
+        if (fs::is_directory(userdp))
+            datapath = userdp;
+        else
+            datapath = shareddp;
+    }
+    else
+    {
+        datapath = fs::path{suppliedDataPath};
+    }
+
+    if (userDataPath.empty())
+    {
+        userDataPath = calculateStandardUserDataPath(sxt);
+    }
+#else
     if (!hasSuppliedDataPath)
     {
         auto shareddp = sst::plugininfra::paths::bestLibrarySharedFolderPathFor(sxt);
@@ -217,6 +249,7 @@ SurgeStorage::SurgeStorage(const SurgeStorage::SurgeStorageConfig &config) : oth
     // These are how I test a broken windows install for documents
     // userDataPath = fs::path{"/good/luck/bozo"};
     // userDataPath = fs::path{"/usr/sbin"};
+#endif
 #elif LINUX
     const auto installPath = sst::plugininfra::paths::sharedLibraryBinaryPath().parent_path();
 
@@ -1456,51 +1489,38 @@ void SurgeStorage::perform_queued_wtloads()
     {
         for (int o = 0; o < n_oscs; o++)
         {
-            // A malformed wavetable must never let an exception escape into the
-            // audio thread; catch here so a bad load can't terminate the process.
-            try
+            if (patch.scene[sc].osc[o].wt.queue_id != -1)
             {
-                if (patch.scene[sc].osc[o].wt.queue_id != -1)
-                {
-                    if (patch.scene[sc].osc[o].wt.everBuilt)
-                        patch.isDirty = true;
-                    load_wt(patch.scene[sc].osc[o].wt.queue_id, &patch.scene[sc].osc[o].wt,
-                            &patch.scene[sc].osc[o]);
-                    patch.scene[sc].osc[o].wt.force_refresh_display = false;
-                    patch.scene[sc].osc[o].wt.refresh_display = true;
-                }
-                else if (patch.scene[sc].osc[o].wt.queue_filename[0])
-                {
-                    if (!(uses_wavetabledata(patch.scene[sc].osc[o].type.val.i)))
-                    {
-                        patch.scene[sc].osc[o].queue_type = ot_wavetable;
-                    }
-                    int wtidx = -1, ct = 0;
-                    for (const auto &wti : wt_list)
-                    {
-                        if (path_to_string(wti.path) == patch.scene[sc].osc[0].wt.queue_filename)
-                        {
-                            wtidx = ct;
-                        }
-                        ct++;
-                    }
-
-                    patch.scene[sc].osc[o].wt.current_id = wtidx;
-                    load_wt(patch.scene[sc].osc[o].wt.queue_filename, &patch.scene[sc].osc[o].wt,
-                            &patch.scene[sc].osc[o]);
-                    patch.scene[sc].osc[o].wt.force_refresh_display = true;
-                    patch.scene[sc].osc[o].wt.refresh_display = true;
-                    if (patch.scene[sc].osc[o].wt.everBuilt)
-                        patch.isDirty = true;
-                }
+                if (patch.scene[sc].osc[o].wt.everBuilt)
+                    patch.isDirty = true;
+                load_wt(patch.scene[sc].osc[o].wt.queue_id, &patch.scene[sc].osc[o].wt,
+                        &patch.scene[sc].osc[o]);
+                patch.scene[sc].osc[o].wt.force_refresh_display = false;
+                patch.scene[sc].osc[o].wt.refresh_display = true;
             }
-            catch (const std::exception &e)
+            else if (patch.scene[sc].osc[o].wt.queue_filename[0])
             {
-                // Clear the queue so we don't retry the bad load every block
-                patch.scene[sc].osc[o].wt.queue_id = -1;
-                patch.scene[sc].osc[o].wt.queue_filename = "";
-                reportError(std::string("Unable to load wavetable: ") + e.what(),
-                            "Wavetable Load Error");
+                if (!(uses_wavetabledata(patch.scene[sc].osc[o].type.val.i)))
+                {
+                    patch.scene[sc].osc[o].queue_type = ot_wavetable;
+                }
+                int wtidx = -1, ct = 0;
+                for (const auto &wti : wt_list)
+                {
+                    if (path_to_string(wti.path) == patch.scene[sc].osc[0].wt.queue_filename)
+                    {
+                        wtidx = ct;
+                    }
+                    ct++;
+                }
+
+                patch.scene[sc].osc[o].wt.current_id = wtidx;
+                load_wt(patch.scene[sc].osc[o].wt.queue_filename, &patch.scene[sc].osc[o].wt,
+                        &patch.scene[sc].osc[o]);
+                patch.scene[sc].osc[o].wt.force_refresh_display = true;
+                patch.scene[sc].osc[o].wt.refresh_display = true;
+                if (patch.scene[sc].osc[o].wt.everBuilt)
+                    patch.isDirty = true;
             }
         }
     }

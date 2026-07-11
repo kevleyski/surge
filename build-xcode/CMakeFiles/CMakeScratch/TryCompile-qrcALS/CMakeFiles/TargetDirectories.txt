@@ -1,0 +1,2 @@
+/Users/klambert/workspace_KJSL/github_kevleyski/surge-ios/build-xcode/CMakeFiles/CMakeScratch/TryCompile-qrcALS/CMakeFiles/cmTC_a52e1.dir
+/Users/klambert/workspace_KJSL/github_kevleyski/surge-ios/build-xcode/CMakeFiles/CMakeScratch/TryCompile-qrcALS/CMakeFiles/ALL_BUILD.dir

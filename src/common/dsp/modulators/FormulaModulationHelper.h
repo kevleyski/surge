@@ -69,8 +69,7 @@ struct EvaluatorState
 
     float del, a, h, dec, s, r;
     float rate, amp, phase, deform;
-    float tempo;
-    double songpos;
+    float tempo, songpos;
 
     bool retrigger_AEG, retrigger_FEG;
 

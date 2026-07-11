@@ -272,7 +272,7 @@ void PatchStoreDialog::shownInParent()
 {
     if (nameEd->isShowing() && isVisible())
     {
-        Surge::GUI::grabKeyboardFocusIfAllowed(nameEd.get());
+        nameEd->grabKeyboardFocus();
     }
 }
 
@@ -388,7 +388,7 @@ void PatchStoreDialog::resized()
 
     if (isVisible())
     {
-        Surge::GUI::grabKeyboardFocusIfAllowed(nameEd.get());
+        nameEd->grabKeyboardFocus();
     }
 
     if (showTagsField)

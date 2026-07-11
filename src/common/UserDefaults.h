@@ -90,7 +90,6 @@ enum DefaultKey
     UseNarratorAnnouncementsForPatchTypeahead,
     ExpandModMenusWithSubMenus,
     FocusModEditorAfterAddModulationFrom,
-    NeverMoveKeyboardFocus,
     ShowVirtualKeyboard_Plugin,
     ShowVirtualKeyboard_Standalone,
     VirtualKeyboardClickSetsVelocity,

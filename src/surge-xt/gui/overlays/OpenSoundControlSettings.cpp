@@ -181,7 +181,7 @@ void OpenSoundControlSettings::shownInParent()
 {
     if (inPort && inPort->isShowing())
     {
-        Surge::GUI::grabKeyboardFocusIfAllowed(inPort.get());
+        inPort->grabKeyboardFocus();
     }
 }
 

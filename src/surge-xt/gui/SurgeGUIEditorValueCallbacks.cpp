@@ -3690,7 +3690,7 @@ void SurgeGUIEditor::valueChanged(Surge::GUI::IComponentTagValue *control)
                 refresh_mod();
 
                 if (lfoRateSlider)
-                    Surge::GUI::grabKeyboardFocusIfAllowed(lfoRateSlider);
+                    lfoRateSlider->grabKeyboardFocus();
             }
             else if (cms->getMouseMode() == Surge::Widgets::ModulationSourceButton::HAMBURGER)
             {

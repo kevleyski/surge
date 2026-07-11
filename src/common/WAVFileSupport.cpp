@@ -482,9 +482,7 @@ bool SurgeStorage::load_wt_wav_portable(std::string fn, Wavetable *wt, std::stri
             windowSize = windowSize / 2;
 
         wh.n_samples = windowSize;
-        // Clamp so BuildWT stays within the fixed-size tables. Samples are built
-        // with AppendSilence, which adds 3 frames, so leave room for those.
-        wh.n_tables = std::min(max_subtables - 3, (int)(sample_length / windowSize));
+        wh.n_tables = (int)(sample_length / windowSize);
     }
 
     int channels = 1;

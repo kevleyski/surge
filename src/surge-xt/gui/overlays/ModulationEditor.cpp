@@ -566,7 +566,7 @@ struct ModulationListContents : public juce::Component, public Surge::GUI::SkinC
                 contents->editor->viewport->setViewPosition(0, 0);
             }
             if (surgeLikeSlider->isShowing())
-                Surge::GUI::grabKeyboardFocusIfAllowed(surgeLikeSlider.get());
+                surgeLikeSlider->grabKeyboardFocus();
         }
         bool firstInSort{false}, hasFollower{false};
         bool isTop{false}, isAfterTop{false}, isLast{false};
@@ -1703,7 +1703,7 @@ void ModulationSideControls::doAdd()
     addSourceW->setLabels({"Select Source"});
     addTargetW->setLabels({"Select Target"});
     addTargetW->setEnabled(false);
-    Surge::GUI::grabKeyboardFocusIfAllowed(addSourceW.get());
+    addSourceW->grabKeyboardFocus();
     repaint();
 }
 

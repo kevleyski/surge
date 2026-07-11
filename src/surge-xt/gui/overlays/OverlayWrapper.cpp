@@ -27,7 +27,6 @@
 #include "OverlayComponent.h"
 #include "widgets/MainFrame.h"
 #include "SurgeJUCELookAndFeel.h"
-#include "SurgeGUIUtils.h"
 
 namespace Surge
 {
@@ -795,7 +794,7 @@ void OverlayWrapper::onClose()
             [w = juce::Component::SafePointer(pc)]() {
                 if (!w)
                     return;
-                Surge::GUI::grabKeyboardFocusIfAllowed(w);
+                w->grabKeyboardFocus();
             });
     }
     else

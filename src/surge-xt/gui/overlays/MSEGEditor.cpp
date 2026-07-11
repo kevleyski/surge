@@ -3860,7 +3860,7 @@ void MSEGControlRegion::hvSnapTypein(bool isH)
     typeinEditor->setBounds(r);
 
     typeinEditor->setVisible(true);
-    Surge::GUI::grabKeyboardFocusIfAllowed(typeinEditor.get());
+    typeinEditor->grabKeyboardFocus();
 
     typeinEditor->callback = [w = juce::Component::SafePointer(this), isH](auto s) {
         auto sn = std::clamp(std::atoi(s.c_str()), 1, 32);
